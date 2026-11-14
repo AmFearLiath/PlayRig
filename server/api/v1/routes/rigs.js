@@ -360,10 +360,18 @@ router.post('/validate-zip', async (req, res) => {
   }
 });
 
-// POST /api/v1/rigs/import-zip - Authenticated Import of complete ZIP project
+// Helper to bump patch version
+function bumpPatchVersion(ver) {
+  if (!ver) return 'v1.0.1';
+  const match = String(ver).match(/^v?(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) return ver;
+  return `v${match[1]}.${match[2]}.${parseInt(match[3], 10) + 1}`;
+}
+
+// POST /api/v1/rigs/import-zip - Authenticated Import of complete ZIP project (Create or Update)
 router.post('/import-zip', requireAuth, async (req, res) => {
   try {
-    const { zipBase64, title, category, subcategory, author, copyright } = req.body;
+    const { zipBase64, mode, targetRigId, title, category, subcategory, author, copyright } = req.body;
     if (!zipBase64) {
       return res.status(400).json({
         success: false,
@@ -396,19 +404,63 @@ router.post('/import-zip', requireAuth, async (req, res) => {
       });
     }
 
-    // Determine Metadata & Hierarchy
-    const targetTitle = title || scanReport.metadata.title || 'Importiertes Rig';
-    const targetCat = category || scanReport.metadata.category || 'creative';
-    const targetSubcat = subcategory || scanReport.metadata.subcategory || 'Imported';
-    
-    const importAuthor = author || scanReport.metadata.author || (req.user ? (req.user.name || req.user.username) : 'Community Creator');
-    const isLiath = importAuthor.toLowerCase() === 'liath' || (req.user && (req.user.username === 'creator' || req.user.name === 'Liath'));
-    const importCopyright = copyright || scanReport.metadata.copyright || (isLiath ? '© GameChiller' : `© ${importAuthor}`);
+    const isUpdate = (mode === 'update') || Boolean(targetRigId);
+    let existingRig = null;
 
-    const baseSlug = targetTitle.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
-    const rigSlug = 'rig-' + baseSlug.substring(0, 32) + '-' + Date.now().toString(36).slice(-4);
-    const relRigDir = path.join('rigs', targetCat, targetSubcat, rigSlug).replace(/\\/g, '/');
-    const targetDir = path.join(ROOT_DIR, relRigDir);
+    if (isUpdate) {
+      existingRig = await db.getRigById(targetRigId);
+      if (!existingRig) {
+        return res.status(404).json({
+          success: false,
+          error: { code: 'RIG_NOT_FOUND', message: `Das zu aktualisierende Rig '${targetRigId}' wurde nicht gefunden.` }
+        });
+      }
+
+      // Check permission
+      const isOwner = req.user.role === 'admin' ||
+        existingRig.author === req.user.name ||
+        existingRig.author === req.user.username ||
+        (existingRig.author && existingRig.author.toLowerCase() === 'liath' && req.user.username === 'creator');
+      if (!isOwner) {
+        return res.status(403).json({
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Nur der Eigentümer oder ein Administrator kann dieses Rig per ZIP aktualisieren.' }
+        });
+      }
+    }
+
+    // Determine Metadata & Hierarchy
+    let targetTitle, targetCat, targetSubcat, importAuthor, importCopyright, targetVersion, rigSlug, relRigDir, targetDir;
+
+    if (isUpdate) {
+      rigSlug = existingRig.id;
+      targetTitle = title || existingRig.title;
+      targetCat = category || existingRig.category || 'creative';
+      targetSubcat = subcategory || existingRig.subcategory || 'General';
+      importAuthor = author || existingRig.author;
+      importCopyright = copyright || existingRig.copyright;
+      targetVersion = scanReport.metadata.version || bumpPatchVersion(existingRig.version);
+
+      let diskDir = getRigDir(existingRig.path);
+      if (!diskDir || !fs.existsSync(diskDir)) {
+        diskDir = path.join(ROOT_DIR, 'rigs', targetCat, targetSubcat, rigSlug);
+      }
+      targetDir = diskDir;
+      relRigDir = path.relative(ROOT_DIR, targetDir).replace(/\\/g, '/');
+    } else {
+      targetTitle = title || scanReport.metadata.title || 'Importiertes Rig';
+      targetCat = category || scanReport.metadata.category || 'creative';
+      targetSubcat = subcategory || scanReport.metadata.subcategory || 'Imported';
+      importAuthor = author || scanReport.metadata.author || (req.user ? (req.user.name || req.user.username) : 'Community Creator');
+      const isLiath = importAuthor.toLowerCase() === 'liath' || (req.user && (req.user.username === 'creator' || req.user.name === 'Liath'));
+      importCopyright = copyright || scanReport.metadata.copyright || (isLiath ? '© GameChiller' : `© ${importAuthor}`);
+      targetVersion = scanReport.metadata.version || 'v1.0.0';
+
+      const baseSlug = targetTitle.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
+      rigSlug = 'rig-' + baseSlug.substring(0, 32) + '-' + Date.now().toString(36).slice(-4);
+      relRigDir = path.join('rigs', targetCat, targetSubcat, rigSlug).replace(/\\/g, '/');
+      targetDir = path.join(ROOT_DIR, relRigDir);
+    }
 
     // Unzip safe files into directory
     fs.mkdirSync(targetDir, { recursive: true });
@@ -479,17 +531,23 @@ router.post('/import-zip', requireAuth, async (req, res) => {
       }
     }
 
-    // Ensure docs.json exists
+    // Ensure docs.json exists / is updated
     const docsJsonPath = path.join(targetDir, 'docs.json');
-    if (!fs.existsSync(docsJsonPath)) {
-      const docsManifest = {
+    let docsManifest;
+    if (fs.existsSync(docsJsonPath)) {
+      try {
+        docsManifest = JSON.parse(fs.readFileSync(docsJsonPath, 'utf8'));
+      } catch (e) {}
+    }
+    if (!docsManifest) {
+      docsManifest = {
         "$schema": "https://playrig.gamechiller.de/schemas/rig-docs-v1.json",
         "id": rigSlug,
         "name": targetTitle,
-        "version": scanReport.metadata.version || "v1.0.0",
+        "version": targetVersion,
         "author": importAuthor,
         "copyright": importCopyright,
-        "overview": `Vollständig importiertes Projekt (${scanReport.filesScanned} Dateien). Erfolgreich auf Schadcode und Backdoors geprüft.`,
+        "overview": `Projekt (${scanReport.filesScanned} Dateien). Erfolgreich auf Schadcode und Backdoors geprüft.`,
         "features": [
           "Importiertes vollwertiges Web-Rig",
           "Automatisches PlayRig Bridge Binding",
@@ -502,50 +560,99 @@ router.post('/import-zip', requireAuth, async (req, res) => {
           "status": scanReport.status
         }
       };
-      fs.writeFileSync(docsJsonPath, JSON.stringify(docsManifest, null, 2), 'utf8');
+    } else {
+      docsManifest.version = targetVersion;
+      docsManifest.security = {
+        score: scanReport.score,
+        inspectedAt: new Date().toISOString(),
+        status: scanReport.status
+      };
     }
+    fs.writeFileSync(docsJsonPath, JSON.stringify(docsManifest, null, 2), 'utf8');
 
-    // Register Rig in Database
-    const newRig = await db.createRig({
-      id: rigSlug,
-      title: targetTitle,
-      description: `Importiertes ZIP-Projekt mit ${scanReport.filesScanned} Dateien. Sicherheitsprüfung: Status ${scanReport.status.toUpperCase()} (Score: ${scanReport.score}/100).`,
-      category: targetCat,
-      subcategory: targetSubcat,
-      path: `${relRigDir}/index.html`,
-      version: scanReport.metadata.version || 'v1.0.0',
-      author: importAuthor,
-      copyright: importCopyright,
-      icon: 'archive',
-      color: '#00f0ff',
-      tags: ['ZIP-Import', targetCat, 'Verified'],
-      status: 'active',
-      access: 'public',
-      settings: {
-        imported: true,
-        importSource: 'zip-upload',
-        securityScore: scanReport.score,
-        filesCount: scanReport.filesScanned
-      }
-    }, req.user);
+    let resultRig;
+    if (isUpdate) {
+      // Update existing Rig in Database
+      resultRig = await db.updateRig(existingRig.id, {
+        title: targetTitle,
+        description: `Per ZIP aktualisiertes Projekt (${scanReport.filesScanned} Dateien). Sicherheitsprüfung: Status ${scanReport.status.toUpperCase()} (Score: ${scanReport.score}/100).`,
+        category: targetCat,
+        subcategory: targetSubcat,
+        version: targetVersion,
+        author: importAuthor,
+        copyright: importCopyright,
+        path: `${relRigDir}/index.html`,
+        settings: {
+          ...(existingRig.settings || {}),
+          updatedViaZip: true,
+          lastZipUpdate: new Date().toISOString(),
+          securityScore: scanReport.score,
+          filesCount: scanReport.filesScanned
+        }
+      }, req.user);
 
-    await db.logAudit?.(
-      req.user.id,
-      req.user.username,
-      'RIG_ZIP_IMPORT_SUCCESS',
-      `Rig '${targetTitle}' (${rigSlug}) erfolgreich aus ZIP importiert (Score: ${scanReport.score})`
-    );
+      await db.logAudit?.(
+        req.user.id,
+        req.user.username,
+        'RIG_ZIP_UPDATE_SUCCESS',
+        `Rig '${targetTitle}' (${rigSlug}) erfolgreich per ZIP aktualisiert (Version: ${targetVersion}, Score: ${scanReport.score})`
+      );
 
-    res.status(201).json({
-      success: true,
-      data: {
-        rig: newRig,
-        report: scanReport,
-        directUrl: `/${newRig.path}`,
-        studioUrl: `/studio`
-      },
-      meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
-    });
+      res.status(200).json({
+        success: true,
+        data: {
+          rig: resultRig,
+          updated: true,
+          report: scanReport,
+          directUrl: `/${resultRig.path}`,
+          studioUrl: `/studio`
+        },
+        meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
+      });
+    } else {
+      // Register New Rig in Database
+      resultRig = await db.createRig({
+        id: rigSlug,
+        title: targetTitle,
+        description: `Importiertes ZIP-Projekt mit ${scanReport.filesScanned} Dateien. Sicherheitsprüfung: Status ${scanReport.status.toUpperCase()} (Score: ${scanReport.score}/100).`,
+        category: targetCat,
+        subcategory: targetSubcat,
+        path: `${relRigDir}/index.html`,
+        version: targetVersion,
+        author: importAuthor,
+        copyright: importCopyright,
+        icon: 'archive',
+        color: '#00f0ff',
+        tags: ['ZIP-Import', targetCat, 'Verified'],
+        status: 'active',
+        access: 'public',
+        settings: {
+          imported: true,
+          importSource: 'zip-upload',
+          securityScore: scanReport.score,
+          filesCount: scanReport.filesScanned
+        }
+      }, req.user);
+
+      await db.logAudit?.(
+        req.user.id,
+        req.user.username,
+        'RIG_ZIP_IMPORT_SUCCESS',
+        `Rig '${targetTitle}' (${rigSlug}) erfolgreich aus ZIP importiert (Score: ${scanReport.score})`
+      );
+
+      res.status(201).json({
+        success: true,
+        data: {
+          rig: resultRig,
+          updated: false,
+          report: scanReport,
+          directUrl: `/${resultRig.path}`,
+          studioUrl: `/studio`
+        },
+        meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
+      });
+    }
   } catch (err) {
     res.status(500).json({
       success: false,

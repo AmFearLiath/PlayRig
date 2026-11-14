@@ -852,15 +852,17 @@ async function updateRig(id, data, user) {
   const access = data.access !== undefined ? data.access : existing.access;
   const featured = data.featured !== undefined ? (data.featured ? 1 : 0) : existing.featured;
   const thumbnail = data.thumbnail !== undefined ? data.thumbnail : (existing.thumbnail || null);
+  const author = data.author !== undefined ? data.author : existing.author;
+  const copyright = data.copyright !== undefined ? data.copyright : existing.copyright;
   const settings = data.settings !== undefined ? JSON.stringify(data.settings) : JSON.stringify(existing.settings);
 
   await pool.query(`
     UPDATE rigs SET
       title = ?, description = ?, category = ?, subcategory = ?,
-      version = ?, icon = ?, color = ?, tags = ?, status = ?,
+      version = ?, author = ?, copyright = ?, icon = ?, color = ?, tags = ?, status = ?,
       access = ?, featured = ?, thumbnail = ?, settings = ?, updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `, [title, description, category, subcategory, version, icon, color, tags, status, access, featured, thumbnail, settings, id]);
+  `, [title, description, category, subcategory, version, author, copyright, icon, color, tags, status, access, featured, thumbnail, settings, id]);
 
   if (user) {
     await logAudit(user.id, user.username, 'UPDATE_RIG', `Updated Rig ${id}`);

@@ -195,12 +195,14 @@ Führt eine tiefe statische Sicherheitsanalyse und Strukturprüfung eines vollst
 ```
 
 #### `POST /api/v1/rigs/import-zip`
-Importiert ein geprüftes ZIP-Archiv, entpackt es sicher, bindet automatisch die PlayRig Bridge und Design Tokens ein, erzeugt bei Bedarf ein konformes `docs.json` und registriert das Rig mit Standardeinstellungen in der MySQL-Datenbank.
+Importiert ein geprüftes ZIP-Archiv, entpackt es sicher, bindet automatisch die PlayRig Bridge und Design Tokens ein, erzeugt bei Bedarf ein konformes `docs.json` und registriert das Rig in der MySQL-Datenbank.
+Unterstützt wahlweise das **Erstellen eines neuen Rigs** oder das **Aktualisieren / Überschreiben eines bestehenden Rigs** in place.
 - **Berechtigung:** Erfordert Rolle `creator` oder `admin`.
-- **Payload:**
+- **Payload (Neues Rig anlegen):**
 ```json
 {
   "zipBase64": "data:application/zip;base64,UEsDBBQAAAA...",
+  "mode": "create",
   "title": "Mein Super Rig",
   "category": "gaming",
   "subcategory": "Sandbox",
@@ -208,7 +210,18 @@ Importiert ein geprüftes ZIP-Archiv, entpackt es sicher, bindet automatisch die
   "copyright": "© Alex Creator"
 }
 ```
+- **Payload (Bestehendes Rig aktualisieren):**
+```json
+{
+  "zipBase64": "data:application/zip;base64,UEsDBBQAAAA...",
+  "mode": "update",
+  "targetRigId": "emergence-laboratory",
+  "title": "Emergence Laboratory v2.0",
+  "category": "animations"
+}
+```
 - **Besonderheiten:**
+  - **In-Place Aktualisierung:** Bei `mode: "update"` bleibt die ursprüngliche Rig-ID und Verzeichnisstruktur erhalten; die Dateien auf der Festplatte werden aktualisiert, Versionsnummern gepatcht und die MySQL-Metadaten aktualisiert.
   - **Autoren- und Copyright-Integrität:** Eigene Rigs behalten immer den angegebenen Namen und ihr eigenes Copyright. Lediglich von Liath für GameChiller entwickelte Core-Rigs tragen die Signatur `Liath` / `© GameChiller`.
   - **Sofort lauffähig (Out-of-the-Box):** Das System scannt `index.html`. Falls die PlayRig Design-Tokens (`tokens.css`, `themes.css`, etc.) oder die Bridge (`playrig-bridge.js`) fehlen, werden sie mit korrekten relativen Pfaden automatisch injiziert.
   - **Sicherheits-Blockierung:** Rigs mit einem Score unter 70 oder kritischen Verstößen (Zip-Slip, Binaries, Backdoors) werden mit HTTP 400 (`SECURITY_SCAN_FAILED`) abgewiesen und im Audit-Log vermerkt.

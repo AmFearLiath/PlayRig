@@ -1004,6 +1004,12 @@
     if (fileInput) fileInput.value = '';
     const resultsPanel = document.getElementById('zip-scan-results');
     if (resultsPanel) resultsPanel.style.display = 'none';
+
+    // Reset mode to create
+    const modeCreate = document.getElementById('zip-mode-create');
+    if (modeCreate) modeCreate.checked = true;
+    toggleZipImportMode('create');
+
     const dropzone = document.getElementById('zip-dropzone');
     if (dropzone) {
       dropzone.style.display = 'block';
@@ -1022,6 +1028,90 @@
           if (f) handleZipFile(f);
         });
       }
+    }
+  }
+
+  function populateTargetRigSelect() {
+    const select = document.getElementById('zip-target-rig-select');
+    if (!select) return;
+
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- Rig zum Aktualisieren wählen --</option>';
+
+    const rigs = state.rigs || [];
+    rigs.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = `${r.title} (${r.category} • ${r.id})`;
+      select.appendChild(opt);
+    });
+
+    if (currentVal) select.value = currentVal;
+  }
+
+  function toggleZipImportMode(mode) {
+    const targetGroup = document.getElementById('zip-target-rig-group');
+    const submitBtn = document.getElementById('btn-submit-zip-import');
+    const targetSelect = document.getElementById('zip-target-rig-select');
+
+    if (mode === 'update') {
+      if (targetGroup) targetGroup.style.display = 'block';
+      populateTargetRigSelect();
+
+      // Try to auto-match if scanReport title or id matches an existing rig
+      if (currentScanReport && targetSelect && !targetSelect.value) {
+        const match = (state.rigs || []).find(r =>
+          (currentScanReport.metadata?.id && r.id.toLowerCase() === currentScanReport.metadata.id.toLowerCase()) ||
+          (currentScanReport.metadata?.title && r.title.toLowerCase() === currentScanReport.metadata.title.toLowerCase())
+        );
+        if (match) {
+          targetSelect.value = match.id;
+          onTargetRigSelected(match.id);
+        }
+      }
+
+      if (submitBtn) {
+        const currentRigTitle = targetSelect?.options[targetSelect.selectedIndex]?.textContent;
+        submitBtn.textContent = targetSelect?.value ? `🔄 Rig mit ZIP-Inhalt aktualisieren` : '🔄 Bestehendes Rig aktualisieren';
+      }
+    } else {
+      if (targetGroup) targetGroup.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.textContent = '🚀 Projekt freigeben & in meine Rigs importieren';
+      }
+      // Restore metadata from scanReport
+      if (currentScanReport) {
+        const titleInput = document.getElementById('zip-import-title');
+        const catInput = document.getElementById('zip-import-cat');
+        const authorInput = document.getElementById('zip-import-author');
+        const copyrightInput = document.getElementById('zip-import-copyright');
+
+        if (titleInput && currentScanReport.metadata?.title) titleInput.value = currentScanReport.metadata.title;
+        if (catInput && currentScanReport.metadata?.category) catInput.value = currentScanReport.metadata.category;
+        if (authorInput && currentScanReport.metadata?.author) authorInput.value = currentScanReport.metadata.author;
+        if (copyrightInput && currentScanReport.metadata?.copyright) copyrightInput.value = currentScanReport.metadata.copyright;
+      }
+    }
+  }
+
+  function onTargetRigSelected(rigId) {
+    if (!rigId) return;
+    const rig = (state.rigs || []).find(r => r.id === rigId);
+    if (!rig) return;
+
+    const titleInput = document.getElementById('zip-import-title');
+    const catInput = document.getElementById('zip-import-cat');
+    const authorInput = document.getElementById('zip-import-author');
+    const copyrightInput = document.getElementById('zip-import-copyright');
+    const submitBtn = document.getElementById('btn-submit-zip-import');
+
+    if (titleInput) titleInput.value = rig.title;
+    if (catInput && rig.category) catInput.value = rig.category;
+    if (authorInput && rig.author) authorInput.value = rig.author;
+    if (copyrightInput && rig.copyright) copyrightInput.value = rig.copyright;
+
+    if (submitBtn) {
+      submitBtn.textContent = `🔄 '${rig.title}' mit ZIP-Inhalt aktualisieren`;
     }
   }
 
@@ -1070,6 +1160,14 @@
           return;
         }
 
+        const mode = document.querySelector('input[name="zip-import-mode"]:checked')?.value || 'create';
+        const targetRigId = mode === 'update' ? document.getElementById('zip-target-rig-select')?.value : null;
+
+        if (mode === 'update' && !targetRigId) {
+          window.showToast('Bitte wähle ein bestehendes Rig zum Aktualisieren aus.', 'warning');
+          return;
+        }
+
         const title = document.getElementById('zip-import-title').value.trim();
         const category = document.getElementById('zip-import-cat').value;
         const author = document.getElementById('zip-import-author')?.value.trim();
@@ -1079,14 +1177,16 @@
         try {
           if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Entpacke & initialisiere Rig...';
+            submitBtn.innerHTML = mode === 'update' ? '⏳ Aktualisiere Rig per ZIP...' : '⏳ Entpacke & initialisiere Rig...';
           }
-          window.showToast('Entpacke ZIP und registriere Rig in PlayRig...', 'info');
+          window.showToast(mode === 'update' ? 'Aktualisiere Rig-Dateien aus ZIP...' : 'Entpacke ZIP und registriere Rig in PlayRig...', 'info');
 
           const res = await api('/rigs/import-zip', {
             method: 'POST',
             body: JSON.stringify({
               zipBase64: currentZipBase64,
+              mode,
+              targetRigId,
               title,
               category,
               author,
@@ -1095,7 +1195,11 @@
           });
 
           const rigData = res.data?.rig || res.rig;
-          window.showToast(`Rig '${rigData?.title || title}' erfolgreich importiert und verifiziert!`, 'success');
+          const isUpdated = res.data?.updated;
+          const successMsg = isUpdated
+            ? `Rig '${rigData?.title || title}' erfolgreich mit ZIP-Dateien aktualisiert!`
+            : `Rig '${rigData?.title || title}' erfolgreich importiert und verifiziert!`;
+          window.showToast(successMsg, 'success');
 
           resetZipImport();
           await loadMyTools();
@@ -1303,6 +1407,29 @@
         submitBtn.title = 'Projekt freigeben und in PlayRig importieren';
       }
     }
+
+    // Populate existing rigs dropdown and check for auto-matching
+    populateTargetRigSelect();
+
+    const matchedRig = (state.rigs || []).find(r =>
+      (report.metadata?.id && r.id.toLowerCase() === report.metadata.id.toLowerCase()) ||
+      (report.metadata?.title && r.title.toLowerCase() === report.metadata.title.toLowerCase())
+    );
+
+    if (matchedRig) {
+      const modeUpdate = document.getElementById('zip-mode-update');
+      if (modeUpdate) modeUpdate.checked = true;
+      toggleZipImportMode('update');
+      const select = document.getElementById('zip-target-rig-select');
+      if (select) {
+        select.value = matchedRig.id;
+        onTargetRigSelected(matchedRig.id);
+      }
+    } else {
+      const modeCreate = document.getElementById('zip-mode-create');
+      if (modeCreate) modeCreate.checked = true;
+      toggleZipImportMode('create');
+    }
   }
 
   // ==========================================
@@ -1378,6 +1505,8 @@
   window.openRigEditor = openRigEditor;
   window.setImporterTab = setImporterTab;
   window.resetZipImport = resetZipImport;
+  window.toggleZipImportMode = toggleZipImportMode;
+  window.onTargetRigSelected = onTargetRigSelected;
   window.openStudioPushRigModal = openStudioPushRigModal;
   window.closeStudioPushRigModal = closeStudioPushRigModal;
 
