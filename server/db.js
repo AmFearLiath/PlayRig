@@ -210,7 +210,7 @@ async function seedInitialData() {
       'High-End 3D Voxel Generator für Kugeln, Kuppeln, Ellipsoide und Torus-Geometrien mit voxelgenauem Schichten-Viewer, Aspect-Ratio Höheneinstellung und Multi-Format Blueprint Export.',
       'gaming',
       'Minecraft',
-      'Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
+      'rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -227,7 +227,7 @@ async function seedInitialData() {
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
+      path = 'rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
       featured = 1,
       views = GREATEST(views, 142),
       stars = GREATEST(stars, 48),
@@ -249,7 +249,7 @@ async function seedInitialData() {
       'Echtzeit-Partikelfeld mit orbitaler Physik, Gravitationslinsen, Schockwellen-Impulsen und dynamischen Farbpaletten.',
       'animations',
       'Particles-FX',
-      'Animations/Particles-FX/Particle-Gravity-Vortex/index.html',
+      'rigs/Animations/Particles-FX/Particle-Gravity-Vortex/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -266,7 +266,7 @@ async function seedInitialData() {
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Animations/Particles-FX/Particle-Gravity-Vortex/index.html'
+      path = 'rigs/Animations/Particles-FX/Particle-Gravity-Vortex/index.html'
   `, [
     JSON.stringify(['Physics', 'Particles', 'Canvas2D', 'Vortex', 'Animation']),
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
@@ -284,7 +284,7 @@ async function seedInitialData() {
       'High-End Savegame Editor für Keen Games Enshrouded. Automatische Steam-Erkennung, Level & XP Booster, 16 Ausrüstungs-Slots, Rucksack-Manager, Item-Katalog mit über 4.300 Original-Icons und automatisches Backup.',
       'gaming',
       'Enshrouded',
-      'Gaming/Enshrouded/Save-Editor/index.html',
+      'rigs/Gaming/Enshrouded/Save-Editor/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -298,12 +298,12 @@ async function seedInitialData() {
       64,
       14,
       1,
-      '/Gaming/Enshrouded/Save-Editor/thumbnail.png',
+      '/rigs/Gaming/Enshrouded/Save-Editor/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/Enshrouded/Save-Editor/index.html',
-      thumbnail = '/Gaming/Enshrouded/Save-Editor/thumbnail.png',
+      path = 'rigs/Gaming/Enshrouded/Save-Editor/index.html',
+      thumbnail = '/rigs/Gaming/Enshrouded/Save-Editor/thumbnail.png',
       featured = 1
   `, [
     JSON.stringify(['Enshrouded', 'Savegame', 'RPG', 'Inventory', 'Level', 'Backup']),
@@ -322,7 +322,7 @@ async function seedInitialData() {
       'Multi-Dice Roller (D4 bis D100) mit 3D-Canvas Physikwürfeln, prozeduraler Sound-Synthese, Nat-20 Kritischer Treffer Fanfare und Diablo-inspiriertem Schatzkisten-Simulator.',
       'gaming',
       'RPG-Tools',
-      'Gaming/RPG-Tools/rpg-dice-loot-vault/index.html',
+      'rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -336,12 +336,12 @@ async function seedInitialData() {
       42,
       9,
       1,
-      '/Gaming/RPG-Tools/rpg-dice-loot-vault/thumbnail.png',
+      '/rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/RPG-Tools/rpg-dice-loot-vault/index.html',
-      thumbnail = '/Gaming/RPG-Tools/rpg-dice-loot-vault/thumbnail.png'
+      path = 'rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/index.html',
+      thumbnail = '/rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/thumbnail.png'
   `, [
     JSON.stringify(['RPG', 'Dice', 'Loot', 'D&D', 'Audio-SFX', 'Canvas2D', 'Physics']),
     JSON.stringify({ defaultTheme: 'royal-gold' })
@@ -359,7 +359,7 @@ async function seedInitialData() {
       'Kultiger Cyberpunk Digital-Rain Generator mit Katakana, Runen, Hexadezimal-Glyphen, Schockwellen-Mausinteraktion, Neon-Paletten und prozeduralem Web Audio Regen-Ambiente.',
       'animations',
       'Canvas-Shaders',
-      'Animations/Canvas-Shaders/cyber-matrix-rain-lab/index.html',
+      'rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -373,12 +373,12 @@ async function seedInitialData() {
       56,
       15,
       0,
-      '/Animations/Canvas-Shaders/cyber-matrix-rain-lab/thumbnail.png',
+      '/rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Animations/Canvas-Shaders/cyber-matrix-rain-lab/index.html',
-      thumbnail = '/Animations/Canvas-Shaders/cyber-matrix-rain-lab/thumbnail.png'
+      path = 'rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/index.html',
+      thumbnail = '/rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/thumbnail.png'
   `, [
     JSON.stringify(['Matrix', 'Cyberpunk', 'Canvas', 'Glyphs', 'Procedural', 'Audio']),
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
@@ -396,7 +396,7 @@ async function seedInitialData() {
       'Visueller Echtzeit-Generator für moderne Glassmorphismus-Karten und animierte rotierende Border-Beams mit 3D-Mausneigung, Unschärfe-Reglern und 1-Klick CSS/Tailwind-Export.',
       'helper',
       'Generators',
-      'Helper/Generators/glassmorphism-beam-studio/index.html',
+      'rigs/Helper/Generators/glassmorphism-beam-studio/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -410,12 +410,12 @@ async function seedInitialData() {
       39,
       7,
       1,
-      '/Helper/Generators/glassmorphism-beam-studio/thumbnail.png',
+      '/rigs/Helper/Generators/glassmorphism-beam-studio/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Helper/Generators/glassmorphism-beam-studio/index.html',
-      thumbnail = '/Helper/Generators/glassmorphism-beam-studio/thumbnail.png'
+      path = 'rigs/Helper/Generators/glassmorphism-beam-studio/index.html',
+      thumbnail = '/rigs/Helper/Generators/glassmorphism-beam-studio/thumbnail.png'
   `, [
     JSON.stringify(['CSS3', 'Glassmorphism', 'Border-Beam', 'Generator', 'Tailwind', 'UI-Design']),
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
@@ -433,7 +433,7 @@ async function seedInitialData() {
       'Interaktiver 3D-Bänder Audio-Visualizer mit integriertem prozeduralem Synthwave Beat-Generator, Mikrofon-Live-Input, Audiodatei-Wiedergabe und FFT-Frequenzanalyse.',
       'creative',
       'Audio-Visual',
-      'Creative/Audio-Visual/audio-reactive-ribbon/index.html',
+      'rigs/Creative/Audio-Visual/audio-reactive-ribbon/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -447,12 +447,12 @@ async function seedInitialData() {
       51,
       11,
       1,
-      '/Creative/Audio-Visual/audio-reactive-ribbon/thumbnail.png',
+      '/rigs/Creative/Audio-Visual/audio-reactive-ribbon/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Creative/Audio-Visual/audio-reactive-ribbon/index.html',
-      thumbnail = '/Creative/Audio-Visual/audio-reactive-ribbon/thumbnail.png'
+      path = 'rigs/Creative/Audio-Visual/audio-reactive-ribbon/index.html',
+      thumbnail = '/rigs/Creative/Audio-Visual/audio-reactive-ribbon/thumbnail.png'
   `, [
     JSON.stringify(['WebAudio', 'FFT', 'Visualizer', 'Synthwave', 'Canvas2D', 'Music']),
     JSON.stringify({ defaultTheme: 'neon-synth' })
@@ -470,7 +470,7 @@ async function seedInitialData() {
       'Professioneller Fadenkreuz- und Scope-Generator für CS2, Valorant & Apex Legends. Mit Live-Rückstoßsimulation (Spray Pattern), Ziel-Dummy, Szenarien und 1-Klick Code-Export.',
       'gaming',
       'Shooter-Tools',
-      'Gaming/Shooter-Tools/crosshair-scope-lab/index.html',
+      'rigs/Gaming/Shooter-Tools/crosshair-scope-lab/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -484,12 +484,12 @@ async function seedInitialData() {
       38,
       6,
       0,
-      '/Gaming/Shooter-Tools/crosshair-scope-lab/thumbnail.png',
+      '/rigs/Gaming/Shooter-Tools/crosshair-scope-lab/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/Shooter-Tools/crosshair-scope-lab/index.html',
-      thumbnail = '/Gaming/Shooter-Tools/crosshair-scope-lab/thumbnail.png'
+      path = 'rigs/Gaming/Shooter-Tools/crosshair-scope-lab/index.html',
+      thumbnail = '/rigs/Gaming/Shooter-Tools/crosshair-scope-lab/thumbnail.png'
   `, [
     JSON.stringify(['FPS', 'Crosshair', 'Valorant', 'CS2', 'Scope', 'Shooter']),
     JSON.stringify({ defaultTheme: 'emerald-matrix' })
@@ -507,7 +507,7 @@ async function seedInitialData() {
       'Präzisions-Splitter und Delta-Stoppuhr nach Vorbild von LiveSplit für Speedruns und Bosskämpfe. Mit Delta-Vergleich (+/- PB), goldenen Split-Fanfaren, OBS Chroma-Key und Hotkeys.',
       'gaming',
       'Helper',
-      'Gaming/Helper/speedrun-splits-tracker/index.html',
+      'rigs/Gaming/Helper/speedrun-splits-tracker/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -521,12 +521,12 @@ async function seedInitialData() {
       45,
       10,
       0,
-      '/Gaming/Helper/speedrun-splits-tracker/thumbnail.png',
+      '/rigs/Gaming/Helper/speedrun-splits-tracker/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/Helper/speedrun-splits-tracker/index.html',
-      thumbnail = '/Gaming/Helper/speedrun-splits-tracker/thumbnail.png'
+      path = 'rigs/Gaming/Helper/speedrun-splits-tracker/index.html',
+      thumbnail = '/rigs/Gaming/Helper/speedrun-splits-tracker/thumbnail.png'
   `, [
     JSON.stringify(['Speedrun', 'LiveSplit', 'Stopwatch', 'OBS', 'Enshrouded']),
     JSON.stringify({ defaultTheme: 'royal-gold' })
@@ -544,7 +544,7 @@ async function seedInitialData() {
       'Interaktiver N-Körper Gravitations- und Raumfahrt-Simulator. Berechnet Newtonsche Himmelsmechanik in Echtzeit mit Katapult-Steuerung, Stern-Kollisionen und kosmischem Synth-Drone.',
       'gaming',
       'Procedural',
-      'Gaming/Procedural/celestial-gravity-sandbox/index.html',
+      'rigs/Gaming/Procedural/celestial-gravity-sandbox/index.html',
       'v0.0.1',
       'Liath',
       '© GameChiller',
@@ -558,12 +558,12 @@ async function seedInitialData() {
       62,
       18,
       1,
-      '/Gaming/Procedural/celestial-gravity-sandbox/thumbnail.png',
+      '/rigs/Gaming/Procedural/celestial-gravity-sandbox/thumbnail.png',
       ?
     )
     ON DUPLICATE KEY UPDATE
-      path = 'Gaming/Procedural/celestial-gravity-sandbox/index.html',
-      thumbnail = '/Gaming/Procedural/celestial-gravity-sandbox/thumbnail.png'
+      path = 'rigs/Gaming/Procedural/celestial-gravity-sandbox/index.html',
+      thumbnail = '/rigs/Gaming/Procedural/celestial-gravity-sandbox/thumbnail.png'
   `, [
     JSON.stringify(['Space', 'Physics', 'N-Body', 'Simulation', 'Gravity', 'Procedural']),
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
@@ -572,13 +572,13 @@ async function seedInitialData() {
   // Fix any legacy path referencing 'projects/Gaming' and set default thumbnails
   await pool.query(`
     UPDATE rigs 
-    SET path = 'Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
-        thumbnail = '/Gaming/Minecraft/Voxel-Sphere-Architect/thumbnail.png'
+    SET path = 'rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html',
+        thumbnail = '/rigs/Gaming/Minecraft/Voxel-Sphere-Architect/thumbnail.png'
     WHERE id = 'voxel-sphere-architect'
   `);
   await pool.query(`
     UPDATE rigs 
-    SET thumbnail = '/Animations/Particles-FX/Particle-Gravity-Vortex/thumbnail.png'
+    SET thumbnail = '/rigs/Animations/Particles-FX/Particle-Gravity-Vortex/thumbnail.png'
     WHERE id = 'particle-gravity-vortex'
   `);
 }

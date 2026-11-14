@@ -41,16 +41,16 @@ Das Repository beinhaltet 10 einsatzbereite Flagship-Rigs:
 
 | Rig | Kategorie | Tech-Stack | Beschreibung |
 |---|---|---|---|
-| **[Voxel Sphere & Dome Architect](Gaming/Minecraft/Voxel-Sphere-Architect/)** | Gaming / Minecraft | Three.js WebGL, InstancedMesh | 3D/2D Voxel-Generator für Minecraft-Kugeln, Kuppeln und Ellipsoide mit Schichten-Viewer, Ghosting und Bauplan-Export. |
-| **[Enshrouded Save Editor](Gaming/Enshrouded/Save-Editor/)** | Gaming / Enshrouded | Zstandard WASM, XXHash3, SV2C | Lokale Steam-Spielstand-Erkennung, Level & XP Booster, 16 Ausrüstungs- und 40 Rucksack-Slots mit über 4.300 Ingame-Icons. |
-| **[Retro RPG Dice & Loot Vault](Gaming/RPG-Tools/rpg-dice-loot-vault/)** | Gaming / RPG-Tools | Canvas 2D, Web Audio SFX | D4-D100 Würfelsystem mit 3D-Rotationsphysik, Nat-20 Fanfare und Diablo-inspiriertem Schatzkisten-Simulator. |
-| **[FPS Tactical Crosshair Lab](Gaming/Shooter-Tools/crosshair-scope-lab/)** | Gaming / Shooter-Tools | Canvas Reticle, Recoil Physics | Professioneller Fadenkreuz-Editor für CS2/Valorant mit Live-Rückstoßsimulation, Mil-Dot Sniper-Scope und PNG-Export. |
-| **[Speedrun Splits Tracker](Gaming/Helper/speedrun-splits-tracker/)** | Gaming / Helper | `performance.now()`, Web Audio | LiveSplit-Alternative mit Sub-Millisekunden-Delta, Gold-Splits, Tastatur-Hotkeys und OBS-Chroma-Key/Transparenz-Modus. |
-| **[Celestial Gravity Sandbox](Gaming/Procedural/celestial-gravity-sandbox/)** | Gaming / Procedural | N-Body Gravitation, Verlet Engine | Interaktiver Himmelsmechanik-Simulator mit Maus-Schleuder, Materie-Verschmelzungen und kosmischem Synth-Drone. |
-| **[Cyber Matrix Rain & Glyph Lab](Animations/Canvas-Shaders/cyber-matrix-rain-lab/)** | Animations / Canvas-Shaders | Canvas Shaders, Audio Noise | Digitaler Cyberpunk-Regen mit Katakana, Runen, Hexadezimal-Glyphen, Schockwellen-Interaktion und Regen-Ambiente. |
-| **[Particle Gravity Vortex Lab](Animations/Particles-FX/Particle-Gravity-Vortex/)** | Animations / Particles-FX | Canvas 2D, Orbital Physics | 1.500 Partikel bei 60 FPS mit Gravitationslinsen, Schockwellen-Impulsen und Farbpaletten. |
-| **[Glassmorphism & Beam Studio](Helper/Generators/glassmorphism-beam-studio/)** | Helper / Generators | CSS Custom Props, 3D Gyro | Visueller Generator für moderne Glassmorphismus-Karten und rotierende Border-Beams mit 1-Klick CSS/Tailwind-Export. |
-| **[Audio Reactive Ribbon](Creative/Audio-Visual/audio-reactive-ribbon/)** | Creative / Audio-Visual | Web Audio FFT, Canvas Ribbons | 3D-Wellenbänder mit integriertem prozeduralem Synthwave-Arpeggiator, Mikrofon-Input und Spektralanalyse. |
+| **[Voxel Sphere & Dome Architect](rigs/Gaming/Minecraft/Voxel-Sphere-Architect/)** | Gaming / Minecraft | Three.js WebGL, InstancedMesh | 3D/2D Voxel-Generator für Minecraft-Kugeln, Kuppeln und Ellipsoide mit Schichten-Viewer, Ghosting und Bauplan-Export. |
+| **[Enshrouded Save Editor](rigs/Gaming/Enshrouded/Save-Editor/)** | Gaming / Enshrouded | Zstandard WASM, XXHash3, SV2C | Lokale Steam-Spielstand-Erkennung, Level & XP Booster, 16 Ausrüstungs- und 40 Rucksack-Slots mit über 4.300 Ingame-Icons. |
+| **[Retro RPG Dice & Loot Vault](rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/)** | Gaming / RPG-Tools | Canvas 2D, Web Audio SFX | D4-D100 Würfelsystem mit 3D-Rotationsphysik, Nat-20 Fanfare und Diablo-inspiriertem Schatzkisten-Simulator. |
+| **[FPS Tactical Crosshair Lab](rigs/Gaming/Shooter-Tools/crosshair-scope-lab/)** | Gaming / Shooter-Tools | Canvas Reticle, Recoil Physics | Professioneller Fadenkreuz-Editor für CS2/Valorant mit Live-Rückstoßsimulation, Mil-Dot Sniper-Scope und PNG-Export. |
+| **[Speedrun Splits Tracker](rigs/Gaming/Helper/speedrun-splits-tracker/)** | Gaming / Helper | `performance.now()`, Web Audio | LiveSplit-Alternative mit Sub-Millisekunden-Delta, Gold-Splits, Tastatur-Hotkeys und OBS-Chroma-Key/Transparenz-Modus. |
+| **[Celestial Gravity Sandbox](rigs/Gaming/Procedural/celestial-gravity-sandbox/)** | Gaming / Procedural | N-Body Gravitation, Verlet Engine | Interaktiver Himmelsmechanik-Simulator mit Maus-Schleuder, Materie-Verschmelzungen und kosmischem Synth-Drone. |
+| **[Cyber Matrix Rain & Glyph Lab](rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/)** | Animations / Canvas-Shaders | Canvas Shaders, Audio Noise | Digitaler Cyberpunk-Regen mit Katakana, Runen, Hexadezimal-Glyphen, Schockwellen-Interaktion und Regen-Ambiente. |
+| **[Particle Gravity Vortex Lab](rigs/Animations/Particles-FX/Particle-Gravity-Vortex/)** | Animations / Particles-FX | Canvas 2D, Orbital Physics | 1.500 Partikel bei 60 FPS mit Gravitationslinsen, Schockwellen-Impulsen und Farbpaletten. |
+| **[Glassmorphism & Beam Studio](rigs/Helper/Generators/glassmorphism-beam-studio/)** | Helper / Generators | CSS Custom Props, 3D Gyro | Visueller Generator für moderne Glassmorphismus-Karten und rotierende Border-Beams mit 1-Klick CSS/Tailwind-Export. |
+| **[Audio Reactive Ribbon](rigs/Creative/Audio-Visual/audio-reactive-ribbon/)** | Creative / Audio-Visual | Web Audio FFT, Canvas Ribbons | 3D-Wellenbänder mit integriertem prozeduralem Synthwave-Arpeggiator, Mikrofon-Input und Spektralanalyse. |
 
 ---
 
@@ -70,18 +70,20 @@ PlayRig/
 │
 ├── studio/                      # PlayRig Studio (Rig-Entwicklungsumgebung)
 ├── admin/                       # PlayRig Admin Panel (Benutzer & System-Verwaltung)
+├── _shared/                     # Geteilte CSS Tokens, Komponenten & JS Bridges
 │
-├── Gaming/                      # Gaming Tools & Generatoren
-│   ├── Minecraft/
-│   ├── Enshrouded/
-│   ├── RPG-Tools/
-│   ├── Shooter-Tools/
-│   ├── Helper/
-│   └── Procedural/
-│
-├── Animations/                  # Canvas Shader & Visual FX
-├── Creative/                    # Audio-Visual & Generative Kunst
-└── Helper/                      # UI-Generatoren & Dienstprogramme
+└── rigs/                        # 🕹️ Zentrales Rigs-Verzeichnis
+    ├── Gaming/                  # Gaming Tools & Generatoren
+    │   ├── Minecraft/
+    │   ├── Enshrouded/
+    │   ├── RPG-Tools/
+    │   ├── Shooter-Tools/
+    │   ├── Helper/
+    │   └── Procedural/
+    │
+    ├── Animations/              # Canvas Shader & Visual FX
+    ├── Creative/                # Audio-Visual & Generative Kunst
+    └── Helper/                  # UI-Generatoren & Dienstprogramme
 ```
 
 ---
@@ -125,3 +127,4 @@ node server/server.js
 **Copyright (c) 2026 GameChiller / AmFearLiath (Author: Liath). All Rights Reserved.**
 
 Dieses Repository ist **Source-Available** zur Ansicht und Evaluierung. Jegliche unautorisierte Nutzung, Kopie, Modifikation, Verteilung, Veröffentlichung oder kommerzielle Verwendung ohne vorherige schriftliche Genehmigung ist ausdrücklich untersagt. Details siehe [LICENSE.md](LICENSE.md).
+

@@ -8,9 +8,9 @@
 1. **Systemname & Begrifflichkeiten:**  
    Die Plattform heißt offiziell **PlayRig** (bestehend aus dem öffentlichen **PlayRig Deck** und dem geschützten **PlayRig Studio / Admin Panel**). Alle erstellten Projekte, Werkzeuge und Generatoren heißen offiziell **Rigs**.
 2. **Ordnerhierarchie:**  
-   Alle Rigs werden strikt nach dem Schema organisiert:  
-   `projects/Kategorien/Unterkategorien/Projektname/Dateinamen`  
-   *Beispiel:* `projects/Gaming/Minecraft/Voxel-Sphere-Architect/index.html`
+   Alle Rigs werden strikt im zentralen Ordner `rigs/` nach dem Schema organisiert:  
+   `rigs/Kategorien/Unterkategorien/Projektname/Dateinamen`  
+   *Beispiel:* `rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html`
 3. **Eindeutige ID & Slug:**  
    Jedes Rig besitzt eine systemweit unverwechselbare ID (z.B. `voxel-sphere-architect`, `particle-gravity-vortex`).
 4. **Zentrale Datenbank (MySQL auf Port 3307):**  

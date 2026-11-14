@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayRig Speedrun Splits Tracker // Pro Delta Timer</title>
+  <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Standard PlayRig Hub Bar -->
+  <header class="playrig-hub-bar">
+    <div class="hub-bar-brand">
+      <a href="/" class="hub-back-btn" title="Zurück zum PlayRig Deck">
+        <span class="hub-back-arrow">‹</span>
+        <span class="hub-logo-dot"></span>
+        <span class="hub-brand-name">PlayRig</span>
+      </a>
+      <span class="hub-separator">/</span>
+      <span class="hub-module-name">Speedrun Splits Tracker</span>
+      <span class="hub-version-tag">v0.0.1</span>
+    </div>
+    <div class="hub-bar-meta">
+      <span class="hub-badge-author">Author: Liath</span>
+      <span class="hub-badge-copyright">© GameChiller</span>
+      <button id="btn-obs-mode" class="hub-action-btn" title="OBS Chroma Key Overlay Mode">🎥 OBS Mode</button>
+      <button id="btn-reset" class="hub-action-btn btn-danger" title="Timer zurücksetzen (Taste: R)">↺ Reset</button>
+    </div>
+  </header>
+
+  <main class="splits-container" id="splits-app">
+    <!-- Top Game & Category Info -->
+    <div class="tracker-header">
+      <div class="game-meta">
+        <input type="text" id="game-title" class="title-input game-name" value="Enshrouded" spellcheck="false">
+        <input type="text" id="game-category" class="title-input category-name" value="Flame Altar Any%" spellcheck="false">
+      </div>
+      <div class="attempts-counter">
+        <span class="attempts-label">ATTEMPTS</span>
+        <span class="attempts-num" id="attempts-val">42</span>
+      </div>
+    </div>
+
+    <!-- Main Splits Table -->
+    <div class="splits-table-wrapper">
+      <table class="splits-table" id="splits-table">
+        <thead>
+          <tr>
+            <th class="col-icon">#</th>
+            <th class="col-name">Segment</th>
+            <th class="col-delta">Delta</th>
+            <th class="col-time">Split / PB</th>
+          </tr>
+        </thead>
+        <tbody id="splits-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Timer Display -->
+    <div class="timer-card">
+      <div class="timer-sub">
+        <span class="sub-label">PREVIOUS SEGMENT</span>
+        <span class="sub-time" id="sub-delta-time">±0.00</span>
+      </div>
+      <div class="timer-main" id="main-timer-display">
+        00:00<span class="timer-ms">.00</span>
+      </div>
+    </div>
+
+    <!-- Control Actions & Hotkey Bar -->
+    <div class="tracker-controls">
+      <button id="btn-split" class="ctrl-btn btn-primary" title="Space oder Klick">
+        <span class="btn-icon">⚡</span> <span id="split-btn-label">START / SPLIT</span>
+      </button>
+      <button id="btn-pause" class="ctrl-btn btn-secondary" title="P: Pause/Resume">
+        <span class="btn-icon">⏸</span> Pause
+      </button>
+      <button id="btn-undo" class="ctrl-btn btn-secondary" title="U: Undo Split">
+        <span class="btn-icon">↩</span> Undo
+      </button>
+      <button id="btn-skip" class="ctrl-btn btn-secondary" title="S: Skip Segment">
+        <span class="btn-icon">⏭</span> Skip
+      </button>
+    </div>
+
+    <!-- Bottom Configuration Drawer -->
+    <div class="tracker-settings">
+      <div class="preset-selector">
+        <label>Presets:</label>
+        <select id="preset-select" class="track-select">
+          <option value="enshrouded">Enshrouded Any%</option>
+          <option value="darksouls">Dark Souls Any%</option>
+          <option value="sm64">Super Mario 64 (16 Star)</option>
+          <option value="bossrush">RPG Boss Rush</option>
+        </select>
+      </div>
+
+      <div class="tracker-actions">
+        <button id="btn-add-split" class="mini-btn">+ Segment</button>
+        <button id="btn-export-splits" class="mini-btn">Export JSON</button>
+        <button id="btn-import-splits" class="mini-btn">Import JSON</button>
+        <input type="file" id="file-import" accept=".json" style="display:none">
+      </div>
+    </div>
+
+    <!-- Hotkey Legend -->
+    <div class="hotkey-legend">
+      <span><kbd>Space</kbd> Split / Start</span>
+      <span><kbd>R</kbd> Reset</span>
+      <span><kbd>P</kbd> Pause</span>
+      <span><kbd>U</kbd> Undo</span>
+      <span><kbd>S</kbd> Skip</span>
+    </div>
+  </main>
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+

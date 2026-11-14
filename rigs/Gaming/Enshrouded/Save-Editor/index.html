@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="royal-gold">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enshrouded Save & Character Editor | PlayRig</title>
+
+  <!-- PlayRig Tokens & Styles -->
+  <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../../_shared/css/base.css">
+  <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../../_shared/css/animations.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
+  <script src="../../../../_shared/js/toast.js"></script>
+</head>
+<body class="fx-spotlight-active">
+
+  <!-- ========================================================================= -->
+  <!-- TOPBAR / PLAYRIG STANDARD HEADER                                          -->
+  <!-- ========================================================================= -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" id="btn-back-to-deck" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
+      </a>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Enshrouded <span class="gradient-text-gold">Save Editor</span></h1>
+        <span class="badge badge-amber">Gaming • Enshrouded</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+      </div>
+    </div>
+
+    <!-- Center: Process Watcher & Save Status -->
+    <div class="topbar-center">
+      <div id="process-status-pill" class="process-pill process-safe" title="Live-Prozessüberwachung von enshrouded.exe">
+        <span class="process-dot"></span>
+        <span id="process-status-text">Spiel beendet (Sicher)</span>
+      </div>
+      <div id="active-file-pill" class="active-file-pill" style="display: none;">
+        <span class="file-icon">💾</span>
+        <span id="active-file-name">character0.ksd</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-change-character" class="btn btn-secondary btn-sm" style="display: none;">
+        Charakter wechseln ⇄
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- ONBOARDING & PERMISSION OVERLAY MODAL                                      -->
+  <!-- ========================================================================= -->
+  <div id="onboarding-modal" class="onboard-overlay active">
+    <div class="onboard-card fx-beam">
+      <div class="onboard-header">
+        <div class="onboard-emblem">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 8v4"/>
+            <path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <h2>Enshrouded <span class="gradient-text-gold">Charakter-Savegame</span> laden</h2>
+        <p>Wähle, wie PlayRig auf deine Spielstände zugreifen soll. Deine Dateien werden zu 100% lokal auf deinem Rechner verarbeitet.</p>
+      </div>
+
+      <!-- Step 1: Permission Prompt (if not granted yet) -->
+      <div id="permission-prompt-box" class="permission-prompt-box">
+        <div class="permission-feature-row">
+          <div class="perm-icon">⚡</div>
+          <div class="perm-desc">
+            <strong>Automatische Steam-Suche</strong>
+            <p>Darf PlayRig deinen lokalen Steam-Speicherort (1203620) nach Charakteren durchsuchen und zur 1-Klick-Auswahl auflisten?</p>
+          </div>
+        </div>
+        <div class="permission-actions">
+          <button id="btn-grant-permission" class="btn btn-primary fx-ripple">
+            ⚡ Automatische Suche erlauben (Berechtigung erteilen)
+          </button>
+          <button id="btn-choose-manual" class="btn btn-secondary">
+            📁 Nein, manuell auswählen / Drag & Drop
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Detected Characters Grid (Shown when permitted or detected) -->
+      <div id="detected-characters-box" class="detected-characters-box" style="display: none;">
+        <div class="detected-header">
+          <h3>Gefundene Charaktere</h3>
+          <button id="btn-refresh-detected" class="btn btn-ghost btn-sm" title="Erneut scannen">🔄 Aktualisieren</button>
+        </div>
+        <div id="detected-characters-list" class="detected-characters-grid">
+          <!-- Dynamically populated -->
+        </div>
+        <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Anderen Spielstand laden?</span>
+          <label class="btn btn-secondary btn-sm" style="cursor: pointer;">
+            📁 Eigene .ksd Datei wählen
+            <input type="file" id="input-manual-file" accept=".ksd" style="display: none;">
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 3: Manual Drag & Drop Zone -->
+      <div id="manual-drop-box" class="manual-drop-box" style="display: none;">
+        <div id="dropzone" class="save-dropzone">
+          <div class="dropzone-icon">📥</div>
+          <h4>Ziehe deine <span class="highlight-text">character*.ksd</span> Datei hierher</h4>
+          <p>Oder klicke, um eine Datei von deiner Festplatte auszuwählen.</p>
+          <span class="dropzone-hint">Speicherort meist unter: Steam\userdata\[ID]\1203620\remote</span>
+          <input type="file" id="input-dropzone-file" accept=".ksd" style="display: none;">
+        </div>
+        <div style="margin-top: 14px; text-align: center;">
+          <button id="btn-back-to-auto" class="btn btn-ghost btn-sm">← Zurück zur automatischen Suche</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WORKSTATION                                                          -->
+  <!-- ========================================================================= -->
+  <main id="editor-workspace" class="editor-workspace" style="display: none;">
+
+    <!-- TOP CHARACTER BANNER & QUICK STATS -->
+    <section class="char-banner glass-panel fx-beam">
+      <div class="char-avatar-col">
+        <div class="char-avatar-orb">
+          <span id="char-avatar-initials">LI</span>
+          <div class="char-level-badge" id="char-badge-level">50</div>
+        </div>
+      </div>
+
+      <div class="char-info-col">
+        <div class="char-title-row">
+          <input type="text" id="char-name-input" class="char-name-input" value="Liath" title="Charaktername bearbeiten" spellcheck="false">
+          <span id="char-slot-label" class="badge badge-indigo">Slot: character0.ksd</span>
+          <span id="unsaved-badge" class="badge badge-amber" style="display: none;">Ungespeichert</span>
+        </div>
+
+        <div class="char-metrics-row">
+          <!-- Level Stepper -->
+          <div class="metric-box">
+            <span class="metric-label">Level</span>
+            <div class="metric-stepper">
+              <button class="btn-step" id="btn-level-dec">-</button>
+              <input type="number" id="input-char-level" class="metric-input" min="1" max="100" value="26">
+              <button class="btn-step" id="btn-level-inc">+</button>
+            </div>
+          </div>
+
+          <!-- XP Stepper -->
+          <div class="metric-box" style="flex: 1.2;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span class="metric-label">Erfahrungspunkte (XP)</span>
+              <button id="btn-max-xp" class="btn-micro">Max XP</button>
+            </div>
+            <input type="number" id="input-char-xp" class="metric-input" min="0" max="999999" value="2727" style="width: 100%; text-align: left; padding: 4px 8px;">
+          </div>
+
+          <!-- Skill Nodes Counter -->
+          <div class="metric-box">
+            <span class="metric-label">Gelernte Skills</span>
+            <span id="metric-skills-count" class="metric-value-display">0</span>
+          </div>
+
+          <!-- Inventory Count -->
+          <div class="metric-box">
+            <span class="metric-label">Inventar-Gegenstände</span>
+            <span id="metric-inventory-count" class="metric-value-display">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="char-actions-col">
+        <button id="btn-save-savegame" class="btn btn-primary fx-ripple" title="Direkt im Steam-Ordner speichern mit Sicherheitskopie">
+          💾 Speichern & Backup
+        </button>
+        <button id="btn-download-ksd" class="btn btn-secondary" title="Als bearbeitete .ksd-Datei herunterladen">
+          ⬇ Als .ksd Export
+        </button>
+        <div class="undo-redo-group">
+          <button id="btn-undo" class="btn btn-secondary btn-sm" title="Rückgängig (Strg+Z)" disabled>↩</button>
+          <button id="btn-redo" class="btn btn-secondary btn-sm" title="Wiederholen (Strg+Y)" disabled>↪</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="editor-nav-tabs">
+      <button class="nav-tab active" data-tab="tab-inventory">
+        <span class="tab-icon">🎒</span> Ausrüstung & Rucksack
+      </button>
+      <button class="nav-tab" data-tab="tab-spawner">
+        <span class="tab-icon">📦</span> Item-Katalog & Spawner
+      </button>
+      <button class="nav-tab" data-tab="tab-skills">
+        <span class="tab-icon">⚡</span> Skillbaum & Attribute
+      </button>
+      <button class="nav-tab" data-tab="tab-knowledge">
+        <span class="tab-icon">📜</span> Wissen & Rezepte
+      </button>
+      <button class="nav-tab" data-tab="tab-tools">
+        <span class="tab-icon">🛠️</span> Power-Tools (God Mode)
+      </button>
+    </nav>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 1: INVENTORY & EQUIPMENT                                            -->
+    <!-- ======================================================================= -->
+    <section id="tab-inventory" class="tab-pane active">
+      <div class="inventory-layout">
+
+        <!-- LEFT: 16 EQUIPMENT SLOTS -->
+        <div class="glass-panel equip-panel">
+          <div class="panel-header">
+            <h3>Ausrüstung (16 Slots)</h3>
+            <span class="badge badge-indigo">Angelegt</span>
+          </div>
+
+          <div class="equip-grid">
+            <div class="equip-slot-wrap" data-slot-type="Armour_Head" title="Kopfbedeckung / Helm">
+              <span class="slot-label">Helm</span>
+              <div class="inv-slot" id="equip-Armour_Head" data-container="equipment" data-slot-index="0"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_UpperBody" title="Brustrüstung / Robe">
+              <span class="slot-label">Brust</span>
+              <div class="inv-slot" id="equip-Armour_UpperBody" data-container="equipment" data-slot-index="1"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_Arms" title="Handschuhe / Armschienen">
+              <span class="slot-label">Handschuhe</span>
+              <div class="inv-slot" id="equip-Armour_Arms" data-container="equipment" data-slot-index="2"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_LowerBody" title="Beinkleid / Hosen">
+              <span class="slot-label">Beine</span>
+              <div class="inv-slot" id="equip-Armour_LowerBody" data-container="equipment" data-slot-index="3"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_Feet" title="Stiefel / Schuhe">
+              <span class="slot-label">Stiefel</span>
+              <div class="inv-slot" id="equip-Armour_Feet" data-container="equipment" data-slot-index="4"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_Ring_1" title="Ring 1">
+              <span class="slot-label">Ring 1</span>
+              <div class="inv-slot" id="equip-Armour_Ring_1" data-container="equipment" data-slot-index="5"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Armour_Ring_2" title="Ring 2">
+              <span class="slot-label">Ring 2</span>
+              <div class="inv-slot" id="equip-Armour_Ring_2" data-container="equipment" data-slot-index="6"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Shield" title="Schild">
+              <span class="slot-label">Schild</span>
+              <div class="inv-slot" id="equip-Shield" data-container="equipment" data-slot-index="7"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Glider" title="Gleiter">
+              <span class="slot-label">Gleiter</span>
+              <div class="inv-slot" id="equip-Glider" data-container="equipment" data-slot-index="8"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="HookShot" title="Enterhaken / Greifhaken">
+              <span class="slot-label">Greifhaken</span>
+              <div class="inv-slot" id="equip-HookShot" data-container="equipment" data-slot-index="9"></div>
+            </div>
+            <div class="equip-slot-wrap" data-slot-type="Backpack" title="Rucksack">
+              <span class="slot-label">Rucksack</span>
+              <div class="inv-slot" id="equip-Backpack" data-container="equipment" data-slot-index="10"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CENTER: MAIN BACKPACK (40 SLOTS) & ACTION BAR -->
+        <div class="glass-panel backpack-panel">
+          <div class="panel-header">
+            <div>
+              <h3>Rucksack (Hauptinventar)</h3>
+              <p class="panel-subtitle">40 Standard-Slots + Erweiterung durch angelegten Rucksack</p>
+            </div>
+            <div class="backpack-quick-actions">
+              <button id="btn-repair-all" class="btn btn-secondary btn-sm" title="Haltbarkeit aller Items im Rucksack auf 100% setzen">🔧 Alle reparieren</button>
+              <button id="btn-stack-all" class="btn btn-secondary btn-sm" title="Alle Stacks auf Maximum füllen">📦 Stacks füllen</button>
+            </div>
+          </div>
+
+          <!-- Main 40 Slots Grid -->
+          <div id="main-backpack-grid" class="backpack-slots-grid">
+            <!-- 40 slots rendered by app.js -->
+          </div>
+
+          <!-- Extra Backpack Container (if backpack worn) -->
+          <div class="extra-container-wrap" style="margin-top: 18px;">
+            <div class="panel-header" style="margin-bottom: 8px;">
+              <h4 style="font-size: 0.95rem; margin: 0; color: var(--gold-400);">Rucksack-Erweiterung (Extra Taschen)</h4>
+              <span id="extra-capacity-badge" class="badge badge-cyan">0 Slots</span>
+            </div>
+            <div id="extra-backpack-grid" class="backpack-slots-grid extra-grid">
+              <!-- Extra slots -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: ITEM INSPECTOR & PROPERTY EDITOR -->
+        <aside class="glass-panel item-inspector-panel">
+          <div class="panel-header">
+            <h3>Item-Inspector</h3>
+            <span id="inspector-slot-badge" class="badge badge-indigo">Kein Slot gewählt</span>
+          </div>
+
+          <div id="inspector-empty-state" class="inspector-empty">
+            <div style="font-size: 2.2rem; opacity: 0.4;">🔍</div>
+            <p>Klicke auf einen Ausrüstungs- oder Rucksack-Slot, um Eigenschaften, Level, Haltbarkeit oder Anzahl zu bearbeiten.</p>
+          </div>
+
+          <div id="inspector-details" class="inspector-details" style="display: none;">
+            <div class="inspector-item-card">
+              <div class="inspector-thumb-box" id="inspector-thumb-box">
+                <img id="inspector-img" src="" alt="Item Icon">
+              </div>
+              <div class="inspector-meta-box">
+                <h4 id="inspector-name">Item Name</h4>
+                <div class="inspector-badge-row">
+                  <span id="inspector-rarity-badge" class="rarity-pill">Legendary</span>
+                  <span id="inspector-category-badge" class="badge badge-indigo">Waffe</span>
+                </div>
+                <span id="inspector-debug-id" class="inspector-debug-id">id: 12345</span>
+              </div>
+            </div>
+
+            <!-- Property Controls -->
+            <div class="inspector-controls-form">
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between;">
+                  <label class="form-label">Anzahl (Stack)</label>
+                  <span id="inspector-stack-max" style="font-size: 0.75rem; color: var(--text-dim);">Max: 100</span>
+                </div>
+                <div class="form-grid-2">
+                  <input type="number" id="inspector-count" class="nexus-input" min="1" value="1">
+                  <button id="btn-inspector-max-stack" class="btn btn-secondary btn-sm">Auf Max füllen</button>
+                </div>
+              </div>
+
+              <div class="form-group" id="inspector-durability-group">
+                <label class="form-label">Haltbarkeit</label>
+                <div class="form-grid-2">
+                  <input type="number" id="inspector-durability" class="nexus-input" min="0">
+                  <button id="btn-inspector-repair" class="btn btn-secondary btn-sm">🔧 Reparieren</button>
+                </div>
+              </div>
+
+              <div class="form-group" id="inspector-level-group">
+                <label class="form-label">Item-Level</label>
+                <input type="number" id="inspector-level" class="nexus-input" min="1" max="100">
+              </div>
+
+              <div class="form-group" id="inspector-upgrades-group">
+                <label class="form-label">Upgrades angewendet</label>
+                <input type="number" id="inspector-upgrades" class="nexus-input" min="0" max="10">
+              </div>
+
+              <div class="inspector-actions-row">
+                <button id="btn-inspector-duplicate" class="btn btn-secondary btn-sm" title="Item duplizieren">📋 Duplizieren</button>
+                <button id="btn-inspector-clear" class="btn btn-ghost btn-sm" style="color: var(--rose-400);" title="Item aus Slot entfernen">🗑️ Löschen</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 2: ITEM SPAWNER & CATALOG                                           -->
+    <!-- ======================================================================= -->
+    <section id="tab-spawner" class="tab-pane">
+      <div class="glass-panel" style="padding: 24px;">
+        <div class="spawner-toolbar">
+          <div class="spawner-search-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="spawner-search-input" class="spawner-search-input" placeholder="Über 4.300 Items durchsuchen (z.B. Schwert, Titan, Trank, Ring, Gleiter)...">
+          </div>
+
+          <div class="spawner-filter-row">
+            <div id="spawner-category-chips" class="spawner-chips-group">
+              <button class="spawner-chip active" data-cat="all">Alle</button>
+              <button class="spawner-chip" data-cat="Weapons">Waffen</button>
+              <button class="spawner-chip" data-cat="Equipment">Rüstung</button>
+              <button class="spawner-chip" data-cat="Consumables">Tränke & Nahrung</button>
+              <button class="spawner-chip" data-cat="BuildTools">Baustoffe & Werkzeuge</button>
+              <button class="spawner-chip" data-cat="Resources">Ressourcen</button>
+            </div>
+
+            <select id="spawner-rarity-select" class="nexus-select" style="max-width: 180px;">
+              <option value="all">Alle Seltenheiten</option>
+              <option value="Legendary">🟡 Legendär</option>
+              <option value="Epic">🟣 Episch</option>
+              <option value="Rare">🔵 Selten</option>
+              <option value="Uncommon">🟢 Ungewöhnlich</option>
+              <option value="Common">⚪ Gewöhnlich</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="spawner-status-bar">
+          <span id="spawner-results-count" style="font-size: 0.85rem; color: var(--text-dim);">4.262 Gegenstände verfügbar</span>
+          <span style="font-size: 0.82rem; color: var(--gold-400);">Klicke auf ein Item, um es in den aktuell gewählten Slot oder die nächste freie Tasche zu legen.</span>
+        </div>
+
+        <!-- Items Catalog Grid -->
+        <div id="spawner-catalog-grid" class="spawner-grid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 3: SKILLS                                                           -->
+    <!-- ======================================================================= -->
+    <section id="tab-skills" class="tab-pane">
+      <div class="glass-panel" style="padding: 24px;">
+        <div class="panel-header">
+          <div>
+            <h3>Skillbaum & Fähigkeiten</h3>
+            <p class="panel-subtitle">Aktiviere oder setze Fähigkeiten deines Charakters zurück.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-skills-unlock-all" class="btn btn-secondary btn-sm">⭐ Alle Skills freischalten</button>
+            <button id="btn-skills-reset" class="btn btn-ghost btn-sm" style="color: var(--rose-400);">🔄 Skillbaum zurücksetzen</button>
+          </div>
+        </div>
+
+        <div id="skills-list-container" class="skills-grid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 4: KNOWLEDGE & RECIPES                                              -->
+    <!-- ======================================================================= -->
+    <section id="tab-knowledge" class="tab-pane">
+      <div class="glass-panel" style="padding: 24px;">
+        <div class="panel-header">
+          <div>
+            <h3>Wissen, Entdeckungen & Rezepte</h3>
+            <p class="panel-subtitle">Verwalte freigeschaltete Handwerksrezepte und entdeckte Materialien.</p>
+          </div>
+          <button id="btn-unlock-all-recipes" class="btn btn-primary btn-sm fx-ripple">
+            📜 Alle Rezepte & Entdeckungen freischalten
+          </button>
+        </div>
+
+        <div class="knowledge-stats-row">
+          <div class="admin-metric-card">
+            <div class="admin-metric-header"><span>Bekannte Einträge</span><span>📖</span></div>
+            <div id="metric-knowledge-total" class="admin-metric-value">0</div>
+          </div>
+        </div>
+
+        <div class="knowledge-search-wrap" style="margin: 18px 0;">
+          <input type="text" id="knowledge-search" class="nexus-input" placeholder="Wissen oder Rezept filtern...">
+        </div>
+
+        <div id="knowledge-list-container" class="knowledge-list">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 5: POWER-TOOLS & GOD MODE                                           -->
+    <!-- ======================================================================= -->
+    <section id="tab-tools" class="tab-pane">
+      <div class="power-tools-grid">
+        <div class="glass-panel power-tool-card fx-beam">
+          <div class="tool-icon">⚡</div>
+          <h4>Sofort Level 50</h4>
+          <p>Setzt das Charakterlevel auf 50 und füllt die Erfahrungspunkte auf.</p>
+          <button id="power-tool-level50" class="btn btn-primary btn-sm fx-ripple">Level 50 aktivieren</button>
+        </div>
+
+        <div class="glass-panel power-tool-card fx-beam">
+          <div class="tool-icon">🔧</div>
+          <h4>Vollständige Reparatur</h4>
+          <p>Setzt die Haltbarkeit aller ausgerüsteten Gegenstände und Rucksack-Items auf 100%.</p>
+          <button id="power-tool-repair-all" class="btn btn-secondary btn-sm">Alles reparieren</button>
+        </div>
+
+        <div class="glass-panel power-tool-card fx-beam">
+          <div class="tool-icon">📦</div>
+          <h4>Maximale Stapel</h4>
+          <p>Füllt alle stapelbaren Gegenstände im Rucksack (Pfeile, Tränke, Baustoffe) auf das absolute Maximum.</p>
+          <button id="power-tool-max-stacks" class="btn btn-secondary btn-sm">Stacks füllen</button>
+        </div>
+
+        <div class="glass-panel power-tool-card fx-beam">
+          <div class="tool-icon">📜</div>
+          <h4>Handwerks-Meister</h4>
+          <p>Schaltet sämtliche Bau-, Schmiede-, Alchemie- und Überlebensrezepte des Spiels frei.</p>
+          <button id="power-tool-unlock-all" class="btn btn-secondary btn-sm">Alle Rezepte lernen</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- UNSAVED CHANGES SAFETY MODAL                                              -->
+  <!-- ========================================================================= -->
+  <div id="unsaved-safety-modal" class="modal-overlay">
+    <div class="export-modal-box" style="max-width: 480px;">
+      <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+        <span>⚠️</span>
+        <span class="gradient-text-gold">Ungespeicherte Änderungen</span>
+      </h3>
+      <p style="color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem;">
+        Du hast Änderungen an deinem Charakter vorgenommen, die noch nicht gespeichert wurden. Wie möchtest du fortfahren?
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <button id="safety-btn-save-leave" class="btn btn-primary fx-ripple">
+          💾 Jetzt speichern & zum Deck zurückkehren
+        </button>
+        <button id="safety-btn-discard-leave" class="btn btn-secondary" style="color: var(--rose-400);">
+          ✕ Ohne Speichern verlassen
+        </button>
+        <button id="safety-btn-cancel" class="btn btn-ghost">
+          Abbrechen & weiter bearbeiten
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+

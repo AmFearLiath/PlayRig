@@ -764,8 +764,8 @@ app.post('/api/enshrouded/read-save', async (req, res) => {
       return res.status(400).json({ error: 'player_character Block nicht gefunden' });
     }
 
-    const items = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json'), 'utf8'));
-    const skills = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json'), 'utf8'));
+    const items = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json'), 'utf8'));
+    const skills = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json'), 'utf8'));
     const isItem = (id) => Object.prototype.hasOwnProperty.call(items, id);
     const isSkill = (id) => Object.prototype.hasOwnProperty.call(skills.nodes, id);
     const ESPACOS = new Set(['Armour_Head', 'Armour_UpperBody', 'Armour_Arms', 'Armour_LowerBody', 'Armour_Feet', 'Armour_Ring', 'Shield', 'HookShot', 'Glider', 'Backpack']);
@@ -876,8 +876,8 @@ app.post('/api/enshrouded/parse-file', express.raw({ type: 'application/octet-st
       return res.status(400).json({ error: 'player_character Block nicht gefunden' });
     }
 
-    const items = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json'), 'utf8'));
-    const skills = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json'), 'utf8'));
+    const items = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json'), 'utf8'));
+    const skills = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json'), 'utf8'));
     const isItem = (id) => Object.prototype.hasOwnProperty.call(items, id);
     const isSkill = (id) => Object.prototype.hasOwnProperty.call(skills.nodes, id);
     const ESPACOS = new Set(['Armour_Head', 'Armour_UpperBody', 'Armour_Arms', 'Armour_LowerBody', 'Armour_Feet', 'Armour_Ring', 'Shield', 'HookShot', 'Glider', 'Backpack']);

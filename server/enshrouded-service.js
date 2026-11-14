@@ -31,13 +31,13 @@ let skillsCatalog = null;
 
 function loadCatalogs(rootDir) {
   if (!itemsCatalog) {
-    const itemsPath = path.join(rootDir, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json');
+    const itemsPath = path.join(rootDir, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'items.json');
     if (fs.existsSync(itemsPath)) {
       itemsCatalog = JSON.parse(fs.readFileSync(itemsPath, 'utf8'));
     }
   }
   if (!skillsCatalog) {
-    const skillsPath = path.join(rootDir, 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json');
+    const skillsPath = path.join(rootDir, 'rigs', 'Gaming', 'Enshrouded', 'Save-Editor', 'data', 'skills.json');
     if (fs.existsSync(skillsPath)) {
       skillsCatalog = JSON.parse(fs.readFileSync(skillsPath, 'utf8'));
     }

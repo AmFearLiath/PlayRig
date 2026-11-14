@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="crimson-voltage">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crosshair & Scope Lab | PlayRig</title>
+
+  <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../../_shared/css/base.css">
+  <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../../_shared/css/animations.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
+  <script src="../../../../_shared/js/toast.js"></script>
+</head>
+<body class="fx-spotlight-active">
+  <!-- Topbar -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
+      </a>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Crosshair & <span class="gradient-text-crimson">Scope Lab</span></h1>
+        <span class="badge badge-rose">Gaming • Shooter-Tools</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-export-png" class="btn btn-secondary btn-sm" title="Transparentes Fadenkreuz als PNG speichern">
+        ⬇ PNG Download
+      </button>
+    </div>
+  </header>
+
+  <main class="lab-container">
+    <!-- Controls Sidebar -->
+    <aside class="controls-panel glass-panel">
+      <h2 class="panel-heading">Fadenkreuz Parameter</h2>
+
+      <!-- Presets -->
+      <div class="form-group">
+        <label class="form-label">Profi-Presets</label>
+        <div class="preset-chips-row">
+          <button class="preset-chip active" data-preset="dot">Clean Dot</button>
+          <button class="preset-chip" data-preset="classic">CS Classic</button>
+          <button class="preset-chip" data-preset="pro">Valorant Pro</button>
+          <button class="preset-chip" data-preset="circle">Apex Circle</button>
+        </div>
+      </div>
+
+      <!-- Color Swatches -->
+      <div class="form-group">
+        <label class="form-label">Fadenkreuz-Farbe</label>
+        <div class="swatches-row">
+          <button class="swatch-btn active" data-c="#00ff66" style="background:#00ff66;" title="High-Vis Green"></button>
+          <button class="swatch-btn" data-c="#00d2ff" style="background:#00d2ff;" title="Cyan"></button>
+          <button class="swatch-btn" data-c="#ff0055" style="background:#ff0055;" title="Red"></button>
+          <button class="swatch-btn" data-c="#ffff00" style="background:#ffff00;" title="Yellow"></button>
+          <button class="swatch-btn" data-c="#ffffff" style="background:#ffffff;" title="White"></button>
+          <input type="color" id="input-custom-color" value="#00ff66" class="color-picker-input" title="Eigene Farbe">
+        </div>
+      </div>
+
+      <!-- Geometry Sliders -->
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Linienlänge</label>
+          <span id="val-length" class="slider-val">6px</span>
+        </div>
+        <input type="range" id="slider-length" min="1" max="30" value="6" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Linienstärke (Thickness)</label>
+          <span id="val-thickness" class="slider-val">2px</span>
+        </div>
+        <input type="range" id="slider-thickness" min="1" max="12" value="2" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Zentrum-Lücke (Gap)</label>
+          <span id="val-gap" class="slider-val">3px</span>
+        </div>
+        <input type="range" id="slider-gap" min="0" max="25" value="3" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Schwarzer Umriss (Outline)</label>
+          <span id="val-outline" class="slider-val">1px</span>
+        </div>
+        <input type="range" id="slider-outline" min="0" max="5" value="1" class="nexus-slider">
+      </div>
+
+      <!-- Center Dot -->
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="nexus-checkbox-label">
+            <input type="checkbox" id="check-dot" class="nexus-checkbox">
+            <span style="font-weight: 700; color: #fff;">Zentraler Punkt (Center Dot)</span>
+          </label>
+          <span id="val-dot-size" class="slider-val">2px</span>
+        </div>
+        <input type="range" id="slider-dot-size" min="1" max="8" value="2" class="nexus-slider" style="margin-top:8px;">
+      </div>
+
+      <!-- T-Style Toggle -->
+      <div class="form-group">
+        <label class="nexus-checkbox-label">
+          <input type="checkbox" id="check-t-style" class="nexus-checkbox">
+          <span style="font-weight: 700; color: #fff;">T-Style (Ohne obere Linie)</span>
+        </label>
+      </div>
+    </aside>
+
+    <!-- Center Viewport Simulation -->
+    <section class="simulation-section">
+      <!-- Background Switcher Bar -->
+      <div class="scene-switch-bar">
+        <span style="font-size:0.8rem; font-weight:700; color:var(--text-dim);">Szenen-Test:</span>
+        <button class="scene-btn active" data-scene="dust">🏜️ Dust Dunes</button>
+        <button class="scene-btn" data-scene="bunker">🏢 Dunkler Bunker</button>
+        <button class="scene-btn" data-scene="cyber">🌃 Neon City</button>
+        <button class="scene-btn" data-scene="grid">🏁 Grid Pattern</button>
+      </div>
+
+      <!-- Viewport Card with Target & Crosshair -->
+      <div class="crosshair-viewport scene-dust" id="viewport-box">
+        <!-- Target Dummy -->
+        <div class="target-dummy" id="target-dummy"></div>
+
+        <!-- The Crosshair Element -->
+        <div class="crosshair-anchor" id="crosshair-render">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div class="spray-hint">
+          <span>Klicke und halte die linke Maustaste für Rückstoß-Streuungs-Simulation (Spray)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Export & Codes Panel -->
+    <aside class="export-panel glass-panel">
+      <h2 class="panel-heading">Game-Codes</h2>
+
+      <!-- Valorant Code -->
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="form-label">Valorant Profil-Code</label>
+          <button id="btn-copy-val" class="btn-micro">Kopieren</button>
+        </div>
+        <textarea id="val-code-box" class="code-box" style="height: 100px;" readonly></textarea>
+      </div>
+
+      <!-- CS2 Commands -->
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label class="form-label">CS2 Konsole (Autoexec)</label>
+          <button id="btn-copy-cs2" class="btn-micro">Kopieren</button>
+        </div>
+        <textarea id="cs2-code-box" class="code-box" style="height: 140px;" readonly></textarea>
+      </div>
+
+      <button id="btn-copy-svg" class="btn btn-primary fx-ripple" style="width: 100%; margin-top: 10px;">
+        📋 SVG-Code kopieren
+      </button>
+    </aside>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+

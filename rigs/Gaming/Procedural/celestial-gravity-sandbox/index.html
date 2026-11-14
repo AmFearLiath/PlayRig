@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayRig Celestial Gravity // N-Body Orbital Physics Sandbox</title>
+  <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Standard PlayRig Hub Bar -->
+  <header class="playrig-hub-bar">
+    <div class="hub-bar-brand">
+      <a href="/" class="hub-back-btn" title="Zurück zum PlayRig Deck">
+        <span class="hub-back-arrow">‹</span>
+        <span class="hub-logo-dot"></span>
+        <span class="hub-brand-name">PlayRig</span>
+      </a>
+      <span class="hub-separator">/</span>
+      <span class="hub-module-name">Celestial Gravity Sandbox</span>
+      <span class="hub-version-tag">v0.0.1</span>
+    </div>
+    <div class="hub-bar-meta">
+      <span class="hub-badge-author">Author: Liath</span>
+      <span class="hub-badge-copyright">© GameChiller</span>
+      <button id="btn-toggle-sound" class="hub-action-btn" title="Kosmischen Raum-Sound an/aus">🔊 Ambient Sound</button>
+      <button id="btn-clear-space" class="hub-action-btn btn-danger" title="Universum leeren">☄ Clear Space</button>
+    </div>
+  </header>
+
+  <!-- Fullscreen Physics Canvas -->
+  <div class="canvas-container" id="canvas-wrapper">
+    <canvas id="gravity-canvas"></canvas>
+    
+    <!-- Top HUD Overlays -->
+    <div class="hud-stats">
+      <div class="hud-item"><span class="hud-label">KÖRPER:</span> <span id="stat-bodies" class="hud-val">0</span></div>
+      <div class="hud-item"><span class="hud-label">GESAMT-MASSE:</span> <span id="stat-mass" class="hud-val">0</span></div>
+      <div class="hud-item"><span class="hud-label">FPS:</span> <span id="stat-fps" class="hud-val">60</span></div>
+    </div>
+
+    <!-- Mouse Sling Velocity Guide -->
+    <div class="sling-hint" id="sling-hint">Ziehen & Loslassen, um neuen Planeten zu schleudern</div>
+
+    <!-- Control Floating Panel -->
+    <div class="floating-controls glass-panel">
+      <div class="panel-section">
+        <div class="section-title">Presets</div>
+        <div class="preset-grid">
+          <button class="preset-btn active" data-preset="solar">Sonnensystem</button>
+          <button class="preset-btn" data-preset="binary">Doppelstern</button>
+          <button class="preset-btn" data-preset="chaos">3-Körper Chaos</button>
+          <button class="preset-btn" data-preset="ring">Asteroiden-Gürtel</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Spawn-Werkzeug</div>
+        <div class="spawn-type-selector">
+          <button class="type-btn active" data-type="planet">Planet (Masse 10)</button>
+          <button class="type-btn" data-type="star">Stern (Masse 300)</button>
+          <button class="type-btn" data-type="blackhole">Schwarzes Loch (Masse 1500)</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">Physik-Parameter</div>
+        <div class="param-row">
+          <label>Gravitation G</label>
+          <input type="range" id="param-g" min="0.1" max="5.0" step="0.1" value="1.0">
+          <span id="val-g" class="param-val">1.0</span>
+        </div>
+        <div class="param-row">
+          <label>Orbit-Schweif</label>
+          <input type="range" id="param-trail" min="0.01" max="0.3" step="0.01" value="0.08">
+          <span id="val-trail" class="param-val">0.08</span>
+        </div>
+        <div class="param-row">
+          <label>Simulation Speed</label>
+          <input type="range" id="param-speed" min="0.2" max="3.0" step="0.2" value="1.0">
+          <span id="val-speed" class="param-val">1.0x</span>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button id="btn-pause-sim" class="hud-btn"><span id="pause-icon">⏸</span> Pause</button>
+        <button id="btn-recenter" class="hud-btn">🎯 Zentrieren</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
+

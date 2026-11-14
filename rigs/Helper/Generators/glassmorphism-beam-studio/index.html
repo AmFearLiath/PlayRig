@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="cyber-cyan">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Glassmorphism & Border-Beam Studio | PlayRig</title>
+
+  <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../../_shared/css/base.css">
+  <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../../_shared/css/animations.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
+  <script src="../../../../_shared/js/toast.js"></script>
+</head>
+<body class="fx-spotlight-active">
+  <!-- Topbar -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
+      </a>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Glassmorphism & <span class="gradient-text">Beam Studio</span></h1>
+        <span class="badge badge-cyan">Helper • Generators</span>
+        <span class="badge badge-indigo topbar-version-badge">v0.0.1</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-randomize" class="btn btn-secondary btn-sm">
+        🎲 Zufälliger Style
+      </button>
+    </div>
+  </header>
+
+  <!-- Studio Workspace -->
+  <main class="studio-layout">
+    <!-- Controls Sidebar -->
+    <aside class="controls-sidebar glass-panel">
+      <h2 class="panel-heading">Stil-Regler</h2>
+
+      <!-- Background Switcher -->
+      <div class="form-group">
+        <label class="form-label">Test-Hintergrund</label>
+        <div class="bg-selector-row">
+          <button class="bg-thumb-btn active" data-bg="mesh" style="background: linear-gradient(135deg, #0f172a, #1e1b4b, #0f172a);">Mesh</button>
+          <button class="bg-thumb-btn" data-bg="sunset" style="background: linear-gradient(135deg, #f43f5e, #8b5cf6, #06b6d4);">Sunset</button>
+          <button class="bg-thumb-btn" data-bg="matrix" style="background: linear-gradient(135deg, #022c22, #04060a, #064e3b);">Matrix</button>
+          <button class="bg-thumb-btn" data-bg="grid" style="background: #090d16;">Dark Grid</button>
+        </div>
+      </div>
+
+      <!-- Glass Parameters -->
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Blur (Unschärfe)</label>
+          <span id="val-blur" class="slider-val">16px</span>
+        </div>
+        <input type="range" id="slider-blur" min="0" max="40" value="16" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Glas-Deckkraft (Opacity)</label>
+          <span id="val-opacity" class="slider-val">0.65</span>
+        </div>
+        <input type="range" id="slider-opacity" min="0.05" max="0.95" step="0.05" value="0.65" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Eckenabrundung (Radius)</label>
+          <span id="val-radius" class="slider-val">24px</span>
+        </div>
+        <input type="range" id="slider-radius" min="0" max="48" value="24" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Rahmen-Deckkraft (Border)</label>
+          <span id="val-border" class="slider-val">0.2</span>
+        </div>
+        <input type="range" id="slider-border" min="0" max="0.8" step="0.05" value="0.2" class="nexus-slider">
+      </div>
+
+      <!-- Border Beam Runner -->
+      <div class="section-divider"></div>
+      <h3 class="panel-subheading">✨ Border-Beam Effekt</h3>
+
+      <div class="form-group">
+        <label class="nexus-checkbox-label">
+          <input type="checkbox" id="check-enable-beam" class="nexus-checkbox" checked>
+          <span style="font-weight: 700; color: #fff;">Laufendes Rahmenlicht (Border Beam)</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <div class="slider-header">
+          <label class="form-label">Beam-Geschwindigkeit</label>
+          <span id="val-beam-speed" class="slider-val">6s</span>
+        </div>
+        <input type="range" id="slider-beam-speed" min="2" max="15" step="1" value="6" class="nexus-slider">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Beam Farbschema</label>
+        <div class="beam-colors-row">
+          <button class="beam-color-btn active" data-c1="#00d2ff" data-c2="#6366f1">Cyan/Indigo</button>
+          <button class="beam-color-btn" data-c1="#10b981" data-c2="#06b6d4">Emerald</button>
+          <button class="beam-color-btn" data-c1="#f43f5e" data-c2="#fbbf24">Sunset Flame</button>
+          <button class="beam-color-btn" data-c1="#a855f7" data-c2="#ec4899">Neon Pink</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Stage: Live 3D Tilt Card -->
+    <section class="stage-section" id="stage-area">
+      <div class="preview-card-wrap" id="card-wrap">
+        <div class="custom-glass-card" id="preview-card">
+          <div class="custom-beam-border" id="beam-border"></div>
+
+          <div class="card-content">
+            <div class="card-badge-row">
+              <span class="badge badge-cyan">PlayRig Glass</span>
+              <span class="badge badge-indigo">Interactive Tilt</span>
+            </div>
+            <h2 class="card-heading">Glassmorphism UI</h2>
+            <p class="card-text">
+              Bewege die Maus über diese Karte für einen realistischen 3D-Lichtbrechungswinkel. Passe links alle Parameter stufenlos in Echtzeit an.
+            </p>
+            <div class="card-footer-row">
+              <button class="btn btn-primary btn-sm fx-ripple">Interaktiver Button</button>
+              <span style="font-size: 0.8rem; color: var(--text-dim); font-family: var(--font-mono);">backdrop-filter: blur</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code Output Panel -->
+    <aside class="code-export-panel glass-panel">
+      <div class="code-panel-header">
+        <h2 class="panel-heading">Code-Export</h2>
+        <div class="code-format-tabs">
+          <button class="code-tab active" data-fmt="css">CSS</button>
+          <button class="code-tab" data-fmt="tailwind">Tailwind</button>
+        </div>
+      </div>
+
+      <textarea id="code-output" class="code-box" readonly spellcheck="false"></textarea>
+
+      <button id="btn-copy-code" class="btn btn-primary fx-ripple" style="width: 100%; margin-top: 12px;">
+        📋 In Zwischenablage kopieren
+      </button>
+    </aside>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+
