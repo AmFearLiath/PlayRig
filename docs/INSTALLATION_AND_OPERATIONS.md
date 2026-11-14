@@ -27,7 +27,7 @@ npm install
 ### 2.2 Umgebungsvariablen (`.env` oder Umgebung)
 | Variable | Standardwert | Beschreibung |
 |---|---|---|
-| `PORT` | `3000` | HTTP-Port für Deck, Studio und API |
+| `PORT` | `8882` | HTTP-Port für Deck, Studio und API |
 | `DB_HOST` | `localhost` | Hostname des MySQL-Servers |
 | `DB_PORT` | `3307` | TCP-Port des MySQL-Servers |
 | `DB_USER` | `root` | Datenbankbenutzer |
@@ -59,13 +59,13 @@ node server/server.js
 
 ### 4.2 Port-Konflikt-Lösung (`server/port-helper.js`)
 PlayRig verfügt über einen integrierten Port-Manager:
-- Ist Port `3000` belegt, erkennt `ensurePortAvailable` den blockierenden Prozess.
+- Ist Port `8882` belegt, erkennt `ensurePortAvailable` den blockierenden Prozess.
 - **Interaktiver Modus (Terminal):** Fragt den Administrator, ob der alte Prozess beendet werden soll.
 - **Nicht-interaktiver Modus (Service/Daemon):** Beendet verwaiste Prozesse automatisch, um Ausfallzeiten zu verhindern.
 
 ### 4.3 Health-Check Endpunkte
-- HTTP Health: `GET http://localhost:3000/api/health`
-- Context Status: `GET http://localhost:3000/api/v1/auth/context`
+- HTTP Health: `GET http://localhost:8882/api/health`
+- Context Status: `GET http://localhost:8882/api/v1/auth/context`
 
 ---
 

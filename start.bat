@@ -22,14 +22,14 @@ if not exist "node_modules\" (
     call npm install
 )
 
-echo [INFO] Starte PlayRig Engine Server auf Port 3000...
-echo        - Deck:   http://localhost:3000
-echo        - Studio: http://localhost:3000/studio
-echo        - Admin:  http://localhost:3000/admin
+echo [INFO] Starte PlayRig Engine Server auf Port 8882...
+echo        - Deck:   http://localhost:8882
+echo        - Studio: http://localhost:8882/studio
+echo        - Admin:  http://localhost:8882/admin
 echo.
 
 :: Open Browser after 2 seconds in background
-start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:3000"
+start "" cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:8882"
 
 :: Start Node Server
 node server/server.js

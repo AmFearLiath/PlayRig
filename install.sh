@@ -107,8 +107,8 @@ mariadb -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost'
 mariadb -e "FLUSH PRIVILEGES;"
 echo -e "${GREEN}✓ MariaDB-Datenbank '${DB_NAME}' und Benutzer '${DB_USER}' bereitgestellt.${NC}"
 
-# Port-Prüfung: Falls Port 3000 belegt ist, Port 3005 wählen
-APP_PORT=3000
+# Port-Prüfung: Standard-Port 8882
+APP_PORT=8882
 if [ -f "$TARGET_DIR/.env" ]; then
   EXISTING_PORT=$(grep -E '^PORT=' "$TARGET_DIR/.env" | cut -d'=' -f2- | tr -d ' ' | tr -d '"')
   if [ -n "$EXISTING_PORT" ]; then
@@ -117,8 +117,8 @@ if [ -f "$TARGET_DIR/.env" ]; then
 fi
 
 if ss -tlpn "sport = :${APP_PORT}" 2>/dev/null | grep -q ":${APP_PORT} "; then
-  echo -e "${YELLOW}[HINWEIS] Port ${APP_PORT} ist bereits belegt! Verwende Port 3005 für PlayRig...${NC}"
-  APP_PORT=3005
+  echo -e "${YELLOW}[HINWEIS] Port ${APP_PORT} ist bereits belegt! Verwende Ausweich-Port 8883 für PlayRig...${NC}"
+  APP_PORT=8883
 fi
 
 # .env Konfigurationsdatei schreiben

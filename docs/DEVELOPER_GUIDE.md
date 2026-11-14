@@ -25,8 +25,8 @@
    node server/server.js
    ```
 5. **Oberflächen aufrufen:**
-   - **PlayRig Deck (Katalog):** [http://localhost:3000](http://localhost:3000)
-   - **PlayRig Studio (Editor):** [http://localhost:3000/studio](http://localhost:3000/studio)
+   - **PlayRig Deck (Katalog):** [http://localhost:8882](http://localhost:8882)
+   - **PlayRig Studio (Editor):** [http://localhost:8882/studio](http://localhost:8882/studio)
 
 ---
 
@@ -49,7 +49,7 @@ rigs/Gaming/Minecraft/Voxel-Sphere-Architect/
 ## 3. Schritt-für-Schritt: Neues Rig erstellen
 
 ### Schritt 1: Rig im Studio anlegen
-1. Öffne das [PlayRig Studio](http://localhost:3000/studio).
+1. Öffne das [PlayRig Studio](http://localhost:8882/studio).
 2. Klicke unter **Meine Rigs & Code** auf den Button **`+ Neu`**.
 3. Fülle das Formular aus:
    - **Titel:** z. B. `Orbital Gravity Lab`

@@ -40,7 +40,7 @@ Traditionelle Web-Tools leiden unter Tab-Sprawl, fehlender Persistenz und Abhän
 
 ## 📚 Zentrale Dokumentations-Suite
 
-PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du kannst sie **direkt im Browser** über das neue **[Dokumentations-Portal](http://localhost:3000/docs)** aufrufen oder in den Markdown-Handbüchern nachschlagen:
+PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du kannst sie **direkt im Browser** über das neue **[Dokumentations-Portal](http://localhost:8882/docs)** aufrufen oder in den Markdown-Handbüchern nachschlagen:
 
 <div align="center">
 
@@ -56,7 +56,7 @@ PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du 
 
 </div>
 
-> 💡 **Tipp:** Starte den Server und rufe **`http://localhost:3000/docs`** auf, um die interaktive Dokumentation mit integrierter **Live-API-Testkonsole** und Markdown-Viewer zu erleben!
+> 💡 **Tipp:** Starte den Server und rufe **`http://localhost:8882/docs`** auf, um die interaktive Dokumentation mit integrierter **Live-API-Testkonsole** und Markdown-Viewer zu erleben!
 
 ---
 
@@ -122,13 +122,13 @@ Autorisierte Komponenten und Skripte fragen die versionierte REST-Schnittstelle 
 
 ```bash
 # 1. Plattform-Kontext abrufen
-curl http://localhost:3000/api/v1/auth/context
+curl http://localhost:8882/api/v1/auth/context
 
 # 2. Katalog aller aktiven Rigs abrufen
-curl http://localhost:3000/api/v1/rigs?category=gaming
+curl http://localhost:8882/api/v1/rigs?category=gaming
 
 # 3. Autonome Rig-Dokumentation (docs.json) abfragen
-curl http://localhost:3000/api/v1/rigs/voxel-sphere-architect/docs
+curl http://localhost:8882/api/v1/rigs/voxel-sphere-architect/docs
 ```
 
 **Antwort-Format (Standardisiertes Envelope):**
@@ -155,7 +155,7 @@ Jedes Rig unterstützt den autarken Embed-Modus ohne störende Plattform-Menüs:
 ```html
 <!-- Live Voxel Sphere Generator in externe Seite einbinden -->
 <iframe 
-  src="http://localhost:3000/rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html?embed=true" 
+  src="http://localhost:8882/rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html?embed=true" 
   width="100%" 
   height="720" 
   style="border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 16px;" 
@@ -170,12 +170,12 @@ Vollständige Projekte können automatisiert per Skript oder CI/CD über die RES
 
 ```bash
 # 1. ZIP-Archiv vorab auf Schadcode, eval() und Zip-Slip scannen (ohne Speichern)
-curl -X POST http://localhost:3000/api/v1/rigs/validate-zip \
+curl -X POST http://localhost:8882/api/v1/rigs/validate-zip \
   -H "Content-Type: application/json" \
   -d '{"zipBase64": "data:application/zip;base64,UEsDBBQAAAA..."}'
 
 # 2. Nach Freigabe: Rig entpacken, Bridge injizieren und in PlayRig registrieren
-curl -X POST http://localhost:3000/api/v1/rigs/import-zip \
+curl -X POST http://localhost:8882/api/v1/rigs/import-zip \
   -H "Authorization: Bearer <DEIN_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -260,10 +260,10 @@ node server/server.js
 ```
 
 ### 4. Sofort loslegen
-- 🕹️ **PlayRig Deck (Katalog):** [http://localhost:3000](http://localhost:3000)
-- ⚡ **PlayRig Studio (Editor):** [http://localhost:3000/studio](http://localhost:3000/studio)
-- 📚 **Dokumentations-Zentrale:** [http://localhost:3000/docs](http://localhost:3000/docs)
-- 🛡️ **Admin Control Panel:** [http://localhost:3000/admin](http://localhost:3000/admin) *(Login: `admin` / `admin123`)*
+- 🕹️ **PlayRig Deck (Katalog):** [http://localhost:8882](http://localhost:8882)
+- ⚡ **PlayRig Studio (Editor):** [http://localhost:8882/studio](http://localhost:8882/studio)
+- 📚 **Dokumentations-Zentrale:** [http://localhost:8882/docs](http://localhost:8882/docs)
+- 🛡️ **Admin Control Panel:** [http://localhost:8882/admin](http://localhost:8882/admin) *(Login: `admin` / `admin123`)*
 
 ---
 

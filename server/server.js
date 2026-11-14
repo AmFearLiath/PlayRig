@@ -31,7 +31,7 @@ const db = require('./db');
 const { ensurePortAvailable } = require('./port-helper');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8882;
 const ROOT_DIR = path.resolve(__dirname, '..');
 
 // Body Parsers

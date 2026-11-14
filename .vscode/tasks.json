@@ -48,7 +48,7 @@
         "panel": "dedicated",
         "clear": true
       },
-      "detail": "Startet den zentralen PlayRig Node.js-Server auf Port 3000 (MySQL 3307)."
+      "detail": "Startet den zentralen PlayRig Node.js-Server auf Port 8882 (MySQL 3307)."
     },
     {
       "label": "🔄 [Server] PlayRig Server (Dev Watch Mode)",
@@ -63,15 +63,15 @@
       "detail": "Startet den Server im automatischen Watch-Modus bei Dateiänderungen."
     },
     {
-      "label": "🛑 [Server] Port 3000 freigeben & alte Instanzen stoppen",
+      "label": "🛑 [Server] Port 8882 freigeben & alte Instanzen stoppen",
       "type": "shell",
-      "command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$conn = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue; if ($conn) { $conn | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Write-Host 'Port 3000 erfolgreich freigegeben!' -ForegroundColor Green } else { Write-Host 'Port 3000 ist bereits frei.' -ForegroundColor Yellow }\"",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$conn = Get-NetTCPConnection -LocalPort 8882 -ErrorAction SilentlyContinue; if ($conn) { $conn | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Write-Host 'Port 8882 erfolgreich freigegeben!' -ForegroundColor Green } else { Write-Host 'Port 8882 ist bereits frei.' -ForegroundColor Yellow }\"",
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
         "panel": "shared"
       },
-      "detail": "Beendet blockierende Node.js-Prozesse auf Port 3000 sauber ohne Taskmanager."
+      "detail": "Beendet blockierende Node.js-Prozesse auf Port 8882 sauber ohne Taskmanager."
     },
     {
       "label": "📦 [Server] NPM Install Dependencies",

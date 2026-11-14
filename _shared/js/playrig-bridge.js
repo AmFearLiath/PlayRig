@@ -25,8 +25,11 @@
   // Origin Allowlist
   const defaultAllowedOrigins = [
     window.location.origin,
+    'http://localhost:8882',
+    'http://127.0.0.1:8882',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://playrig.amfearliath.de',
     'https://gamechiller.de',
     'https://playrig.gamechiller.de'
   ];

@@ -11,5 +11,5 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "[INFO] Starte PlayRig Server auf Port 3000..."
+echo "[INFO] Starte PlayRig Server auf Port 8882..."
 node server/server.js
