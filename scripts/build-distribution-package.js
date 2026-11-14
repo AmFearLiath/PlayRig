@@ -20,6 +20,7 @@ const items = [
   'docs',
   'docs-portal',
   'deploy',
+  'scripts',
   'install.sh',
   'package.json',
   'ecosystem.config.js',

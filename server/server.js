@@ -1118,9 +1118,9 @@ async function startServer() {
    ➜ Admin Panel:           http://localhost:${PORT}/admin
    ➜ API Health:            http://localhost:${PORT}/api/health
   ==============================================================
-   Standard-Zugänge:
-   • Admin:    admin / admin123
-   • Creator:  creator / creator123
+   Authentifizierung:
+   • Zugang:          Ausschließlich autorisierte Konten
+   • Kontoverwaltung: 'node scripts/create-user.js'
   ==============================================================
       `);
     });

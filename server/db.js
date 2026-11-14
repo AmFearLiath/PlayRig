@@ -196,17 +196,17 @@ async function init() {
 }
 
 async function seedInitialData() {
-  // Check users
-  const [users] = await pool.query('SELECT COUNT(*) as count FROM users');
-  if (users[0].count === 0) {
+  // Remove insecure legacy default accounts if still present with default passwords
+  try {
     const adminPass = hashPassword('admin123');
     const creatorPass = hashPassword('creator123');
     await pool.query(`
-      INSERT INTO users (id, username, name, password_hash, role, status) VALUES
-      ('u-admin-01', 'admin', 'System Admin', ?, 'admin', 'active'),
-      ('u-creator-01', 'creator', 'Liath', ?, 'creator', 'active')
-    `, [adminPass, creatorPass]);
-  }
+      DELETE FROM users 
+      WHERE (username = 'admin' AND password_hash = ?)
+         OR (username = 'creator' AND password_hash = ?)
+         OR (id IN ('u-admin-01', 'u-creator-01') AND password_hash IN (?, ?))
+    `, [adminPass, creatorPass, adminPass, creatorPass]);
+  } catch (e) {}
 
   // Seed default categories
   const defaultCategories = [

@@ -95,6 +95,17 @@
       },
       "detail": "Baut playrig-debian-server.tar.gz und .zip in dist/ für den Debian-Servertransfer."
     },
+    {
+      "label": "👤 [Auth] Benutzer- oder Administratorkonto erstellen",
+      "type": "shell",
+      "command": "node scripts/create-user.js",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Interaktive Erstellung eines neuen Benutzer- oder Admin-Accounts in MySQL."
+    },
 
     // ============================================================
     // 2. ⬆️ GITHUB: UPLOAD & SYNC (Commit, Push, Status)

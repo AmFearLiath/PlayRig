@@ -5,7 +5,8 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "node --watch server/server.js"
+    "dev": "node --watch server/server.js",
+    "create-user": "node scripts/create-user.js"
   },
   "dependencies": {
     "@mongodb-js/zstd": "^7.0.0",
