@@ -756,7 +756,9 @@ async function getRigById(id) {
 
 async function createRig(data, user) {
   const id = data.id || ('rig-' + Date.now().toString(36));
-  const author = user ? (user.name || user.username) : (data.author || 'Liath');
+  const author = data.author || (user ? (user.name || user.username) : 'Community Creator');
+  const isLiath = author.toLowerCase() === 'liath' || (user && user.username === 'creator');
+  const copyright = data.copyright || (isLiath ? '© GameChiller' : `© ${author}`);
   const path = data.path || `${data.category || 'creative'}/${data.subcategory || 'experiments'}/${data.title.replace(/[^a-zA-Z0-9_-]/g, '_')}/index.html`;
 
   await pool.query(`
@@ -774,7 +776,7 @@ async function createRig(data, user) {
     path,
     data.version || 'v0.0.1',
     author,
-    data.copyright || '© GameChiller',
+    copyright,
     data.icon || 'cube',
     data.color || '#00d2ff',
     JSON.stringify(data.tags || []),
@@ -839,7 +841,9 @@ async function forkRig(id, user) {
   if (!source) return null;
 
   const newId = `${source.id}-fork-${Date.now().toString(36).slice(-4)}`;
-  const author = user ? (user.name || user.username) : 'Liath';
+  const author = user ? (user.name || user.username) : 'Community Forker';
+  const isLiath = author.toLowerCase() === 'liath' || (user && user.username === 'creator');
+  const copyright = isLiath ? '© GameChiller' : `© ${author}`;
 
   await pool.query(`
     INSERT INTO rigs (
@@ -856,7 +860,7 @@ async function forkRig(id, user) {
     source.path,
     'v0.0.1',
     author,
-    '© GameChiller',
+    copyright,
     source.icon,
     source.color,
     JSON.stringify(source.tags || []),

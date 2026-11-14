@@ -196,8 +196,8 @@
             <p class="hero-spotlight-desc">${featuredRig.description || 'Interaktives high-end Webmodul mit GameChiller-Integration.'}</p>
 
             <div class="hero-spotlight-meta-row">
-              <span>👤 <strong>${featuredRig.author || 'Liath'}</strong></span>
-              <span>© ${featuredRig.copyright || '© GameChiller'}</span>
+              <span>👤 <strong>${featuredRig.author || 'Creator'}</strong></span>
+              <span>${featuredRig.copyright || (featuredRig.author ? '© ' + featuredRig.author : '© Community')}</span>
               <span>👁️ ${featuredRig.views || 142} Aufrufe</span>
               <span>⭐ ${featuredRig.stars || 48} Sterne</span>
             </div>
@@ -314,7 +314,7 @@
           <h4 class="showcase-card-title">${rig.title}</h4>
           <p class="showcase-card-desc">${(rig.description || '').substring(0, 95)}...</p>
           <div style="font-size:0.75rem; color:var(--text-dim);">
-            Author: <strong style="color:#fff;">${rig.author || 'Liath'}</strong>
+            Author: <strong style="color:#fff;">${rig.author || 'Creator'}</strong>
           </div>
         </div>
 
@@ -459,8 +459,8 @@
           </td>
           <td><span class="badge badge-indigo">${rig.category} • ${rig.subcategory}</span></td>
           <td style="font-size: 0.82rem; color: var(--text-dim);">
-            <div style="color: #fff; font-weight: 600;">${rig.author || 'Liath'}</div>
-            <div style="font-size: 0.72rem; color: var(--text-dim);">${rig.copyright || '© GameChiller'}</div>
+            <div style="color: #fff; font-weight: 600;">${rig.author || 'Creator'}</div>
+            <div style="font-size: 0.72rem; color: var(--text-dim);">${rig.copyright || (rig.author ? '© ' + rig.author : '© Community')}</div>
           </td>
           <td>
             <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -525,7 +525,7 @@
           <p class="tool-desc">${rig.description || ''}</p>
 
           <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 8px;">
-            Author: <strong style="color: #fff;">${rig.author || 'Liath'}</strong> • ${rig.copyright || '© GameChiller'}
+            Author: <strong style="color: #fff;">${rig.author || 'Creator'}</strong> • ${rig.copyright || (rig.author ? '© ' + rig.author : '© Community')}
           </div>
 
           <div class="tool-tags-row">
@@ -666,7 +666,7 @@
     const contentEl = modal.querySelector('#docs-modal-content');
 
     titleEl.innerHTML = `📖 <span>${rig.title}</span>`;
-    subEl.textContent = `${rig.category} • ${rig.subcategory} | Version: ${rig.version || 'v0.0.2'} | Author: ${rig.author || 'Liath'} (${rig.copyright || '© GameChiller'})`;
+    subEl.textContent = `${rig.category} • ${rig.subcategory} | Version: ${rig.version || 'v0.0.2'} | Author: ${rig.author || 'Creator'} (${rig.copyright || (rig.author ? '© ' + rig.author : '© Community')})`;
     contentEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--cyan-400);">⏳ Lade Standalone-Dokumentation...</div>`;
 
     let docData = rig.standaloneDocs || null;
@@ -756,7 +756,7 @@ window.PlayRig.navigate("/studio");</div>
       ` : ''}
 
       <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border-default); display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:0.75rem; color:var(--text-dim);">Entwickelt von <strong>${rig.author || 'Liath'}</strong> • ${rig.copyright || '© GameChiller'}</span>
+        <span style="font-size:0.75rem; color:var(--text-dim);">Entwickelt von <strong>${rig.author || 'Creator'}</strong> • ${rig.copyright || (rig.author ? '© ' + rig.author : '© Community')}</span>
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('docs-modal').style.display='none';">Schließen</button>
       </div>
     `;

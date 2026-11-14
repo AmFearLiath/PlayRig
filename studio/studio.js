@@ -350,7 +350,7 @@
           <span class="badge badge-indigo">${rig.category} • ${rig.subcategory}</span>
         </td>
         <td>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">${rig.version || 'v0.0.1'} • <strong>${rig.author || 'Liath'}</strong></span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">${rig.version || 'v0.0.1'} • <strong>${rig.author || 'Creator'}</strong></span>
         </td>
         <td>
           ${isOwner ? `
@@ -474,6 +474,19 @@
     titleInput.addEventListener('input', () => {
       slugInput.value = titleInput.value.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
     });
+
+    const authorInput = document.getElementById('create-tool-author');
+    const copyrightInput = document.getElementById('create-tool-copyright');
+    if (authorInput && !authorInput.value) {
+      if (state.user) {
+        const userName = state.user.displayName || state.user.username || '';
+        authorInput.value = userName;
+        const isLiath = (state.user.username === 'creator' || userName.toLowerCase() === 'liath');
+        if (copyrightInput && !copyrightInput.value) {
+          copyrightInput.value = isLiath ? '© GameChiller' : (userName ? `© ${userName}` : '');
+        }
+      }
+    }
   }
 
   // Categories View
@@ -551,8 +564,8 @@
 
     document.getElementById('editor-meta-title').value = rig.title;
     document.getElementById('editor-meta-version').value = rig.version || 'v0.0.1';
-    document.getElementById('editor-meta-author').value = rig.author || 'Liath';
-    document.getElementById('editor-meta-copyright').value = rig.copyright || '© GameChiller';
+    document.getElementById('editor-meta-author').value = rig.author || (window.CURRENT_USER ? (window.CURRENT_USER.displayName || window.CURRENT_USER.username) : '');
+    document.getElementById('editor-meta-copyright').value = rig.copyright || (rig.author ? `© ${rig.author}` : '');
     document.getElementById('editor-meta-status').value = rig.status || 'active';
     document.getElementById('editor-meta-subcategory').value = rig.subcategory || '';
     document.getElementById('editor-meta-desc').value = rig.description || '';
@@ -892,12 +905,15 @@
       const isPublic = document.getElementById('create-tool-public').checked;
       const description = document.getElementById('create-tool-desc').value;
       const tags = document.getElementById('create-tool-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      const author = document.getElementById('create-tool-author')?.value.trim() || undefined;
+      const copyright = document.getElementById('create-tool-copyright')?.value.trim() || undefined;
 
       try {
         const newRig = await api('/rigs', {
           method: 'POST',
           body: JSON.stringify({
             title, id, category, subcategory,
+            author, copyright,
             access: isPublic ? 'public' : 'private',
             isPublic, description, tags, settings: { theme }
           })

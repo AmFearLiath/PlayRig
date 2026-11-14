@@ -238,14 +238,18 @@ app.get('/api/tools/:id', handleGetRigById);
 // Create Rig
 async function handleCreateRig(req, res) {
   try {
+    const author = req.body.author || (req.user ? (req.user.name || req.user.username) : 'Community Creator');
+    const isLiath = author.toLowerCase() === 'liath' || (req.user && (req.user.username === 'creator' || req.user.name === 'Liath'));
+    const copyright = req.body.copyright || (isLiath ? '© GameChiller' : `© ${author}`);
+
     const rigData = {
       title: req.body.title || 'Neues Rig',
       description: req.body.description || '',
       category: req.body.category || 'creative',
       subcategory: req.body.subcategory || 'General',
       version: req.body.version || 'v0.0.1',
-      author: req.user ? (req.user.name || req.user.username) : (req.body.author || 'Liath'),
-      copyright: '© GameChiller',
+      author: author,
+      copyright: copyright,
       icon: req.body.icon || 'cube',
       color: req.body.color || '#00d2ff',
       tags: req.body.tags || ['PlayRig', 'HTML5'],
@@ -289,7 +293,7 @@ async function handleCreateRig(req, res) {
       <span class="badge badge-cyan">${newRig.category}</span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">
-      ${newRig.version || 'v0.0.1'} • © GameChiller • Author: ${newRig.author || 'Liath'}
+      ${newRig.version || 'v0.0.1'} • ${newRig.copyright || '© Community'} • Author: ${newRig.author || 'Community Creator'}
     </div>
   </header>
 
@@ -324,7 +328,7 @@ body {
 `;
 
       const starterJs = `// PlayRig Script für ${newRig.title}
-// Author: ${newRig.author || 'Liath'} | Copyright: © GameChiller
+// Author: ${newRig.author || 'Community Creator'} | Copyright: ${newRig.copyright || '© Community'}
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btn-action');
   if (btn) {
@@ -428,6 +432,10 @@ app.post('/api/rigs/import', requireAuth, async (req, res) => {
     const relFolder = `${category}/${subcategory}/${slug}`;
     const targetDir = path.join(ROOT_DIR, relFolder);
 
+    const importAuthor = req.body.author || originalAuthor || (req.user ? (req.user.name || req.user.username) : 'Community Creator');
+    const isLiathImport = importAuthor.toLowerCase() === 'liath' || (req.user && (req.user.username === 'creator' || req.user.name === 'Liath'));
+    const importCopyright = req.body.copyright || (isLiathImport ? '© GameChiller' : `© ${importAuthor}`);
+
     const cdnArray = Array.isArray(cdns) ? cdns : (cdns ? cdns.split('\n').filter(Boolean) : []);
     const cdnTags = cdnArray
       .map(c => c.trim().endsWith('.css') ? `<link rel="stylesheet" href="${c.trim()}">` : `<script src="${c.trim()}"></script>`)
@@ -460,7 +468,7 @@ app.post('/api/rigs/import', requireAuth, async (req, res) => {
       <span class="badge badge-indigo">Imported</span>
     </div>
     <div style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">
-      v0.0.1 • © GameChiller • Author: Liath (via @${originalAuthor})
+      v0.0.1 • ${importCopyright} • Author: ${importAuthor}
     </div>
   </header>
 
@@ -484,8 +492,8 @@ ${importedHtml}
       subcategory,
       path: `${relFolder}/index.html`,
       version: 'v0.0.1',
-      author: req.user ? (req.user.name || req.user.username) : 'Liath',
-      copyright: '© GameChiller',
+      author: importAuthor,
+      copyright: importCopyright,
       icon: 'download',
       color: '#6366f1',
       tags: ['Imported', source, 'PlayRig'],
