@@ -1037,6 +1037,12 @@ async function startServer() {
   try {
     console.log('[PlayRig Engine] Verbinde mit MySQL Datenbank (Port 3307)...');
     await db.init();
+
+    // Initialize Extensible Backend Services
+    const serviceManager = require('./services');
+    await serviceManager.initAll({ rootDir: ROOT_DIR, db });
+    serviceManager.registerRoutes(app);
+
     app.listen(PORT, () => {
       console.log(`
   ==============================================================

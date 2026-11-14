@@ -307,7 +307,7 @@ async function seedInitialData() {
       featured = 1
   `, [
     JSON.stringify(['Enshrouded', 'Savegame', 'RPG', 'Inventory', 'Level', 'Backup']),
-    JSON.stringify({ defaultTheme: 'royal-gold' })
+    JSON.stringify({ defaultTheme: 'royal-gold', services: { required: ['enshrouded'], optional: [] } })
   ]);
 
   // Seed RPG Dice Loot Vault

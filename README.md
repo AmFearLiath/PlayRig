@@ -66,7 +66,11 @@ PlayRig/
 ├── server/                      # Node.js Express Backend
 │   ├── server.js                # REST API, Routing, Static Hosting & Auth
 │   ├── db.js                    # MySQL Pool (Port 3307), Schema & Seeding
-│   └── enshrouded-service.js    # SV2C Container, Zstd Decompressor & Hasher
+│   └── services/                # ⚡ Extensible Backend Companion Services
+│       ├── index.js             # Service Manager & Dynamic Auto-Discovery
+│       ├── base-service.js      # Abstract BaseService Class
+│       └── enshrouded/          # Enshrouded Save & Character Engine
+│           └── index.js         # SV2C Container, Zstd WASM & Backups
 │
 ├── studio/                      # PlayRig Studio (Rig-Entwicklungsumgebung)
 ├── admin/                       # PlayRig Admin Panel (Benutzer & System-Verwaltung)

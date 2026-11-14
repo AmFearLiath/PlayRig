@@ -94,6 +94,10 @@ window.PLAYRIG_REGISTRY = [
       "Item-Katalog mit über 4.300 echten Ingame-Itemgrafiken",
       "Rezept- und Wissensfreischalter (God Mode / Quick Boost)"
     ],
+    services: {
+      required: ['enshrouded'],
+      optional: []
+    },
     embedSupported: true
   },
   {

@@ -74,3 +74,22 @@ Das PlayRig-System umfasst fünf standardisierte Hauptkategorien:
    Eigenständiges PlayRig-Design mit Deep Slate / OLED Surface (`#07090e`, `#0a0f1d`), gestochen scharfen Schriftbildern (*Plus Jakarta Sans* & *JetBrains Mono*) und dynamischen Micro-Interactions.
 2. **Höchste technische Exzellenz:**  
    Three.js InstancedMesh für 100.000+ Polygone/Voxel bei 60 FPS, Web Audio API für haptisches Soundfeedback, GPU-beschleunigte CSS-Filter.
+
+---
+
+### § 7. Extensible Backend Companion Services (`server/services/`)
+1. **Modulare Service-Architektur:**  
+   Komplexe Rigs, die systemspezifische Server-Fähigkeiten benötigen (z. B. Spielstand-Dechiffrierung, Zstandard WASM, Dateisystem-Backups, Prozesserkennung), werden durch eigenständige Backend-Services unter `server/services/<service-name>/` angebunden.
+2. **Standardisiertes BaseService-Interface:**  
+   Jeder Service erbt von `server/services/base-service.js` mit `id`, `name`, `version`, `capabilities`, `init(context)`, `healthCheck()` und REST-API-Routen.
+3. **Rig-Deklaration & Badges:**  
+   Rigs konfigurieren ihre benötigten Services im Manifest/Registry über:
+   ```json
+   "services": {
+     "required": ["enshrouded"],
+     "optional": []
+   }
+   ```
+   Das PlayRig Deck und Studio validieren die Verfügbarkeit der Services live und stellen Status-Badges bereit.
+4. **Zentraler Service-Manager:**  
+   Der Service-Manager (`server/services/index.js`) erkennt Services automatisch, überwacht ihren Lebenszyklus und stellt globale Endpunkte unter `/api/services` zur Verfügung.

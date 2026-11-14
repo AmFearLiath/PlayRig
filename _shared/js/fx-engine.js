@@ -13,14 +13,14 @@
     borderBeams: localStorage.getItem('nexus_fx_border_beams') !== 'false',
     spotlights: localStorage.getItem('nexus_fx_spotlights') !== 'false',
     tilt: localStorage.getItem('nexus_fx_tilt') !== 'false',
-    sound: localStorage.getItem('nexus_fx_sound') === 'true',
+    sound: localStorage.getItem('nexus_fx_sound') === 'true' && false, // Default: completely muted
     hideBtn: localStorage.getItem('nexus_fx_hide_btn') === 'true',
     audioCtx: null
   };
 
   // Audio Synthesizer (Native Web Audio API, Zero Bloat)
   function playHapticSound(type = 'click') {
-    if (!FX.sound) return;
+    if (!FX.sound) return; // Completely silent by default
     try {
       if (!FX.audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -40,18 +40,11 @@
       const now = ctx.currentTime;
 
       if (type === 'click') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(350, now + 0.04);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-        osc.start(now);
-        osc.stop(now + 0.04);
-      } else if (type === 'hover') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(450, now);
-        gain.gain.setValueAtTime(0.02, now);
-        gain.gain.linearRampToValueAtTime(0.001, now + 0.02);
+        osc.frequency.setValueAtTime(360, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.02);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
         osc.start(now);
         osc.stop(now + 0.02);
       }
@@ -178,13 +171,6 @@
       btn.appendChild(circle);
       setTimeout(() => circle.remove(), 600);
     });
-
-    document.addEventListener('mouseenter', (e) => {
-      const btn = e.target.closest?.('.btn, .sidebar-nav-item, .shape-btn');
-      if (btn && FX.sound) {
-        playHapticSound('hover');
-      }
-    }, true);
   }
 
   // --- Floating FX Lab Customizer UI ---

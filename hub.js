@@ -289,7 +289,10 @@
         </div>
 
         <div class="showcase-card-body">
-          <span class="badge badge-indigo" style="font-size:0.7rem; align-self:flex-start;">${rig.category} • ${rig.subcategory}</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:4px;">
+            <span class="badge badge-indigo" style="font-size:0.7rem;">${rig.category} • ${rig.subcategory}</span>
+            ${rig.services && rig.services.required && rig.services.required.length > 0 ? `<span class="badge badge-amber" style="font-size:0.62rem;" title="Erfordert PlayRig Backend Service: ${rig.services.required.join(', ')}">⚡ ${rig.services.required.join(', ')}</span>` : ''}
+          </div>
           <h4 class="showcase-card-title">${rig.title}</h4>
           <p class="showcase-card-desc">${(rig.description || '').substring(0, 95)}...</p>
           <div style="font-size:0.75rem; color:var(--text-dim);">
@@ -485,7 +488,8 @@
             </svg>
           </div>
           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-            <div style="display: flex; gap: 6px;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+              ${rig.services && rig.services.required && rig.services.required.length > 0 ? `<span class="badge badge-amber" style="font-size: 0.65rem;" title="Erfordert PlayRig Backend Service">⚡ Service: ${rig.services.required.join(', ')}</span>` : ''}
               ${versionBadge}
             </div>
             ${catBadge}
