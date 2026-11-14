@@ -1,0 +1,114 @@
+/* ==========================================================================
+   NEXUS DESIGN SYSTEM - BASE & RESET
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('./tokens.css');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background Ambient Radial Glows */
+body::before {
+  content: '';
+  position: fixed;
+  top: -20vh;
+  left: 10vw;
+  width: 50vw;
+  height: 50vw;
+  max-width: 650px;
+  max-height: 650px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(6, 182, 212, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20vh;
+  right: 10vw;
+  width: 60vw;
+  height: 60vw;
+  max-width: 750px;
+  max-height: 750px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, rgba(99, 102, 241, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(13, 18, 29, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+/* Code & Monospace */
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* Selection */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: #ffffff;
+}
+
+/* Embed Mode Class - collapses unnecessary outer framing when viewed inside iframe */
+body.is-embedded {
+  background: transparent !important;
+}
+
+body.is-embedded::before,
+body.is-embedded::after {
+  display: none;
+}
+

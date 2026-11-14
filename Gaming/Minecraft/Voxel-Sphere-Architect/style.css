@@ -1,0 +1,376 @@
+/* ==========================================================================
+   VOXEL SPHERE ARCHITECT - STYLES
+   ========================================================================== */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* Header */
+.app-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-default);
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--cyan-500) 0%, var(--indigo-600) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Main Workspace */
+.workspace-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 340px 1fr 340px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Left Sidebar - Controls */
+.sidebar-left, .sidebar-right {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 18px;
+  gap: 20px;
+  z-index: 10;
+}
+
+.sidebar-right {
+  border-right: none;
+  border-left: 1px solid var(--border-default);
+}
+
+.section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cyan-400);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+/* Shape Grid Selector */
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.shape-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.shape-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-strong);
+  color: #ffffff;
+}
+
+.shape-btn.active {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--cyan-400);
+  color: var(--cyan-400);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.25);
+}
+
+.shape-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* Center Viewports */
+.viewport-center {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #05070b;
+  overflow: hidden;
+}
+
+.viewport-tabs-bar {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viewport-canvas-container {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#three-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#blueprint-canvas-container {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: #060910;
+  align-items: center;
+  justify-content: center;
+}
+
+#blueprint-canvas-container.active {
+  display: flex;
+}
+
+#blueprint-canvas {
+  cursor: grab;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#blueprint-canvas:active {
+  cursor: grabbing;
+}
+
+/* Blueprint Floating HUD */
+.blueprint-hud {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 25;
+}
+
+.blueprint-hud span {
+  color: var(--cyan-400);
+  font-weight: 700;
+}
+
+/* Viewport 3D Floating Camera HUD */
+.camera-controls-hud {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+}
+
+/* Stats Pill Cards */
+.stats-summary-card {
+  background: rgba(13, 18, 30, 0.95);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.stat-label {
+  color: var(--text-muted);
+}
+
+.stat-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stat-val.highlight {
+  color: var(--cyan-400);
+  font-size: 1.15rem;
+}
+
+/* Material Palette Selector */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.palette-item {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.palette-item:hover {
+  transform: scale(1.05);
+}
+
+.palette-item.active {
+  border-color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+/* Layer Stepper Bar */
+.layer-stepper-box {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.layer-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.layer-badge {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cyan-400);
+  background: rgba(6, 182, 212, 0.1);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+/* Export Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.export-modal-box {
+  width: 100%;
+  max-width: 650px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-cyan);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScale {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.export-textarea {
+  width: 100%;
+  height: 220px;
+  background: rgba(5, 8, 14, 0.9);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--cyan-400);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 12px;
+  outline: none;
+  resize: vertical;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1080px) {
+  .workspace-body {
+    grid-template-columns: 280px 1fr 280px;
+  }
+}
+

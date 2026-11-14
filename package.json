@@ -1,0 +1,26 @@
+{
+  "name": "playrig-platform",
+  "version": "1.0.0",
+  "description": "PlayRig Platform - Modular Web Tools & Rigs Platform, Creator Studio & Admin Panel",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "dependencies": {
+    "@mongodb-js/zstd": "^7.0.0",
+    "express": "^4.21.2",
+    "hash-wasm": "^4.13.0",
+    "jszip": "^3.10.2",
+    "mysql2": "^3.24.6"
+  },
+  "keywords": [
+    "tools",
+    "gaming",
+    "dashboard",
+    "codepen-like",
+    "embeddable"
+  ],
+  "author": "Nexus Deck Team",
+  "license": "MIT"
+}

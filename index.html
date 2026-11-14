@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="cyber-cyan">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayRig Deck • Gaming, Visual FX & Utility Architecture</title>
+  
+  <!-- PlayRig Design System -->
+  <link rel="stylesheet" href="_shared/css/tokens.css">
+  <link rel="stylesheet" href="_shared/css/themes.css">
+  <link rel="stylesheet" href="_shared/css/base.css">
+  <link rel="stylesheet" href="_shared/css/components.css">
+  <link rel="stylesheet" href="_shared/css/animations.css">
+  <link rel="stylesheet" href="hub.css">
+</head>
+<body class="fx-spotlight-active">
+
+  <div class="hub-container">
+    
+    <!-- Top Platform Header -->
+    <header class="hub-header">
+      <div class="hub-brand">
+        <div class="hub-logo-mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#07090e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <div class="hub-title-group">
+          <h1><span class="gradient-text">PLAYRIG</span> DECK</h1>
+          <p>Autonome High-End HTML/CSS/JS Rigs • 100% Client-Side • Embed-Ready</p>
+        </div>
+      </div>
+
+      <!-- Mode Selector: Entdecken vs Katalog -->
+      <div class="deck-mode-bar">
+        <button id="btn-mode-discovery" class="deck-mode-btn active">
+          <span>✨</span> Entdecken
+        </button>
+        <button id="btn-mode-catalog" class="deck-mode-btn">
+          <span>📚</span> Katalog
+        </button>
+      </div>
+
+      <!-- Right Actions: Importer, Studio Link, Profile -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button id="btn-open-codepen-import" class="btn btn-secondary btn-sm fx-ripple" title="Projekt von CodePen oder Web importieren">
+          📥 Rig-Importer
+        </button>
+
+        <a href="/studio" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;" title="Zum PlayRig Creator Studio">
+          ⚡ Studio ↗
+        </a>
+
+        <!-- Dynamic User Auth Container -->
+        <div id="hub-auth-container" style="display: flex; align-items: center;">
+          <button id="btn-hub-login" class="btn btn-primary btn-sm fx-ripple">
+            🔑 Anmelden
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         VIEW 1: DISCOVERY & SHOWCASE (Katalogübersicht)
+         ========================================================================== -->
+    <main id="deck-view-discovery" class="discovery-container">
+
+      <!-- Hero Spotlight Stage -->
+      <section id="hero-spotlight-section">
+        <!-- Rendered dynamically by hub.js with live interactive preview -->
+      </section>
+
+      <!-- Carousel 1: Top Bewertet & Community Favoriten -->
+      <section class="showcase-section">
+        <div class="showcase-header">
+          <div class="showcase-title-wrap">
+            <h3><span>⭐</span> Top Bewertet & Community Favoriten</h3>
+            <p>Die von der Community am höchsten bewerteten Rigs und Werkzeuge.</p>
+          </div>
+          <button class="showcase-filter-link" data-sort="stars">
+            Im Katalog sortieren →
+          </button>
+        </div>
+        <div class="showcase-carousel-wrapper">
+          <div class="showcase-carousel-track" id="rail-top-rated">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Carousel 2: Meistgeladen & Populär -->
+      <section class="showcase-section">
+        <div class="showcase-header">
+          <div class="showcase-title-wrap">
+            <h3><span>🔥</span> Meistgeladen & Beliebt</h3>
+            <p>Rigs mit den meisten Downloads, Klon-Vorgängen und Sandbox-Aufrufen.</p>
+          </div>
+          <button class="showcase-filter-link" data-sort="views">
+            Im Katalog ansehen →
+          </button>
+        </div>
+        <div class="showcase-carousel-wrapper">
+          <div class="showcase-carousel-track" id="rail-popular">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Carousel 3: Animations & Visual FX Spotlight -->
+      <section class="showcase-section">
+        <div class="showcase-header">
+          <div class="showcase-title-wrap">
+            <h3><span>🎨</span> Animations & Visual FX Lab</h3>
+            <p>Border-Beams, 3D Spotlights, Partikelsysteme und Canvas-Shader.</p>
+          </div>
+          <button class="showcase-filter-link" data-category="animations">
+            Alle Animations-Rigs →
+          </button>
+        </div>
+        <div class="showcase-carousel-wrapper">
+          <div class="showcase-carousel-track" id="rail-animations">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Carousel 4: Neueste Kreationen -->
+      <section class="showcase-section">
+        <div class="showcase-header">
+          <div class="showcase-title-wrap">
+            <h3><span>⚡</span> Neueste Rigs & Experimente</h3>
+            <p>Frisch entwickelte Module und kürzlich importierte Rigs.</p>
+          </div>
+          <button class="showcase-filter-link" data-sort="newest">
+            Alle Neuzugänge →
+          </button>
+        </div>
+        <div class="showcase-carousel-wrapper">
+          <div class="showcase-carousel-track" id="rail-newest">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ==========================================================================
+         VIEW 2: DEEP CATALOG EXPLORER (Vollständige Katalogansicht)
+         ========================================================================== -->
+    <main id="deck-view-catalog" class="catalog-container" style="display: none;">
+      
+      <!-- Controls Bar: Search, Category Chips, Sort, View Toggle -->
+      <section class="hub-controls-bar">
+        <div class="search-input-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="hub-search" class="search-input" placeholder="Rigs, Kategorien, FX oder Tags durchsuchen...">
+          <span class="kbd-shortcut-hint">Ctrl + K</span>
+        </div>
+
+        <div class="filter-chips-row" id="filter-chips">
+          <button class="chip-btn active" data-category="all">Alle Rigs</button>
+        </div>
+
+        <!-- Sorting Selector -->
+        <select id="catalog-sort-select" class="nexus-select" style="width: auto; padding: 7px 14px; font-size: 0.82rem;">
+          <option value="featured">✨ Empfohlen</option>
+          <option value="stars">⭐ Beste Bewertung</option>
+          <option value="views">🔥 Beliebteste (Views)</option>
+          <option value="newest">⚡ Neueste zuerst</option>
+        </select>
+
+        <!-- View Switcher (Cards vs Compact Table) -->
+        <div class="seg-control" style="margin-left: auto;">
+          <button id="view-mode-detailed" class="seg-btn active accent-cyan" title="Ausführliche Card-Ansicht">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Cards
+          </button>
+          <button id="view-mode-compact" class="seg-btn" title="Kompakte Listenansicht mit Tooltips">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            Kompakt
+          </button>
+        </div>
+      </section>
+
+      <!-- Rigs Catalog Grid -->
+      <section class="tools-grid-section">
+        <div class="tools-grid" id="tools-grid">
+          <!-- Rendered dynamically by hub.js -->
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- INTERACTIVE SANDBOX MODAL (TEST RUNNER) -->
+  <div id="sandbox-modal" class="sandbox-modal">
+    <div class="sandbox-window">
+      <!-- Sandbox Header -->
+      <div class="sandbox-topbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span id="sandbox-tool-title" style="font-weight: 700; font-size: 1.05rem; color: #ffffff;">Rig Runner</span>
+          <span class="badge badge-cyan">Sandbox Mode</span>
+        </div>
+
+        <!-- Viewport Size Toggles -->
+        <div class="seg-control">
+          <button class="seg-btn viewport-btn active" data-device="responsive" title="Volle Breite (Responsive)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            Vollbild
+          </button>
+          <button class="seg-btn viewport-btn" data-device="1080p" title="Desktop 1080p (1920x1080)">1080p</button>
+          <button class="seg-btn viewport-btn" data-device="tablet" title="Tablet (768x1024)">Tablet</button>
+          <button class="seg-btn viewport-btn" data-device="mobile" title="Mobile (390x844)">Mobile</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="btn-sandbox-screenshot" class="btn btn-secondary btn-sm" title="Screenshot aufnehmen & als Thumbnail speichern">
+            📸 Screenshot
+          </button>
+          <button id="btn-reload-sandbox" class="btn btn-ghost btn-icon" title="Neu laden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
+          <a id="sandbox-standalone-link" href="#" target="_blank" class="btn btn-secondary btn-sm" title="In neuem Tab öffnen">
+            Vollbild Tab ↗
+          </a>
+          <button id="btn-close-sandbox" class="btn btn-ghost btn-icon" style="font-size: 1.2rem;" title="Schließen">✕</button>
+        </div>
+      </div>
+
+      <div class="sandbox-viewport-container">
+        <div id="sandbox-wrapper" class="sandbox-iframe-wrapper">
+          <iframe id="sandbox-frame" src="about:blank"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMBED CODE MODAL -->
+  <div id="embed-modal" class="modal-overlay">
+    <div class="export-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.2rem; margin: 0;">
+          <span class="gradient-text">Rig einbetten</span> (Embed Snippet)
+        </h2>
+        <button id="btn-close-embed-modal" class="btn btn-ghost btn-icon" style="font-size: 1.2rem;">✕</button>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+        Kopiere diesen HTML-Code, um das Rig direkt in jede externe Webseite, Notion, ein OBS-Browser-Overlay oder ein Intranet einzubetten:
+      </p>
+
+      <textarea id="embed-code-area" class="export-textarea" style="height: 120px;" readonly></textarea>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-copy-embed-code" class="btn btn-primary fx-ripple">
+          Code in Zwischenablage kopieren
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIG-IMPORTER MODAL -->
+  <div id="codepen-import-modal" class="modal-overlay">
+    <div class="export-modal-box" style="max-width: 620px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.25rem; display: flex; align-items: center; gap: 8px; margin: 0;">
+          <span>📥</span>
+          <span class="gradient-text">Rig-Importer & Web Ingest</span>
+        </h2>
+        <button id="btn-close-codepen-modal" class="btn btn-ghost btn-icon" style="font-size: 1.2rem;">✕</button>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+        Gib die URL eines öffentlichen CodePen-Pens, JSFiddle oder Web-Projekts ein. Das System erzeugt daraus automatisch ein standardisiertes PlayRig-Modul.
+      </p>
+
+      <form id="form-codepen-import" style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 600;">CodePen / Projekt URL *</label>
+          <input type="url" id="import-pen-url" class="nexus-input" placeholder="https://codepen.io/username/pen/xxxxxx" required style="padding: 10px 14px;">
+          <span class="form-help" style="margin-top: 4px;">Unterstützt öffentliche Pens von codepen.io</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600;">Titel des Rigs (Optional)</label>
+            <input type="text" id="import-pen-title" class="nexus-input" placeholder="Mein importiertes Rig" style="padding: 9px 12px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600;">Kategorie</label>
+            <select id="import-pen-cat" class="nexus-select" style="padding: 9px 12px;">
+              <option value="animations">Animations & Visual FX</option>
+              <option value="gaming">Gaming & Sandbox</option>
+              <option value="creative" selected>Creative & Art</option>
+              <option value="helper">Helper & Utility</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" id="btn-cancel-codepen-import" class="btn btn-secondary">Abbrechen</button>
+          <button type="submit" class="btn btn-primary fx-ripple">
+            🚀 Projekt jetzt importieren & anlegen
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CENTRAL LOGIN MODAL ON DECK -->
+  <div id="hub-login-modal" class="modal-overlay">
+    <div class="export-modal-box" style="max-width: 420px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.3rem; display: flex; align-items: center; gap: 8px; margin: 0;">
+          <span>🔑</span>
+          <span class="gradient-text">Anmelden</span>
+        </h2>
+        <button id="btn-close-hub-login" class="btn btn-ghost btn-icon">✕</button>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+        Melde dich an, um Rigs zu klonen, eigene Projekte anzulegen und das Studio zu nutzen.
+      </p>
+
+      <form id="hub-login-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="form-group">
+          <label class="form-label">Benutzername</label>
+          <input type="text" id="hub-login-username" class="nexus-input" placeholder="creator oder admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Passwort</label>
+          <input type="password" id="hub-login-password" class="nexus-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary fx-ripple" style="margin-top: 6px;">
+          Anmelden
+        </button>
+      </form>
+
+      <div style="border-top: 1px solid var(--border-default); padding-top: 14px; text-align: center;">
+        <span style="font-size: 0.78rem; color: var(--text-dim);">Standard-Zugänge:</span>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 8px;">
+          <button type="button" id="btn-hub-quick-creator" class="btn btn-secondary btn-sm">Creator (creator / creator123)</button>
+          <button type="button" id="btn-hub-quick-admin" class="btn btn-secondary btn-sm">Admin (admin / admin123)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Scripts -->
+  <script src="_shared/js/toast.js"></script>
+  <script src="_shared/js/fx-engine.js"></script>
+  <script src="registry.js"></script>
+  <script src="hub.js"></script>
+</body>
+</html>

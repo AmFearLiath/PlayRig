@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="synthwave-sunset">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Reactive Ribbon Visualizer | PlayRig</title>
+
+  <link rel="stylesheet" href="../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../_shared/css/base.css">
+  <link rel="stylesheet" href="../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../_shared/css/animations.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="../../../_shared/js/embed-bridge.js"></script>
+  <script src="../../../_shared/js/toast.js"></script>
+</head>
+<body class="fx-spotlight-active">
+  <!-- Topbar -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
+      </a>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Audio Reactive <span class="gradient-text-magenta">Ribbon Lab</span></h1>
+        <span class="badge badge-indigo">Creative • Audio-Visual</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-play-synth-beat" class="btn btn-primary btn-sm fx-ripple">
+        ▶ Demo-Beat starten
+      </button>
+      <button id="btn-fullscreen-toggle" class="btn btn-secondary btn-sm" title="Vollbild-Modus">
+        ⛶ Vollbild
+      </button>
+    </div>
+  </header>
+
+  <!-- Fullscreen Canvas -->
+  <div class="visualizer-container">
+    <canvas id="ribbon-canvas"></canvas>
+
+    <!-- Floating Controller HUD -->
+    <aside class="ribbon-hud glass-panel fx-beam" id="ribbon-hud">
+      <div class="hud-header">
+        <h3 class="hud-title">Visualizer Steuerung</h3>
+        <button id="btn-toggle-hud" class="btn-micro">Minimieren _</button>
+      </div>
+
+      <div class="hud-body">
+        <!-- Audio Source Selector -->
+        <div class="form-group">
+          <label class="form-label">Audio-Quelle</label>
+          <div class="source-chips-row">
+            <button class="source-chip active" data-source="synth">Synthwave Beat</button>
+            <button class="source-chip" data-source="mic">Mikrofon</button>
+            <label class="source-chip" style="cursor:pointer;">
+              MP3 Datei
+              <input type="file" id="input-audio-file" accept="audio/*" style="display:none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- Palette Selector -->
+        <div class="form-group">
+          <label class="form-label">Farb-Spektrum</label>
+          <div class="color-palette-row">
+            <button class="color-swatch-btn active" data-c1="#f43f5e" data-c2="#8b5cf6" style="background: linear-gradient(135deg, #f43f5e, #8b5cf6);"></button>
+            <button class="color-swatch-btn" data-c1="#00d2ff" data-c2="#3b82f6" style="background: linear-gradient(135deg, #00d2ff, #3b82f6);"></button>
+            <button class="color-swatch-btn" data-c1="#10b981" data-c2="#06b6d4" style="background: linear-gradient(135deg, #10b981, #06b6d4);"></button>
+            <button class="color-swatch-btn" data-c1="#fbbf24" data-c2="#ea580c" style="background: linear-gradient(135deg, #fbbf24, #ea580c);"></button>
+          </div>
+        </div>
+
+        <!-- Ribbon Lines Count -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="form-label">Bänder-Anzahl</label>
+            <span id="val-lines" class="slider-val">24</span>
+          </div>
+          <input type="range" id="slider-lines" min="8" max="48" step="4" value="24" class="nexus-slider">
+        </div>
+
+        <!-- Amplitude / Sensitivity -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="form-label">Wellen-Amplitude</label>
+            <span id="val-amplitude" class="slider-val">1.2x</span>
+          </div>
+          <input type="range" id="slider-amplitude" min="0.4" max="3.0" step="0.2" value="1.2" class="nexus-slider">
+        </div>
+
+        <!-- Camera Perspective Tilt -->
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="form-label">Perspektiven-Neigung</label>
+            <span id="val-tilt" class="slider-val">45°</span>
+          </div>
+          <input type="range" id="slider-tilt" min="15" max="75" step="5" value="45" class="nexus-slider">
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+

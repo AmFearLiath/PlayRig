@@ -1,0 +1,148 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "username": "admin",
+      "displayName": "System Admin",
+      "role": "admin",
+      "salt": "aac62c2e063184edc6ac7f91207ad80b",
+      "passwordHash": "2c0501663f1b82621b7fe51c8f45f80986152416c2b8a0d79dacd65493437de5",
+      "avatarGradient": "linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)",
+      "createdAt": "2026-11-12T23:53:23.197Z"
+    },
+    {
+      "id": "usr_creator",
+      "username": "creator",
+      "displayName": "Game Designer",
+      "role": "creator",
+      "salt": "df8772b812d82786f54cc5c7579b6469",
+      "passwordHash": "252aaca5c31cad1c193474a3f0feed97cb5c6fe68d7ec8b9ea90ed700d6899fb",
+      "avatarGradient": "linear-gradient(135deg, #10b981 0%, #06b6d4 100%)",
+      "createdAt": "2026-11-12T23:53:23.198Z"
+    }
+  ],
+  "tokens": {
+    "nxt_de24cfaa1faebcad0789246cb6babe28cc5fbda851564b61d8bcbb622537e9a6": "usr_admin"
+  },
+  "categories": [
+    {
+      "name": "Gaming",
+      "subcategories": [
+        "Minecraft",
+        "Diagnostics",
+        "Warmup",
+        "Calculators",
+        "Tabletop",
+        "Stream"
+      ]
+    },
+    {
+      "name": "Helper",
+      "subcategories": [
+        "Audio",
+        "Productivity",
+        "Fun",
+        "Diagnostics",
+        "Graphics"
+      ]
+    },
+    {
+      "name": "Media",
+      "subcategories": [
+        "Image",
+        "Video",
+        "Audio",
+        "Converters"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "id": "voxel-sphere-architect",
+      "title": "Voxel Sphere & Dome Architect",
+      "category": "Gaming",
+      "subcategory": "Minecraft",
+      "difficulty": "pro",
+      "difficultyLabel": "Meisterklasse",
+      "difficultyColor": "rose",
+      "icon": "cube",
+      "description": "Professioneller 3D/2D Voxel-Generator für Minecraft-Kreise, Kuppeln, Sphären & Ellipsoide. Mit interaktivem Schichten-Viewer, Geister-Ebenen (Ghosting), Block-Zählung (Materialliste) und Befehlsexport (/setblock).",
+      "path": "Gaming/Minecraft/Voxel-Sphere-Architect/index.html",
+      "ownerId": "usr_admin",
+      "author": "Liath",
+      "copyright": "© GameChiller",
+      "version": "v0.0.1",
+      "isPublic": true,
+      "tags": [
+        "Minecraft",
+        "3D WebGL",
+        "Three.js",
+        "InstancedMesh",
+        "Voxel",
+        "Blueprint",
+        "Export"
+      ],
+      "techStack": [
+        "Three.js CDN",
+        "OrbitControls",
+        "HTML5 Canvas 2D",
+        "Nexus Core"
+      ],
+      "features": [
+        "Echtzeit 3D-Vorschau mit ultra-schnellem Three.js InstancedMesh",
+        "Interaktiver 2D-Bauplan mit Koordinaten-Lineal und Zoom",
+        "Stufenloser Schichten-Schieberegler (Layer-by-Layer) mit Ghosting-Ebene",
+        "Modi: Voll (Filled), Hohl (Hollow), Wandstärke (Thickness), Kugel, Halbkugel, Ellipsoid & Zylinder",
+        "Automatische Materialberechnung (Shopping List in Stacks & Kisten)",
+        "Export für Minecraft: /setblock-Befehle, JSON & Schematics"
+      ],
+      "embedSupported": true,
+      "createdAt": "2026-11-12T23:53:23.198Z",
+      "updatedAt": "2026-11-12T23:53:23.198Z"
+    }
+  ],
+  "logs": [
+    {
+      "id": "log_mwebtbi4_mwvu",
+      "timestamp": "2026-11-13T01:56:55.036Z",
+      "userId": "usr_admin",
+      "action": "USER_LOGIN",
+      "details": "Benutzer admin erfolgreich angemeldet"
+    },
+    {
+      "id": "log_mwebt69x_expc",
+      "timestamp": "2026-11-13T01:56:48.261Z",
+      "userId": "usr_admin",
+      "action": "USER_LOGOUT",
+      "details": "Benutzer abgemeldet"
+    },
+    {
+      "id": "log_mwea1pwg_i9gx",
+      "timestamp": "2026-11-13T01:07:27.712Z",
+      "userId": "usr_admin",
+      "action": "TOOL_DELETED",
+      "details": "Tool 'CSS Hologram Card' (test-codepen-mod) gelöscht"
+    },
+    {
+      "id": "log_mwea1pw2_ob7b",
+      "timestamp": "2026-11-13T01:07:27.698Z",
+      "userId": "usr_admin",
+      "action": "TOOL_CREATED",
+      "details": "Tool 'CSS Hologram Card' (test-codepen-mod) erstellt [Öffentlich]"
+    },
+    {
+      "id": "log_mwe7mvw2_41ib",
+      "timestamp": "2026-11-12T23:59:56.402Z",
+      "userId": "usr_admin",
+      "action": "USER_LOGIN",
+      "details": "Benutzer admin erfolgreich angemeldet"
+    },
+    {
+      "id": "log_init",
+      "timestamp": "2026-11-12T23:53:23.198Z",
+      "userId": "usr_admin",
+      "action": "SYSTEM_INITIALIZED",
+      "details": "Nexus Engine Datenbank erfolgreich initialisiert"
+    }
+  ]
+}
