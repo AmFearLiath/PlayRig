@@ -1,0 +1,259 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "commitMessage",
+      "type": "promptString",
+      "description": "Gib deine Commit-Nachricht ein (z.B. feat: neues Feature hinzugefügt):",
+      "default": "feat: update rigs, tools and documentation"
+    },
+    {
+      "id": "branchName",
+      "type": "promptString",
+      "description": "Name des neuen Feature-Branches (z.B. feature/neues-rig):",
+      "default": "feature/mein-neues-rig"
+    },
+    {
+      "id": "prSourceBranch",
+      "type": "promptString",
+      "description": "Name des Feature-Branches, der in 'main' gemergt werden soll:",
+      "default": "feature/emergence-laboratory"
+    }
+  ],
+  "tasks": [
+    // ============================================================
+    // 1. 🚀 SERVER & RUNTIME MANAGEMENT
+    // ============================================================
+    {
+      "label": "▶️ [Server] PlayRig Server starten",
+      "type": "shell",
+      "command": "node server/server.js",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*PLAYRIG ENGINE SERVER GESTARTET.*",
+          "endsPattern": ".*Standard-Zugänge.*"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "detail": "Startet den zentralen PlayRig Node.js-Server auf Port 3000 (MySQL 3307)."
+    },
+    {
+      "label": "🔄 [Server] PlayRig Server (Dev Watch Mode)",
+      "type": "shell",
+      "command": "node --watch server/server.js",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "detail": "Startet den Server im automatischen Watch-Modus bei Dateiänderungen."
+    },
+    {
+      "label": "🛑 [Server] Port 3000 freigeben & alte Instanzen stoppen",
+      "type": "shell",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$conn = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue; if ($conn) { $conn | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Write-Host 'Port 3000 erfolgreich freigegeben!' -ForegroundColor Green } else { Write-Host 'Port 3000 ist bereits frei.' -ForegroundColor Yellow }\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Beendet blockierende Node.js-Prozesse auf Port 3000 sauber ohne Taskmanager."
+    },
+    {
+      "label": "📦 [Server] NPM Install Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Installiert alle node_modules-Pakete aus package.json."
+    },
+
+    // ============================================================
+    // 2. ⬆️ GITHUB: UPLOAD & SYNC (Commit, Push, Status)
+    // ============================================================
+    {
+      "label": "🚀 [GitHub: Upload] Quick Commit & Push (Stagen, Commit & Push)",
+      "type": "shell",
+      "command": "cmd /c \"git add . && git commit -m \\\"${input:commitMessage}\\\" && git push origin HEAD\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": false
+      },
+      "detail": "Staged alle geänderten Dateien, committet mit deiner Nachricht und pusht direkt zu GitHub."
+    },
+    {
+      "label": "📤 [GitHub: Upload] Push to Origin (git push origin HEAD)",
+      "type": "shell",
+      "command": "git push origin HEAD",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Pusht bereits lokal committete Änderungen auf das GitHub-Repository."
+    },
+    {
+      "label": "💾 [GitHub: Upload] Status der geänderten Dateien anzeigen (git status)",
+      "type": "shell",
+      "command": "git status -s",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Kompakte Übersicht aller modifizierten, gelöschten und neuen Dateien."
+    },
+    {
+      "label": "🔍 [GitHub: Upload] Code-Unterschiede anzeigen (git diff)",
+      "type": "shell",
+      "command": "git diff",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Zeigt alle ungesicherten Quellcode-Änderungen zeilenweise im Terminal."
+    },
+
+    // ============================================================
+    // 3. ⬇️ GITHUB: DOWNLOAD & AKTUALISIERUNG (Pull, Fetch, Log)
+    // ============================================================
+    {
+      "label": "⬇️ [GitHub: Download] Pull & Update von GitHub (git pull --rebase)",
+      "type": "shell",
+      "command": "git pull --rebase origin main",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Aktualisiert den lokalen Stand sauber mit den neuesten Commits von GitHub (Rebase)."
+    },
+    {
+      "label": "📡 [GitHub: Download] Fetch All Remotes (git fetch --all --prune)",
+      "type": "shell",
+      "command": "git fetch --all --prune",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Fragt alle Remote-Branches und Tags von GitHub ab, ohne lokale Dateien zu ändern."
+    },
+    {
+      "label": "📜 [GitHub: Download] Letzte Commits anzeigen (git log -n 15)",
+      "type": "shell",
+      "command": "git log --oneline --graph --decorate -n 15",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Kompakte Grafik-Historie der letzten 15 Commits mit Hash, Autor und Branch-Tags."
+    },
+
+    // ============================================================
+    // 4. 🔀 GITHUB: BRANCHES & PULL-REQUESTS
+    // ============================================================
+    {
+      "label": "🌿 [GitHub: Branch] Neuen Feature-Branch erstellen & auschecken",
+      "type": "shell",
+      "command": "git checkout -b ${input:branchName}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Erstellt einen neuen Entwicklungs-Branch und wechselt sofort dorthin."
+    },
+    {
+      "label": "🔀 [GitHub: Branch] Aktuellen Branch auf GitHub veröffentlichen (Publish Branch)",
+      "type": "shell",
+      "command": "git push -u origin HEAD",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Überträgt den aktuellen Branch zu GitHub und richtet das Remote-Tracking ein."
+    },
+    {
+      "label": "✅ [GitHub: PR] Feature-Branch in 'main' mergen & freigeben",
+      "type": "shell",
+      "command": "cmd /c \"git checkout main && git pull --rebase origin main && git merge --no-ff \\\"${input:prSourceBranch}\\\" -m \\\"Merge PR/Branch '${input:prSourceBranch}' into main\\\" && git push origin main\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Wechselt zu 'main', holt den neuesten Stand, mergt den Feature-Branch sauber und pusht auf origin/main."
+    },
+    {
+      "label": "🌐 [GitHub: PR] Pull-Requests auf GitHub im Browser öffnen",
+      "type": "shell",
+      "command": "powershell -NoProfile -Command \"Start-Process 'https://github.com/AmFearLiath/PlayRig/pulls'\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Öffnet direkt die GitHub Pull-Request Übersicht im Standard-Browser."
+    },
+
+    // ============================================================
+    // 5. 🛡️ GITHUB: STASH & SICHERHEIT
+    // ============================================================
+    {
+      "label": "📦 [GitHub: Stash] Ungesicherte Änderungen parken (git stash)",
+      "type": "shell",
+      "command": "git stash save \"WIP Stash via PlayRig Task\"",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Sichert unvollendete Änderungen temporär weg für einen sauberen Arbeitsstand."
+    },
+    {
+      "label": "📤 [GitHub: Stash] Geparkte Änderungen wiederherstellen (git stash pop)",
+      "type": "shell",
+      "command": "git stash pop",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Holt die zuletzt geparkten Änderungen zurück in den Arbeitsbereich."
+    },
+    {
+      "label": "⚠️ [GitHub: Reset] Lokale Datei-Änderungen verwerfen (git restore .)",
+      "type": "shell",
+      "command": "git restore .",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Verwirft alle uncommitteten Änderungen und stellt den letzten Commit wieder her."
+    }
+  ]
+}

@@ -191,7 +191,7 @@ async function seedInitialData() {
       name: 'Animations & Visual FX',
       icon: 'sparkles',
       description: 'Border-Beams, 3D Spotlights, Partikelsysteme und Shader',
-      subcategories: ['Border-Beams', 'Spotlights-3D', 'Particles-FX', 'Buttons-Ripples', 'Canvas-Shaders', 'Transitions-Loaders'],
+      subcategories: ['Border-Beams', 'Spotlights-3D', 'Particles-FX', 'Buttons-Ripples', 'Canvas-Shaders', 'Transitions-Loaders', 'Emergence'],
       sort_order: 2
     },
     {
@@ -601,6 +601,49 @@ async function seedInitialData() {
       thumbnail = '/rigs/Gaming/Procedural/celestial-gravity-sandbox/thumbnail.png'
   `, [
     JSON.stringify(['Space', 'Physics', 'N-Body', 'Simulation', 'Gravity', 'Procedural']),
+    JSON.stringify({ defaultTheme: 'cyber-cyan' })
+  ]);
+
+  // Seed Emergence Laboratory
+  await pool.query(`
+    INSERT INTO rigs (
+      id, title, description, category, subcategory, path,
+      version, author, copyright, icon, color, tags, status, access,
+      original_author, views, stars, forks, featured, thumbnail, settings
+    ) VALUES (
+      'emergence-laboratory',
+      'Emergence Laboratory',
+      'Ein interaktives Forschungslabor für zelluläre Automaten und emergente Systeme. Untersuche Conway\\'s Game of Life, HighLife, Seeds, Day & Night, Brian\\'s Brain, Anneal sowie konfigurierbare B/S-Regeln, Populations- und Entropie-Messung, Experiment-Snapshots und JSON-Export.',
+      'animations',
+      'Emergence',
+      'rigs/Animations/Emergence/Emergence-Laboratory/index.html',
+      'v1.0.0',
+      'Liath',
+      '© GameChiller',
+      'sparkles',
+      '#00e5ff',
+      ?,
+      'active',
+      'public',
+      'Liath',
+      210,
+      68,
+      16,
+      1,
+      '/rigs/Animations/Emergence/Emergence-Laboratory/thumbnail.png',
+      ?
+    )
+    ON DUPLICATE KEY UPDATE
+      title = 'Emergence Laboratory',
+      category = 'animations',
+      subcategory = 'Emergence',
+      path = 'rigs/Animations/Emergence/Emergence-Laboratory/index.html',
+      thumbnail = '/rigs/Animations/Emergence/Emergence-Laboratory/thumbnail.png',
+      version = 'v1.0.0',
+      author = 'Liath',
+      copyright = '© GameChiller'
+  `, [
+    JSON.stringify(['Cellular-Automata', 'Game-of-Life', 'Emergence', 'Simulation', 'Science', 'Canvas2D', 'Entropy', 'Export']),
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
   ]);
 

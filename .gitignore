@@ -17,6 +17,7 @@ _examples/
 Thumbs.db
 .vscode/*
 !.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 
 # Temporary / Session data

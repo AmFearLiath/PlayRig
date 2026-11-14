@@ -61,7 +61,7 @@ PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du 
 
 ## 🕹️ Live Flagship Rigs
 
-PlayRig wird mit 10 einsatzbereiten, hochkarätigen Rigs ausgeliefert:
+PlayRig wird mit 11 einsatzbereiten, hochkarätigen Rigs ausgeliefert:
 
 ```
 rigs/
@@ -73,6 +73,7 @@ rigs/
 │   ├── Procedural/celestial-gravity-sandbox/ ➜ N-Körper Himmelsmechanik & Gravitations-Sandbox
 │   └── Helper/speedrun-splits-tracker/       ➜ LiveSplit-Alternative mit Sub-Millisekunden-Delta
 ├── Animations/
+│   ├── Emergence/Emergence-Laboratory/       ➜ Zelluläre Automaten & Emergente Systeme (Game of Life, Seeds, Anneal)
 │   ├── Canvas-Shaders/cyber-matrix-rain-lab/ ➜ Cyberpunk Digital-Rain mit Web Audio Regen-SFX
 │   └── Particles-FX/Particle-Gravity-Vortex/ ➜ 1.500 Partikel Orbit-Physik bei stabilen 60 FPS
 ├── Creative/
