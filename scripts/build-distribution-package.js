@@ -18,6 +18,7 @@ const items = [
   'studio',
   'admin',
   'docs',
+  'docs-portal',
   'deploy',
   'install.sh',
   'package.json',
@@ -27,6 +28,7 @@ const items = [
   'GRUNDREGELN.md',
   'LICENSE.md',
   'favicon.svg',
+  'hub.css',
   'hub.js',
   'registry.js',
   'index.html'
