@@ -208,3 +208,4 @@ Prüft den Health-Status des entsprechenden Companion-Services.
 
 #### `GET /api/v1/docs`
 Gibt das vollständige, maschinenlesbare OpenAPI-Schema der PlayRig-API zurück.
+

@@ -115,3 +115,4 @@ PlayRig nutzt standardmäßig einen lokalen **MySQL-Server auf Port 3307** (`pla
    - Input-Validierung: Alle Keys und IDs werden mit `/^[a-zA-Z0-9_.-]{1,128}$/` validiert.
 5. **In-Window Navigation:** Keine unkontrollierte Tab-Vermehrung durch Verbot von `target="_blank"`.
 6. **Graceful Shutdown & Port-Helper:** Automatisches Beenden blockierender Instanzen mit Sicherheitsprüfung bei Neustarts.
+

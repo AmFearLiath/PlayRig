@@ -53,8 +53,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
+  gap: 2px;
+  padding: 10px 12px;
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 600;
@@ -277,7 +277,8 @@
 }
 
 /* Inputs & Selects */
-.nexus-input, .nexus-select {
+.nexus-input,
+.nexus-select {
   width: 100%;
   padding: 10px 14px;
   background: rgba(13, 18, 30, 0.85);
@@ -290,7 +291,8 @@
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.nexus-input:focus, .nexus-select:focus {
+.nexus-input:focus,
+.nexus-select:focus {
   border-color: var(--cyan-500);
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
 }
@@ -406,19 +408,44 @@
   max-width: 360px;
 }
 
-.nexus-toast.success { border-left: 4px solid var(--emerald-400); }
-.nexus-toast.info    { border-left: 4px solid var(--cyan-400); }
-.nexus-toast.warning { border-left: 4px solid var(--amber-400); }
-.nexus-toast.error   { border-left: 4px solid var(--rose-400); }
+.nexus-toast.success {
+  border-left: 4px solid var(--emerald-400);
+}
+
+.nexus-toast.info {
+  border-left: 4px solid var(--cyan-400);
+}
+
+.nexus-toast.warning {
+  border-left: 4px solid var(--amber-400);
+}
+
+.nexus-toast.error {
+  border-left: 4px solid var(--rose-400);
+}
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes toastOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateY(12px) scale(0.95); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
 }
 
 
@@ -470,8 +497,15 @@
 }
 
 @keyframes modalScale {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Data Table Component */

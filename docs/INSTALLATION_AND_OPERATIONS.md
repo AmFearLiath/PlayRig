@@ -87,3 +87,4 @@ Alle administrativen Eingriffe und Sicherheitsverletzungen werden in der Tabelle
 ```sql
 SELECT timestamp, username, action, details FROM audit_log ORDER BY id DESC LIMIT 50;
 ```
+

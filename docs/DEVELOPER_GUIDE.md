@@ -135,3 +135,4 @@ Erstelle eine Datei `docs.json` im Rig-Verzeichnis:
 2. **Keine Wildcards in `postMessage`:** Immer `window.PlayRig.sendEvent()` oder `postToHost()` nutzen.
 3. **Reduced Motion beachten:** Alle animierten Effekte müssen bei aktivierter Barrierefreiheit reduziert ablaufen.
 4. **Offline First:** Verwende für Datenspeicherung immer `window.PlayRig.storage`, da es automatisch auf `localStorage` zurückfällt, wenn keine Serververbindung besteht.
+

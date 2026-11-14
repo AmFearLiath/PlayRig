@@ -36,3 +36,4 @@ Willkommen in der zentralen technischen Dokumentation der **PlayRig Engine**. Di
    Im Deck werden für Vorschauen ausschließlich statische Snapshots gerendert. Das eigentliche Rig wird niemals nur für eine Vorschau ausgeführt.
 5. **Autorenschaft & Copyright:**  
    Nur die 10 Core-Flagship-Rigs tragen standardmäßig `Author: Liath` und `© GameChiller`. Externe Entwickler und Community-Rigs behalten dauerhaft ihren eigenen Namen und ihr eigenes Copyright.
+

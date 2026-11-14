@@ -1033,6 +1033,9 @@ app.use('/studio', express.static(path.join(ROOT_DIR, 'studio')));
 // Dedicated Admin Panel route
 app.use('/admin', express.static(path.join(ROOT_DIR, 'admin')));
 
+// Dedicated Documentation & API Portal route
+app.use('/docs', express.static(path.join(ROOT_DIR, 'docs-portal')));
+
 // Serve root static workspace (Hub, _shared, and all tool subdirectories)
 app.use(express.static(ROOT_DIR));
 

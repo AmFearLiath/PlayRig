@@ -1,136 +1,230 @@
 <div align="center">
 
 # ⚡ PlayRig Engine
+### High-Performance Web-Tooling, Modular Gaming Rigs & Interactive Sandbox
 
-**High-Performance Modular Web Platform, Rig Studio & Interactive Sandbox**
-
-[![Version](https://img.shields.io/badge/Version-v1.0.0-00f0ff?style=for-the-badge)](https://github.com/AmFearLiath/PlayRig)
-[![Author](https://img.shields.io/badge/Author-Liath-fbbf24?style=for-the-badge)](https://github.com/AmFearLiath)
-[![Copyright](https://img.shields.io/badge/Copyright-GameChiller-a855f7?style=for-the-badge)](https://github.com/AmFearLiath)
+[![Platform: GameChiller](https://img.shields.io/badge/Platform-GameChiller%20Ecosystem-8b5cf6?style=for-the-badge&logo=gamepad)](https://gamechiller.de)
+[![Version: v1.0.0](https://img.shields.io/badge/Version-v1.0.0%20(Release)-00f0ff?style=for-the-badge)](docs/CHANGELOG.md)
+[![Database: MySQL 3307](https://img.shields.io/badge/Database-MySQL%20(Port%203307)-38bdf8?style=for-the-badge&logo=mysql)](server/db.js)
 [![License](https://img.shields.io/badge/License-Proprietary%20%2F%20All%20Rights%20Reserved-ef4444?style=for-the-badge)](LICENSE.md)
-[![Database](https://img.shields.io/badge/Database-MySQL%20(Port%203307)-38bdf8?style=for-the-badge)](server/db.js)
-[![Docs](https://img.shields.io/badge/Docs-Zentrale%20Dokumentation-10b981?style=for-the-badge)](docs/README.md)
+[![Docs](https://img.shields.io/badge/Docs-Zentrale%20Dokumentation-10b981?style=for-the-badge&logo=read-the-docs)](docs/README.md)
 
 <p align="center">
-  <i>Eine moderne, autarke Plattform zur Erstellung, Katalogisierung, Ausführung und Einbettung von interaktiven Web-Tools, Gaming-Editoren, Canvas-Shadern und prozeduralen Generatoren – vollintegriert in das GameChiller-Ökosystem.</i>
+  <b>PlayRig</b> ist die hochmoderne, autarke Laufzeit-, Entwicklungs- und Ausführungsumgebung für modulare Web-Tools, Gaming-Editoren, Canvas-Shader und prozedurale Generatoren im <b>GameChiller-Ökosystem</b>.
 </p>
 
-[✨ Features](#-features) •
-[🕹️ Rig Katalog](#-rig-katalog) •
-[📚 Zentrale Dokumentation](docs/README.md) •
-[🏗️ Architektur & GameChiller Integration](docs/PLAYRIG_GAMECHILLER_INTEGRATION.md) •
-[🛠️ API-Referenz (v1)](docs/API_REFERENCE.md) •
-[🚀 Installation](#-installation--schnellstart) •
-[📜 Lizenz](#-lizenz)
+[🕹️ Rigs Entdecken](#️-live-flagship-rigs) •
+[📚 Dokumentations-Zentrale](#-zentrale-dokumentations-suite) •
+[⚡ Live-Code Beispiele](#-live-code-beispiele) •
+[🏗️ Architektur](#️-architektur--system-design) •
+[🚀 Schnellstart](#-installation--schnellstart-in-60-sekunden)
 
 ---
 
 </div>
 
-## 🌟 Highlights
+## 🌟 Warum PlayRig? Das Erlebnis für Spieler, Creator & Admins
 
-- **Autarke Rigs:** Jedes Modul ist unabhängig ausführbar und vollständig in externe Seiten, OBS-Overlays oder CMS einbettbar (`embedSupported: true`).
-- **PlayRig Deck (Katalog):** Interaktive Entdecken-Ansicht mit Filterung nach Kategorien, Suchfunktion, Favoriten, Klon-Funktion und Live-Vorschau.
-- **PlayRig Studio:** Schneller Code- und Rig-Editor mit 1-Klick CDN-Integration (Three.js, Lucide, Tailwind, MathJS etc.), Hot-Reload und Export.
-- **Admin Control Panel:** Umfassende Nutzer-, Rechte- und Audit-Log-Verwaltung auf separater Sicherheits-Ebene (`/admin`).
-- **Prozedurale Audio-Synthese:** Keine externen MP3-Dateien oder 404-Risiken – Sound-Effekte und Ambientes werden in Echtzeit über die Web Audio API synthetisiert.
+Traditionelle Web-Tools leiden unter Tab-Sprawl, fehlender Persistenz und Abhängigkeiten von instabilen Drittanbieter-Diensten. **PlayRig löst dies radikal:**
 
----
-
-## 🕹️ Rig Katalog
-
-Das Repository beinhaltet 10 einsatzbereite Flagship-Rigs:
-
-| Rig | Kategorie | Tech-Stack | Beschreibung |
-|---|---|---|---|
-| **[Voxel Sphere & Dome Architect](rigs/Gaming/Minecraft/Voxel-Sphere-Architect/)** | Gaming / Minecraft | Three.js WebGL, InstancedMesh | 3D/2D Voxel-Generator für Minecraft-Kugeln, Kuppeln und Ellipsoide mit Schichten-Viewer, Ghosting und Bauplan-Export. |
-| **[Enshrouded Save Editor](rigs/Gaming/Enshrouded/Save-Editor/)** | Gaming / Enshrouded | Zstandard WASM, XXHash3, SV2C | Lokale Steam-Spielstand-Erkennung, Level & XP Booster, 16 Ausrüstungs- und 40 Rucksack-Slots mit über 4.300 Ingame-Icons. |
-| **[Retro RPG Dice & Loot Vault](rigs/Gaming/RPG-Tools/rpg-dice-loot-vault/)** | Gaming / RPG-Tools | Canvas 2D, Web Audio SFX | D4-D100 Würfelsystem mit 3D-Rotationsphysik, Nat-20 Fanfare und Diablo-inspiriertem Schatzkisten-Simulator. |
-| **[FPS Tactical Crosshair Lab](rigs/Gaming/Shooter-Tools/crosshair-scope-lab/)** | Gaming / Shooter-Tools | Canvas Reticle, Recoil Physics | Professioneller Fadenkreuz-Editor für CS2/Valorant mit Live-Rückstoßsimulation, Mil-Dot Sniper-Scope und PNG-Export. |
-| **[Speedrun Splits Tracker](rigs/Gaming/Helper/speedrun-splits-tracker/)** | Gaming / Helper | `performance.now()`, Web Audio | LiveSplit-Alternative mit Sub-Millisekunden-Delta, Gold-Splits, Tastatur-Hotkeys und OBS-Chroma-Key/Transparenz-Modus. |
-| **[Celestial Gravity Sandbox](rigs/Gaming/Procedural/celestial-gravity-sandbox/)** | Gaming / Procedural | N-Body Gravitation, Verlet Engine | Interaktiver Himmelsmechanik-Simulator mit Maus-Schleuder, Materie-Verschmelzungen und kosmischem Synth-Drone. |
-| **[Cyber Matrix Rain & Glyph Lab](rigs/Animations/Canvas-Shaders/cyber-matrix-rain-lab/)** | Animations / Canvas-Shaders | Canvas Shaders, Audio Noise | Digitaler Cyberpunk-Regen mit Katakana, Runen, Hexadezimal-Glyphen, Schockwellen-Interaktion und Regen-Ambiente. |
-| **[Particle Gravity Vortex Lab](rigs/Animations/Particles-FX/Particle-Gravity-Vortex/)** | Animations / Particles-FX | Canvas 2D, Orbital Physics | 1.500 Partikel bei 60 FPS mit Gravitationslinsen, Schockwellen-Impulsen und Farbpaletten. |
-| **[Glassmorphism & Beam Studio](rigs/Helper/Generators/glassmorphism-beam-studio/)** | Helper / Generators | CSS Custom Props, 3D Gyro | Visueller Generator für moderne Glassmorphismus-Karten und rotierende Border-Beams mit 1-Klick CSS/Tailwind-Export. |
-| **[Audio Reactive Ribbon](rigs/Creative/Audio-Visual/audio-reactive-ribbon/)** | Creative / Audio-Visual | Web Audio FFT, Canvas Ribbons | 3D-Wellenbänder mit integriertem prozeduralem Synthwave-Arpeggiator, Mikrofon-Input und Spektralanalyse. |
+- **🎯 Zero Tab Sprawl (In-Window First):** Kein lästiges Fenster-Chaos. Sämtliche Navigationen, Editoren und Vorschauen bleiben exakt im selben Browserfenster.
+- **🧩 100 % Autark (Standalone First):** Jedes Rig läuft vollständig lokal und unabhängig. Fällt das Host-Netzwerk aus, greift nahtlos der integrierte Offline- und Session-Fallback.
+- **⚡ Blitzschnelle Screenshots:** Das PlayRig Deck nutzt statische, gecachte Snapshots (`thumbnail.png`) für das Spotlight. Keine schweren WebGL-Kontexte beim bloßen Durchstöbern des Katalogs!
+- **🔊 Prozedurale Web Audio SFX:** Echte Audio-Synthese in Echtzeit – keine externen MP3s, keine Ladezeiten, null 404-Fehler.
+- **🛡️ Getestete Enterprise-Sicherheit:** Nonce-gesicherte Bridge, strikte Origin-Allowlist, serverseitiges Storage-Gating und RBAC-Rollenmodell.
 
 ---
 
-## 🏗️ Architektur
+## 📚 Zentrale Dokumentations-Suite
+
+PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du kannst sie **direkt im Browser** über das neue **[Dokumentations-Portal](http://localhost:3000/docs)** aufrufen oder in den Markdown-Handbüchern nachschlagen:
+
+<div align="center">
+
+| Handbuch | Fokus & Zielgruppe | Link |
+|---|---|:---:|
+| **📖 Systemdokumentation** | Gesamtarchitektur, Sandbox-Isolation, Module & Speichermodell | [Lesen](docs/SYSTEM_DOCUMENTATION.md) |
+| **🛠️ API-Referenz (v1)** | REST-Endpunkte, Authentifizierung, Scopes, JSON-Envelopes & Playground | [Lesen](docs/API_REFERENCE.md) |
+| **🌐 Integration Bridge** | Bidirektionale `window.PlayRig` Bridge, Nonces & Event-Protokoll | [Lesen](docs/INTEGRATION_BRIDGE.md) |
+| **💻 Entwickler-Leitfaden** | Schritt-für-Schritt zum eigenen Rig, Tokens & Standalone `docs.json` | [Lesen](docs/DEVELOPER_GUIDE.md) |
+| **⚙️ Installation & Betrieb** | MySQL Setup (Port 3307), Server-Bootstrap, Backups & Health-Checks | [Lesen](docs/INSTALLATION_AND_OPERATIONS.md) |
+| **⚖️ System-Grundregeln** | Verbindliches Manifest, Master-Portal Trennung & Richtlinien | [Lesen](GRUNDREGELN.md) |
+| **📜 Changelog** | Alle Release-Notes, Security Fixes & Migrationsschritte | [Lesen](docs/CHANGELOG.md) |
+
+</div>
+
+> 💡 **Tipp:** Starte den Server und rufe **`http://localhost:3000/docs`** auf, um die interaktive Dokumentation mit integrierter **Live-API-Testkonsole** und Markdown-Viewer zu erleben!
+
+---
+
+## 🕹️ Live Flagship Rigs
+
+PlayRig wird mit 10 einsatzbereiten, hochkarätigen Rigs ausgeliefert:
 
 ```
-PlayRig/
-├── index.html                   # PlayRig Deck (Hauptkatalog & Discover UI)
-├── hub.js / hub.css             # Deck Logik, Filter, Modal- und Card-Renderer
-├── registry.js                  # Zentrales Verzeichnis aller Module & Metadaten
-├── GRUNDREGELN.md               # Architektur- und Entwicklungs-Leitfaden
-│
-├── server/                      # Node.js Express Backend
-│   ├── server.js                # REST API, Routing, Static Hosting & Auth
-│   ├── db.js                    # MySQL Pool (Port 3307), Schema & Seeding
-│   └── services/                # ⚡ Extensible Backend Companion Services
-│       ├── index.js             # Service Manager & Dynamic Auto-Discovery
-│       ├── base-service.js      # Abstract BaseService Class
-│       └── enshrouded/          # Enshrouded Save & Character Engine
-│           └── index.js         # SV2C Container, Zstd WASM & Backups
-│
-├── studio/                      # PlayRig Studio (Rig-Entwicklungsumgebung)
-├── admin/                       # PlayRig Admin Panel (Benutzer & System-Verwaltung)
-├── _shared/                     # Geteilte CSS Tokens, Komponenten & JS Bridges
-│
-└── rigs/                        # 🕹️ Zentrales Rigs-Verzeichnis
-    ├── Gaming/                  # Gaming Tools & Generatoren
-    │   ├── Minecraft/
-    │   ├── Enshrouded/
-    │   ├── RPG-Tools/
-    │   ├── Shooter-Tools/
-    │   ├── Helper/
-    │   └── Procedural/
-    │
-    ├── Animations/              # Canvas Shader & Visual FX
-    ├── Creative/                # Audio-Visual & Generative Kunst
-    └── Helper/                  # UI-Generatoren & Dienstprogramme
+rigs/
+├── Gaming/
+│   ├── Minecraft/Voxel-Sphere-Architect/     ➜ 3D Voxel-Generator für Minecraft-Kugeln & Kuppeln
+│   ├── Enshrouded/Save-Editor/               ➜ Steam Save-Editor mit Zstandard & 4.300+ Icons
+│   ├── RPG-Tools/rpg-dice-loot-vault/        ➜ Multi-Dice Roller & Diablo-Kistensimulator
+│   ├── Shooter-Tools/crosshair-scope-lab/     ➜ CS2/Valorant Fadenkreuz-Editor mit Recoil-Physik
+│   ├── Procedural/celestial-gravity-sandbox/ ➜ N-Körper Himmelsmechanik & Gravitations-Sandbox
+│   └── Helper/speedrun-splits-tracker/       ➜ LiveSplit-Alternative mit Sub-Millisekunden-Delta
+├── Animations/
+│   ├── Canvas-Shaders/cyber-matrix-rain-lab/ ➜ Cyberpunk Digital-Rain mit Web Audio Regen-SFX
+│   └── Particles-FX/Particle-Gravity-Vortex/ ➜ 1.500 Partikel Orbit-Physik bei stabilen 60 FPS
+├── Creative/
+│   └── Audio-Visual/audio-reactive-ribbon/   ➜ 3D Synthwave Audio-Visualizer mit FFT-Analyse
+└── Helper/
+    └── Generators/glassmorphism-beam-studio/ ➜ Rotierende CSS-Border-Beams & Glass-Generator
 ```
 
 ---
 
-## 🚀 Installation & Schnellstart
+## ⚡ Live-Code Beispiele
 
-### 1. Voraussetzungen
-- **Node.js:** v18.0.0 oder neuer (empfohlen v20+)
-- **MySQL:** Port 3307 (z. B. via XAMPP MySQL konfiguriert auf Port 3307)
-- **Browser:** Moderner Chromium-basierter Browser oder Firefox
+### 1. Rig-zu-Plattform Kommunikation (PlayRig Bridge)
+Jedes Rig kann über `window.PlayRig` mit GameChiller interagieren:
 
-### 2. Abhängigkeiten installieren
+```javascript
+// 1. Benutzer- und Plattform-Kontext abonnieren
+window.PlayRig.onContext((ctx) => {
+  console.log(`Willkommen zurück, ${ctx.user.displayName}!`);
+  console.log(`Aktiver Gameserver: ${ctx.server?.name || 'Offline'}`);
+});
+
+// 2. Persistente Cloud-Einstellungen speichern (synct automatisch mit API v1)
+await window.PlayRig.storage.set('player_loadout', {
+  primaryWeapon: 'flame_sword',
+  sensitivity: 1.45
+});
+
+// 3. Einstellungen abrufen (mit automatischem LocalStorage-Fallback im Standalone-Modus)
+const loadout = await window.PlayRig.storage.get('player_loadout', { sensitivity: 1.0 });
+
+// 4. In-Window Navigation (niemals neue Tabs!)
+window.PlayRig.navigate('/studio');
+
+// 5. Toast an Benutzer senden
+window.PlayRig.notify('Speicherstand erfolgreich aktualisiert!', 'success');
+```
+
+---
+
+### 2. Live REST-API v1 Abfrage
+Autorisierte Komponenten und Skripte fragen die versionierte REST-Schnittstelle ab:
+
 ```bash
+# 1. Plattform-Kontext abrufen
+curl http://localhost:3000/api/v1/auth/context
+
+# 2. Katalog aller aktiven Rigs abrufen
+curl http://localhost:3000/api/v1/rigs?category=gaming
+
+# 3. Autonome Rig-Dokumentation (docs.json) abfragen
+curl http://localhost:3000/api/v1/rigs/voxel-sphere-architect/docs
+```
+
+**Antwort-Format (Standardisiertes Envelope):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": { "displayName": "Gastspieler", "isGuest": true },
+    "community": { "name": "GameChiller Network" },
+    "theme": "cyber-cyan"
+  },
+  "meta": {
+    "version": "v1.0.0",
+    "timestamp": "2026-11-14T03:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 3. 1-Klick Iframe-Einbettung (OBS, Notion, CMS)
+Jedes Rig unterstützt den autarken Embed-Modus ohne störende Plattform-Menüs:
+
+```html
+<!-- Live Voxel Sphere Generator in externe Seite einbinden -->
+<iframe 
+  src="http://localhost:3000/rigs/Gaming/Minecraft/Voxel-Sphere-Architect/index.html?embed=true" 
+  width="100%" 
+  height="720" 
+  style="border: 1px solid rgba(0, 210, 255, 0.3); border-radius: 16px;" 
+  allow="autoplay; fullscreen">
+</iframe>
+```
+
+---
+
+## 🏗️ Architektur & System-Design
+
+```
++---------------------------------------------------------------------------------+
+|                               GAMECHILLER MASTER-PORTAL                         |
+|             (Zentrale Identitäten, Community-Rollen, Gameserver)                |
++----------------------------------------+----------------------------------------+
+                                         |
+                  [Sichere PlayRig Bridge & REST-API v1]
+                  (Kein Wildcard-Messaging, Origin-Allowlist)
+                                         |
++----------------------------------------v----------------------------------------+
+|                                  PLAYRIG ENGINE                                 |
+|  +--------------------+   +-----------------------+   +----------------------+  |
+|  |    PlayRig Deck    |   |    PlayRig Studio     |   |     Docs-Portal      |  |
+|  |  (Snapshot Stage,  |   | (Zwei-Spalten Editor, |   | (Interaktive Doku &  |  |
+|  |  Sandbox Runner)   |   |   CDN & Themesets)    |   |  Live-API Konsole)   |  |
+|  +--------------------+   +-----------------------+   +----------------------+  |
+|                                           |                                     |
+|  +----------------------------------------v----------------------------------+  |
+|  |                           PLAYRIG RUNTIME SANDBOX                         |  |
+|  |          Iframe-Isolation • In-Window Navigation • Offline-Fallback       |  |
+|  +---------------------------------------------------------------------------+  |
+|                                           |                                     |
+|  +----------------------------------------v----------------------------------+  |
+|  |                           PERSISTENZ & COMPANION LAYER                    |  |
+|  |      MySQL 3307 (rig_storage, Mandantentrennung) • Companion Services     |  |
+|  +---------------------------------------------------------------------------+  |
++---------------------------------------------------------------------------------+
+```
+
+---
+
+## 🚀 Installation & Schnellstart in 60 Sekunden
+
+### 1. Repository klonen & Pakete installieren
+```bash
+git clone https://github.com/AmFearLiath/PlayRig.git
+cd PlayRig
 npm install
 ```
 
+### 2. Datenbank bereitstellen
+PlayRig verbindet sich standardmäßig mit einem lokalen MySQL-Server auf **Port 3307**:
+- **Host:** `localhost`
+- **Port:** `3307`
+- **User:** `root`
+- **Datenbank:** `playrig_db`
+
+*(Die erforderlichen Tabellen und Standardkonten werden beim ersten Start vollautomatisch initialisiert.)*
+
 ### 3. Server starten
-Unter Windows über die Batch-Datei:
-```cmd
-start.bat
-```
-Oder direkt über Node.js:
 ```bash
 node server/server.js
 ```
 
-### 4. Endpunkte
-- **PlayRig Deck:** `http://localhost:3000/`
-- **PlayRig Studio:** `http://localhost:3000/studio`
-- **Admin Control Panel:** `http://localhost:3000/admin`
-- **Health Check API:** `http://localhost:3000/api/health`
-
-**Standard-Zugangsdaten (Initial):**
-- **Admin:** `admin` / `admin123`
-- **Creator:** `creator` / `creator123`
+### 4. Sofort loslegen
+- 🕹️ **PlayRig Deck (Katalog):** [http://localhost:3000](http://localhost:3000)
+- ⚡ **PlayRig Studio (Editor):** [http://localhost:3000/studio](http://localhost:3000/studio)
+- 📚 **Dokumentations-Zentrale:** [http://localhost:3000/docs](http://localhost:3000/docs)
+- 🛡️ **Admin Control Panel:** [http://localhost:3000/admin](http://localhost:3000/admin) *(Login: `admin` / `admin123`)*
 
 ---
 
-## 📜 Lizenz
+## ⚖️ Lizenz & Urheberrecht
 
-**Copyright (c) 2026 GameChiller / AmFearLiath (Author: Liath). All Rights Reserved.**
-
-Dieses Repository ist **Source-Available** zur Ansicht und Evaluierung. Jegliche unautorisierte Nutzung, Kopie, Modifikation, Verteilung, Veröffentlichung oder kommerzielle Verwendung ohne vorherige schriftliche Genehmigung ist ausdrücklich untersagt. Details siehe [LICENSE.md](LICENSE.md).
-
+- **Core-Plattform & Engine:** © GameChiller • Author: `Liath`
+- **Eigenständige Rigs & Community-Code:** Die jeweiligen Autoren und Rechteinhaber sind explizit in den Metadaten der Rigs hinterlegt.
+- **Lizenz:** Proprietary / All Rights Reserved.

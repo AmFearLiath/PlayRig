@@ -7,6 +7,70 @@
 
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
+
+const ROOT_DIR = path.resolve(__dirname, '../../../..');
+const DOCS_DIR = path.join(ROOT_DIR, 'docs');
+
+const AVAILABLE_DOCS = [
+  {
+    id: 'system',
+    file: 'SYSTEM_DOCUMENTATION.md',
+    title: 'Systemdokumentation',
+    icon: '📖',
+    category: 'Architektur',
+    description: 'Architektur, Module, Sandbox-Isolation, Datenhaltung & Sicherheitsmodell.'
+  },
+  {
+    id: 'api',
+    file: 'API_REFERENCE.md',
+    title: 'API-Referenz (v1)',
+    icon: '🛠️',
+    category: 'Entwicklung',
+    description: 'REST-Endpunkte, Authentifizierung, Scopes, Parameter & JSON-Envelopes.'
+  },
+  {
+    id: 'bridge',
+    file: 'INTEGRATION_BRIDGE.md',
+    title: 'Integration Bridge',
+    icon: '🌐',
+    category: 'Integration',
+    description: 'Bidirektionale Bridge, Origin-Allowlist, Nonce-Handshake & Event-Handling.'
+  },
+  {
+    id: 'developer',
+    file: 'DEVELOPER_GUIDE.md',
+    title: 'Entwickler-Leitfaden',
+    icon: '💻',
+    category: 'Entwicklung',
+    description: 'Neues Rig erstellen, Tokens, Offline-Storage & Standalone docs.json.'
+  },
+  {
+    id: 'operations',
+    file: 'INSTALLATION_AND_OPERATIONS.md',
+    title: 'Installation & Betrieb',
+    icon: '⚙️',
+    category: 'DevOps',
+    description: 'MySQL Setup (Port 3307), Server-Bootstrap, Backups & Health-Checks.'
+  },
+  {
+    id: 'manifest',
+    file: '../GRUNDREGELN.md',
+    title: 'Grundregeln & Manifest',
+    icon: '⚖️',
+    category: 'Richtlinien',
+    description: 'Verbindliches Plattform-Manifest, Master-Portal Trennung & Sicherheitsregeln.'
+  },
+  {
+    id: 'changelog',
+    file: 'CHANGELOG.md',
+    title: 'Changelog',
+    icon: '📜',
+    category: 'Historie',
+    description: 'Release-Historie, Security Fixes, Features & Breaking Changes.'
+  }
+];
 
 const API_SPEC = {
   title: 'PlayRig Integration API',
@@ -16,14 +80,15 @@ const API_SPEC = {
   author: 'Liath',
   copyright: '© GameChiller',
   auth: {
-    type: 'Bearer Token (Session Token) oder API Key',
-    header: 'Authorization: Bearer <token>',
-    guestAccess: 'Unterstützt (eingeschränkte Scopes)'
+    type: 'Bearer Token (Session Token) oder X-API-Key',
+    headers: ['Authorization: Bearer <token>', 'X-API-Key: <client_key>'],
+    guestAccess: 'Unterstützt (eingeschränkte Scopes: rigs:read, storage:session)'
   },
   roles: {
     admin: 'Vollzugriff auf alle Rigs, Services, Speicherbereiche und Benutzerverwaltung.',
     creator: 'Erstellung, Bearbeitung und Verwaltung eigener Rigs sowie Zugriff auf User- und Rig-Speicher.',
     user: 'Ausführung freigegebener Rigs und Zugriff auf eigenen Benutzerspeicher.',
+    service: 'Autorisierte externe GameChiller-Hintergrunddienste via X-API-Key.',
     guest: 'Nur lesender Zugriff auf öffentliche Rigs und flüchtige Session-Speicherung.'
   },
   endpoints: [
@@ -50,100 +115,86 @@ const API_SPEC = {
       method: 'GET',
       summary: 'Vollständigen GameChiller Plattform-Kontext abrufen',
       requiredScope: 'none',
-      response: {
-        success: 'true',
-        data: {
-          user: 'object',
-          community: { id: 'string', name: 'string', slug: 'string' },
-          server: { id: 'string', name: 'string', status: 'string' },
-          permissions: 'array'
-        }
-      }
+      response: { success: 'true', data: { user: 'object', community: 'object', game: 'object', server: 'object' } }
     },
     {
       path: '/api/v1/auth/login',
       method: 'POST',
-      summary: 'Benutzer anmelden und Session-Token anfordern',
-      parameters: { username: 'string (required)', password: 'string (required)' }
+      summary: 'Benutzer mit Zugangsdaten authentifizieren',
+      parameters: { username: 'string', password: 'string' },
+      requiredScope: 'none'
     },
     {
       path: '/api/v1/auth/register',
       method: 'POST',
-      summary: 'Neuen GameChiller Benutzer registrieren',
-      parameters: { username: 'string (required)', password: 'string (required)', displayName: 'string' }
+      summary: 'Neuen Benutzer-Account registrieren (Standardrolle: user)',
+      parameters: { username: 'string', password: 'string', displayName: 'string' },
+      requiredScope: 'none'
     },
     // Rigs & Catalog
     {
       path: '/api/v1/rigs',
       method: 'GET',
-      summary: 'Verfügbare Rigs mit Spotlight-Screenshot-URLs und Metadaten auflisten',
-      parameters: { category: 'string', subcategory: 'string', search: 'string', status: 'string' },
+      summary: 'Registrierte Rigs abrufen (Filterbar nach category, subcategory, search)',
       requiredScope: 'rigs:read'
     },
     {
       path: '/api/v1/rigs/:id',
       method: 'GET',
-      summary: 'Vollständiges Manifest und Details eines Rigs abrufen',
+      summary: 'Detailmanifest eines Rigs abrufen',
       requiredScope: 'rigs:read'
     },
     {
       path: '/api/v1/rigs/:id/docs',
       method: 'GET',
-      summary: 'Eigenständige Dokumentation und Bedienungsanleitung des Rigs abrufen',
+      summary: 'Autonome Standalone-Dokumentation (docs.json) eines Rigs abrufen',
       requiredScope: 'rigs:read'
     },
     {
       path: '/api/v1/rigs/:id/screenshot',
       method: 'GET',
-      summary: 'Spotlight-Screenshot des Rigs als Bild abrufen',
-      requiredScope: 'none'
+      summary: 'Geprüftes Snapshot-Vorschaubild als PNG-Binärstream abrufen',
+      requiredScope: 'rigs:read'
     },
     {
-      path: '/api/v1/rigs/:id/screenshot',
+      path: '/api/v1/rigs/status',
       method: 'POST',
-      summary: 'Neuen Spotlight-Screenshot für ein Rig hochladen',
-      parameters: { dataUrl: 'string (Base64 PNG)' },
-      requiredScope: 'rigs:write'
+      summary: 'Betriebsstatus eines Rigs aktualisieren (active, wip, deprecated)',
+      parameters: { id: 'string', status: 'string' },
+      requiredScope: 'rigs:admin / creator'
     },
-    {
-      path: '/api/v1/rigs/:id/status',
-      method: 'PATCH',
-      summary: 'Status eines Rigs anpassen (active, pending, disabled)',
-      parameters: { status: 'string (active|pending|wip|deprecated)' },
-      requiredScope: 'rigs:admin'
-    },
-    // Storage Engine
+    // Scoped Cloud Storage
     {
       path: '/api/v1/storage/user/:key',
       method: 'GET',
-      summary: 'Benutzerspezifische Daten oder Einstellungen abrufen',
-      requiredScope: 'storage:user'
+      summary: 'Benutzerspezifische Einstellung abrufen',
+      requiredScope: 'storage:user (Eigener User oder Gast)'
     },
     {
       path: '/api/v1/storage/user/:key',
       method: 'POST',
-      summary: 'Benutzerspezifische Daten oder Einstellungen speichern',
+      summary: 'Benutzerspezifische Einstellung speichern (Max. 5 MB)',
       parameters: { value: 'any (JSON serializable)' },
       requiredScope: 'storage:user'
     },
     {
       path: '/api/v1/storage/rig/:rigId/:key',
       method: 'GET',
-      summary: 'Rig-spezifische Konfigurationsdaten abrufen',
+      summary: 'Rig-spezifische Konfiguration abrufen',
       requiredScope: 'storage:rig'
     },
     {
       path: '/api/v1/storage/rig/:rigId/:key',
       method: 'POST',
-      summary: 'Rig-spezifische Konfigurationsdaten speichern',
+      summary: 'Rig-spezifische Konfiguration speichern (Nur Eigentümer oder Admin)',
       parameters: { value: 'any (JSON serializable)' },
-      requiredScope: 'storage:rig'
+      requiredScope: 'storage:rig (Ownership enforced)'
     },
     {
       path: '/api/v1/storage/global/:key',
       method: 'GET',
-      summary: 'Globale PlayRig Plattform-Einstellungen abrufen',
-      requiredScope: 'none'
+      summary: 'Globale Plattform-Einstellung abrufen',
+      requiredScope: 'storage:global (oder Admin)'
     },
     {
       path: '/api/v1/storage/global/:key',
@@ -168,6 +219,7 @@ const API_SPEC = {
   ]
 };
 
+// GET /api/v1/docs - Returns specification object
 router.get('/', (req, res) => {
   res.json({
     success: true,
@@ -179,5 +231,52 @@ router.get('/', (req, res) => {
   });
 });
 
-module.exports = router;
+// GET /api/v1/docs/list - Lists all available documentation handbooks
+router.get('/list', (req, res) => {
+  res.json({
+    success: true,
+    data: AVAILABLE_DOCS
+  });
+});
 
+// GET /api/v1/docs/file/:id - Returns markdown text content of a documentation file
+router.get('/file/:id', (req, res) => {
+  const docMeta = AVAILABLE_DOCS.find(d => d.id === req.params.id);
+  if (!docMeta) {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'DOC_NOT_FOUND', message: `Dokumentation '${req.params.id}' nicht gefunden.` }
+    });
+  }
+
+  const filePath = path.resolve(DOCS_DIR, docMeta.file);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({
+      success: false,
+      error: { code: 'FILE_NOT_FOUND', message: `Datei '${docMeta.file}' nicht auf dem Server vorhanden.` }
+    });
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    res.json({
+      success: true,
+      data: {
+        id: docMeta.id,
+        title: docMeta.title,
+        icon: docMeta.icon,
+        category: docMeta.category,
+        description: docMeta.description,
+        filename: path.basename(filePath),
+        content: content
+      }
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 'READ_ERROR', message: err.message }
+    });
+  }
+});
+
+module.exports = router;

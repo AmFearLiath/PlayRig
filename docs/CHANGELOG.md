@@ -54,3 +54,4 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/) 
 - Erstveröffentlichung des PlayRig Decks und Studios.
 - Lokale MySQL-Persistenz auf Port 3307.
 - 10 Flagship-Rigs aus den Bereichen Gaming, Animationen, Creative und Helper.
+

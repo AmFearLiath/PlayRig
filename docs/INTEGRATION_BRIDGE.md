@@ -129,3 +129,4 @@ Wird ein Rig **außerhalb von GameChiller** (z. B. direkt als statische HTML-Dat
 - `storage.get/set` greift transparent auf `localStorage` zurück.
 - `navigate(url)` navigiert standardmäßig per `window.location.href`.
 - **Ergebnis:** Das Rig bleibt zu 100 % funktionsfähig, ohne Fehler zu werfen.
+
