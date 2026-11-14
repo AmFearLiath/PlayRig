@@ -39,3 +39,4 @@
   "notes": "Erstelle immer ein manuelles Backup deiner Original-Spielstandsdateien vor dem Überschreiben.",
   "knownLimitations": "Sehr große modifizierte Inventarmengen über 9999 können vom Spiel auf das Maximum zurückgesetzt werden."
 }
+

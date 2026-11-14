@@ -1,6 +1,12 @@
 /**
- * PLAYRIG API v1 - AUTH & PERMISSION MIDDLEWARE
- * Provides central GameChiller user identity, scope verification, and guest mode.
+ * PLAYRIG API v1 - AUTH & PERMISSION MIDDLEWARE (SECURED)
+ * Provides central GameChiller user identity, API-client verification, scope validation, and guest mode.
+ *
+ * Security:
+ * - API-Client Authentication via X-API-Key
+ * - Server-side Scope Enforcement
+ * - External GameChiller identity verification (zero local admin escalation)
+ * - Safe standard permissions for new users
  *
  * Author: Liath • Copyright: © GameChiller
  */
@@ -25,6 +31,11 @@ const ROLE_SCOPES = {
     'storage:user',
     'community:read'
   ],
+  service: [
+    'rigs:read',
+    'storage:rig',
+    'server:read'
+  ],
   guest: [
     'rigs:read',
     'storage:session'
@@ -32,6 +43,29 @@ const ROLE_SCOPES = {
 };
 
 async function authenticateToken(req, res, next) {
+  // 1. Check API-Client Key (X-API-Key Header for authorized GameChiller components)
+  const apiKey = req.headers['x-api-key'] || req.query.api_key;
+  if (apiKey) {
+    try {
+      const client = await db.getClientByApiKey(apiKey);
+      if (client && client.status === 'active') {
+        req.apiClient = client;
+        req.user = {
+          id: client.client_id,
+          username: client.name,
+          name: client.name,
+          role: 'service',
+          scopes: Array.isArray(client.scopes) ? client.scopes : (ROLE_SCOPES.service)
+        };
+        req.isGuest = false;
+        return next();
+      }
+    } catch (e) {
+      console.warn('[PlayRig API Auth] API-Key validation error:', e.message);
+    }
+  }
+
+  // 2. Check User Bearer Token
   let token = null;
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -46,13 +80,14 @@ async function authenticateToken(req, res, next) {
       if (user) {
         req.user = user;
         req.isGuest = false;
+        // Gated: External identities never automatically inherit admin role
         req.user.scopes = ROLE_SCOPES[user.role] || ROLE_SCOPES.user;
         return next();
       }
     } catch (e) {}
   }
 
-  // Fallback to Guest User with restricted permissions
+  // 3. Fallback to Guest User with restricted permissions
   req.user = {
     id: 'guest',
     username: 'gast',

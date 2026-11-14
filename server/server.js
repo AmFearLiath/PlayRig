@@ -146,7 +146,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   try {
-    const user = await db.registerUser(username, displayName || username, password, 'creator');
+    const user = await db.registerUser(username, displayName || username, password, 'user');
     const auth = await db.authenticate(username, password);
     res.status(201).json(auth);
   } catch (err) {

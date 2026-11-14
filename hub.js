@@ -868,22 +868,44 @@ window.PlayRig.navigate("/studio");</div>
       iframe.src = iframe.src;
     });
 
-    // Sandbox Screenshot Capture
+    // Sandbox Screenshot Capture with Typed Secure Protocol
+    let screenshotTimeout = null;
+
     document.getElementById('btn-sandbox-screenshot')?.addEventListener('click', () => {
       if (!activeRig) return;
       const iframe = document.getElementById('sandbox-frame');
       if (!iframe || !iframe.contentWindow) return;
 
-      window.showToast('Erfasse Screenshot aus Sandbox...', 'info', 2000);
-      iframe.contentWindow.postMessage({ type: 'playrig-capture-screenshot' }, '*');
+      window.showToast('Erfasse Snapshot aus Sandbox...', 'info', 2000);
+      const targetOrigin = window.location.origin;
+
+      if (screenshotTimeout) clearTimeout(screenshotTimeout);
+      screenshotTimeout = setTimeout(() => {
+        window.showToast('Snapshot-Zeitüberschreitung: Rig antwortete nicht innerhalb von 3s.', 'warning', 3500);
+      }, 3000);
+
+      iframe.contentWindow.postMessage({
+        type: 'PLAYRIG_REQUEST_SCREENSHOT',
+        rigId: activeRig.id,
+        timestamp: Date.now()
+      }, targetOrigin);
     });
 
-    // Listen for captured screenshot from iframe
+    // Listen for captured screenshot from iframe with origin verification
     window.addEventListener('message', async (event) => {
+      // Origin check
+      if (event.origin !== window.location.origin && !event.origin.endsWith('.gamechiller.de') && event.origin !== 'http://localhost:3000') {
+        return;
+      }
+
       const data = event.data;
       if (!data || typeof data !== 'object') return;
 
-      if (data.type === 'playrig-screenshot-captured' && data.dataUrl) {
+      const isCaptureSuccess = (data.type === 'PLAYRIG_SCREENSHOT_CAPTURED' || data.type === 'playrig-screenshot-captured') && data.dataUrl;
+      const isCaptureError = data.type === 'PLAYRIG_SCREENSHOT_ERROR' || data.type === 'playrig-screenshot-error';
+
+      if (isCaptureSuccess) {
+        if (screenshotTimeout) clearTimeout(screenshotTimeout);
         if (!activeRig) return;
         const token = localStorage.getItem('playrig_token') || localStorage.getItem('nexus_token');
         if (!token) {
@@ -891,7 +913,7 @@ window.PlayRig.navigate("/studio");</div>
           a.href = data.dataUrl;
           a.download = `${activeRig.id}-screenshot.png`;
           a.click();
-          window.showToast('Screenshot heruntergeladen! (Melde dich an, um ihn als Deck-Thumbnail zu speichern)', 'success', 5000);
+          window.showToast('Snapshot heruntergeladen! (Melde dich an, um ihn als Deck-Vorschau zu speichern)', 'success', 5000);
           return;
         }
 
@@ -907,13 +929,14 @@ window.PlayRig.navigate("/studio");</div>
           const resData = await res.json();
           if (!res.ok) throw new Error(resData.error || 'Fehler beim Speichern');
 
-          window.showToast(`📸 Screenshot erfolgreich als Thumbnail für '${activeRig.title}' gespeichert!`, 'success', 5000);
+          window.showToast(`📸 Snapshot erfolgreich als Vorschau für '${activeRig.title}' gespeichert!`, 'success', 5000);
           renderDiscoveryView();
         } catch (err) {
-          window.showToast('Fehler beim Speichern des Thumbnails: ' + err.message, 'error', 4000);
+          window.showToast('Fehler beim Speichern des Snapshots: ' + err.message, 'error', 4000);
         }
-      } else if (data.type === 'playrig-screenshot-error') {
-        window.showToast('Screenshot fehlgeschlagen: ' + (data.error || 'Unbekannter Fehler'), 'warning', 4000);
+      } else if (isCaptureError) {
+        if (screenshotTimeout) clearTimeout(screenshotTimeout);
+        window.showToast('Snapshot fehlgeschlagen: ' + (data.error || 'Kein Canvas-Element für Screenshot gefunden'), 'warning', 4000);
       }
     });
 

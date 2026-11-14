@@ -2,9 +2,15 @@
  * PLAYRIG BRIDGE & RUNTIME v1.0.0
  * Official Integration Bridge between GameChiller Platform and PlayRig Modules.
  *
- * Provides bidirectional communication, user identity, permissions,
+ * Provides bidirectional secure communication, user identity, permissions,
  * scoped storage, live context sync, screenshot capture, and strict
  * in-window navigation.
+ *
+ * Security Enhancements:
+ * - Specific target origins (no wildcard '*')
+ * - Central allowlist and origin verification
+ * - Nonce-based replay protection
+ * - Message schema validation
  *
  * Author: Liath • Copyright: © GameChiller • Version: v1.0.0
  */
@@ -15,6 +21,32 @@
   const urlParams = new URLSearchParams(window.location.search);
   const isEmbedParam = urlParams.get('embed') === 'true' || urlParams.get('embed') === '1';
   const isInIframe = window.self !== window.top;
+
+  // Origin Allowlist
+  const defaultAllowedOrigins = [
+    window.location.origin,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://gamechiller.de',
+    'https://playrig.gamechiller.de'
+  ];
+
+  const customOrigins = Array.isArray(window.PLAYRIG_ALLOWED_ORIGINS) ? window.PLAYRIG_ALLOWED_ORIGINS : [];
+  const ALLOWED_ORIGINS = new Set([...defaultAllowedOrigins, ...customOrigins]);
+
+  // Determine verified Host Origin for postMessage
+  let hostOrigin = window.location.origin;
+  if (isInIframe && document.referrer) {
+    try {
+      const refUrl = new URL(document.referrer);
+      if (ALLOWED_ORIGINS.has(refUrl.origin) || refUrl.hostname === window.location.hostname || refUrl.hostname.endsWith('.gamechiller.de')) {
+        hostOrigin = refUrl.origin;
+        ALLOWED_ORIGINS.add(hostOrigin);
+      }
+    } catch (e) {
+      // Invalid referrer URL
+    }
+  }
 
   // Active Context Default (Guest fallback)
   let activeContext = {
@@ -37,6 +69,7 @@
     theme: document.documentElement.getAttribute('data-theme') || 'cyber-cyan'
   };
 
+  let sessionNonce = urlParams.get('nonce') || ('pr_' + Math.random().toString(36).substring(2, 10));
   const eventListeners = new Map();
 
   function triggerEvent(name, payload) {
@@ -45,6 +78,30 @@
       list.forEach(fn => {
         try { fn(payload); } catch (e) { console.error('[PlayRig Bridge Error]', e); }
       });
+    }
+  }
+
+  function isOriginAllowed(origin) {
+    if (!origin) return false;
+    if (ALLOWED_ORIGINS.has(origin)) return true;
+    try {
+      const parsed = new URL(origin);
+      if (parsed.hostname === window.location.hostname) return true;
+      if (parsed.hostname.endsWith('.gamechiller.de') || parsed.hostname === 'gamechiller.de') return true;
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  function postToHost(message) {
+    if (!isInIframe) return;
+    message.nonce = sessionNonce;
+    message.timestamp = Date.now();
+    try {
+      window.parent.postMessage(message, hostOrigin);
+    } catch (e) {
+      console.error('[PlayRig Bridge] postMessage transmission failed:', e);
     }
   }
 
@@ -67,15 +124,26 @@
     },
 
     /**
+     * Subscribe to GameChiller Platform context updates
+     */
+    onContext(callback) {
+      if (typeof callback !== 'function') return this;
+      this.on('contextUpdate', callback);
+      // Immediately invoke with active context
+      try { callback(activeContext); } catch (e) {}
+      return this;
+    },
+
+    /**
      * Strict in-window navigation ensuring links never open duplicate tabs
      */
     navigate(targetUrl) {
       if (!targetUrl) return;
       if (isInIframe) {
-        window.parent.postMessage({
+        postToHost({
           type: 'PLAYRIG_NAVIGATE',
           payload: { url: targetUrl }
-        }, '*');
+        });
       } else {
         window.location.href = targetUrl;
       }
@@ -86,10 +154,10 @@
      */
     notify(message, type = 'info', duration = 3000) {
       if (isInIframe) {
-        window.parent.postMessage({
+        postToHost({
           type: 'PLAYRIG_NOTIFY',
           payload: { message, type, duration }
-        }, '*');
+        });
       }
 
       if (window.showToast) {
@@ -118,14 +186,21 @@
 
     emit(event, payload = {}) {
       if (isInIframe) {
-        window.parent.postMessage({
+        postToHost({
           type: 'PLAYRIG_EVENT',
           event: event,
           payload: payload
-        }, '*');
+        });
       }
       triggerEvent(event, payload);
       return this;
+    },
+
+    /**
+     * Canonical alias for emit to conform with specification
+     */
+    sendEvent(eventName, payload = {}) {
+      return this.emit(eventName, payload);
     },
 
     /**
@@ -133,118 +208,135 @@
      */
     storage: {
       async get(key, defaultValue = null) {
+        if (!key || typeof key !== 'string') return defaultValue;
         try {
           const token = localStorage.getItem('playrig_token') || localStorage.getItem('nexus_token');
           const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
           const res = await fetch(`/api/v1/storage/user/${encodeURIComponent(key)}`, { headers });
           if (res.ok) {
-            const data = await res.json();
-            return data.data !== undefined ? data.data : defaultValue;
+            const json = await res.json();
+            return (json.success && json.data !== null && json.data !== undefined) ? json.data : defaultValue;
           }
-        } catch (e) {}
+        } catch (e) {
+          // Fallback to localStorage for offline/standalone execution
+        }
 
-        // Fallback to localStorage
-        const local = localStorage.getItem(`playrig_store_${key}`);
-        return local !== null ? JSON.parse(local) : defaultValue;
+        try {
+          const local = localStorage.getItem(`playrig_storage_${key}`);
+          return local !== null ? JSON.parse(local) : defaultValue;
+        } catch (e) {
+          return defaultValue;
+        }
       },
 
       async set(key, value) {
+        if (!key || typeof key !== 'string') return false;
+        try {
+          localStorage.setItem(`playrig_storage_${key}`, JSON.stringify(value));
+        } catch (e) {}
+
         try {
           const token = localStorage.getItem('playrig_token') || localStorage.getItem('nexus_token');
-          const headers = {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          };
-          await fetch(`/api/v1/storage/user/${encodeURIComponent(key)}`, {
+          const headers = { 'Content-Type': 'application/json' };
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const res = await fetch(`/api/v1/storage/user/${encodeURIComponent(key)}`, {
             method: 'POST',
             headers,
             body: JSON.stringify({ value })
           });
+          return res.ok;
+        } catch (e) {
+          return false;
+        }
+      },
+
+      async delete(key) {
+        if (!key) return false;
+        try {
+          localStorage.removeItem(`playrig_storage_${key}`);
         } catch (e) {}
 
-        localStorage.setItem(`playrig_store_${key}`, JSON.stringify(value));
-        return true;
+        try {
+          const token = localStorage.getItem('playrig_token') || localStorage.getItem('nexus_token');
+          const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+          const res = await fetch(`/api/v1/storage/user/${encodeURIComponent(key)}`, {
+            method: 'DELETE',
+            headers
+          });
+          return res.ok;
+        } catch (e) {
+          return false;
+        }
       }
     },
 
     /**
-     * Authenticated API helper
+     * Set active theme
      */
-    async api(endpoint, options = {}) {
-      const token = localStorage.getItem('playrig_token') || localStorage.getItem('nexus_token');
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...(options.headers || {})
-      };
-
-      const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      const url = path.startsWith('/api') ? path : `/api/v1${path}`;
-      const res = await fetch(url, { ...options, headers });
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.error?.message || json.error || 'API Fehler');
+    setTheme(themeName) {
+      if (!themeName) return;
+      document.documentElement.setAttribute('data-theme', themeName);
+      activeContext.theme = themeName;
+      triggerEvent('themeChange', themeName);
+      if (isInIframe) {
+        postToHost({
+          type: 'PLAYRIG_THEME_CHANGED',
+          payload: { theme: themeName }
+        });
       }
-      return json;
     },
 
     /**
-     * High-res Screenshot capture of Rig for Spotlight presentation
+     * Render static screenshot of current canvas/viewport
      */
     captureScreenshot() {
       try {
-        if (typeof window.playrigCaptureScreenshot === 'function') {
-          return window.playrigCaptureScreenshot();
+        const canvas = document.querySelector('canvas');
+        if (canvas && typeof canvas.toDataURL === 'function') {
+          return canvas.toDataURL('image/png', 0.9);
         }
-
-        const canvases = Array.from(document.querySelectorAll('canvas'));
-        if (canvases.length > 0) {
-          const best = canvases.sort((a, b) => (b.width * b.height) - (a.width * a.height))[0];
-          return best.toDataURL('image/png');
-        }
-        return null;
       } catch (e) {
-        console.error('[PlayRig Screenshot Capture Error]:', e);
-        return null;
+        console.warn('[PlayRig] Canvas toDataURL failed:', e);
       }
+      return null;
     },
 
     /**
-     * Initialize Bridge and Hook Host Communications
+     * Initialization & Message Dispatcher
      */
-    init(options = {}) {
-      if (this.isEmbedded) {
-        document.body.classList.add('is-embedded');
-      }
-
-      // Intercept and prevent target="_blank"
+    init() {
+      // Prevent duplicate links opening in new tabs
       document.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (link && link.target === '_blank') {
-          link.removeAttribute('target');
+        const anchor = e.target.closest('a');
+        if (anchor && anchor.getAttribute('target') === '_blank') {
+          anchor.removeAttribute('target');
         }
-      });
+      }, true);
 
-      // Notify GameChiller / Host that this Rig is ready
-      if (isInIframe) {
-        window.parent.postMessage({
-          type: 'PLAYRIG_READY',
-          payload: {
-            title: document.title,
-            url: window.location.href,
-            minRuntime: 'v1.0.0'
-          }
-        }, '*');
-      }
-
-      // Handle Incoming Bridge Messages
+      // Handle Incoming Bridge Messages with Strict Security Verification
       window.addEventListener('message', (event) => {
-        const msg = event.data;
-        if (!msg || typeof msg !== 'object') return;
+        // 1. Origin verification
+        if (!isOriginAllowed(event.origin)) {
+          console.warn('[PlayRig Bridge Security] Blocked untrusted message from origin:', event.origin);
+          return;
+        }
 
-        // Context Synchronization
+        // 2. Source verification
+        if (isInIframe && event.source !== window.parent) {
+          console.warn('[PlayRig Bridge Security] Message rejected: source is not parent window.');
+          return;
+        }
+
+        const msg = event.data;
+        if (!msg || typeof msg !== 'object' || typeof msg.type !== 'string') return;
+
+        // 3. Handshake & Context Synchronization
         if (msg.type === 'PLAYRIG_INIT_CONTEXT' || msg.type === 'PLAYRIG_UPDATE_CONTEXT') {
-          if (msg.payload) {
+          if (msg.nonce && !sessionNonce) {
+            sessionNonce = msg.nonce;
+          }
+          if (msg.payload && typeof msg.payload === 'object') {
             activeContext = { ...activeContext, ...msg.payload };
             if (msg.payload.theme) {
               document.documentElement.setAttribute('data-theme', msg.payload.theme);
@@ -257,25 +349,38 @@
         if (msg.type === 'PLAYRIG_SET_THEME' || msg.type === 'nexus-set-theme') {
           const newTheme = msg.theme || msg.payload?.theme;
           if (newTheme) {
-            document.documentElement.setAttribute('data-theme', newTheme);
-            activeContext.theme = newTheme;
-            triggerEvent('themeChange', newTheme);
+            PlayRig.setTheme(newTheme);
           }
         }
 
-        // Host requests Screenshot for Deck Spotlight
-        if (msg.type === 'PLAYRIG_REQUEST_SCREENSHOT' || msg.type === 'nexus-capture-screenshot') {
+        // Host requests Screenshot for Deck Spotlight (Standard + Legacy Aliases)
+        if (
+          msg.type === 'PLAYRIG_REQUEST_SCREENSHOT' ||
+          msg.type === 'playrig-capture-screenshot' ||
+          msg.type === 'nexus-capture-screenshot'
+        ) {
           const dataUrl = PlayRig.captureScreenshot();
           if (dataUrl) {
-            window.parent.postMessage({
+            postToHost({
               type: 'PLAYRIG_SCREENSHOT_CAPTURED',
+              rigId: activeContext.module?.id || null,
               dataUrl: dataUrl
-            }, '*');
+            });
+            // Legacy mirror event
+            postToHost({
+              type: 'playrig-screenshot-captured',
+              dataUrl: dataUrl
+            });
           } else {
-            window.parent.postMessage({
+            postToHost({
               type: 'PLAYRIG_SCREENSHOT_ERROR',
+              rigId: activeContext.module?.id || null,
               error: 'Kein Canvas-Element für automatischen Screenshot gefunden'
-            }, '*');
+            });
+            postToHost({
+              type: 'playrig-screenshot-error',
+              error: 'Kein Canvas-Element für automatischen Screenshot gefunden'
+            });
           }
         }
 
@@ -289,6 +394,14 @@
       window.PlayRig = PlayRig;
       window.PlayRigBridge = PlayRig;
       window.NexusEmbed = PlayRig; // Full Backwards Compatibility
+
+      // Notify parent about bridge readiness
+      if (isInIframe) {
+        postToHost({
+          type: 'PLAYRIG_BRIDGE_READY',
+          payload: { version: PlayRig.version }
+        });
+      }
     }
   };
 

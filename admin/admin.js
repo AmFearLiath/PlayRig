@@ -243,7 +243,7 @@
           <td style="text-align:right;">
             <div style="display:inline-flex; gap:6px;">
               <a href="/studio" class="btn btn-primary btn-sm" title="Im Studio bearbeiten">⚡ Studio</a>
-              <a href="/${rig.path}" target="_blank" class="btn btn-ghost btn-sm">↗</a>
+              <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau im selben Fenster">↗</a>
               <button class="btn btn-ghost btn-sm btn-del-rig" data-id="${rig.id}" style="color:var(--rose-400);">✕</button>
             </div>
           </td>

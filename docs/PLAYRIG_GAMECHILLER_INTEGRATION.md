@@ -311,3 +311,4 @@ Es gilt das Prinzip der **strikten Trennung** (§ 13):
 
 - Alle 10 Rigs (`Voxel Sphere Architect`, `Speedrun Splits Tracker`, `Enshrouded Save Editor`, `Celestial Gravity Sandbox`, `RPG Dice Loot Vault`, `Crosshair Scope Lab`, `Cyber Matrix Rain Lab`, `Particle Gravity Vortex`, `Glassmorphism Beam Studio`, `Audio Reactive Ribbon`) sind vollständig in die neue Registry und API v1 eingebunden.
 - In-Window Navigation und Deck Spotlight Screenshot-Rendering sind vollständig verifiziert.
+

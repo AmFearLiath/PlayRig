@@ -9,7 +9,7 @@
 [![Copyright](https://img.shields.io/badge/Copyright-GameChiller-a855f7?style=for-the-badge)](https://github.com/AmFearLiath)
 [![License](https://img.shields.io/badge/License-Proprietary%20%2F%20All%20Rights%20Reserved-ef4444?style=for-the-badge)](LICENSE.md)
 [![Database](https://img.shields.io/badge/Database-MySQL%20(Port%203307)-38bdf8?style=for-the-badge)](server/db.js)
-[![Docs](https://img.shields.io/badge/Handbook-GameChiller%20Integration-10b981?style=for-the-badge)](docs/PLAYRIG_GAMECHILLER_INTEGRATION.md)
+[![Docs](https://img.shields.io/badge/Docs-Zentrale%20Dokumentation-10b981?style=for-the-badge)](docs/README.md)
 
 <p align="center">
   <i>Eine moderne, autarke Plattform zur Erstellung, Katalogisierung, Ausführung und Einbettung von interaktiven Web-Tools, Gaming-Editoren, Canvas-Shadern und prozeduralen Generatoren – vollintegriert in das GameChiller-Ökosystem.</i>
@@ -17,7 +17,9 @@
 
 [✨ Features](#-features) •
 [🕹️ Rig Katalog](#-rig-katalog) •
+[📚 Zentrale Dokumentation](docs/README.md) •
 [🏗️ Architektur & GameChiller Integration](docs/PLAYRIG_GAMECHILLER_INTEGRATION.md) •
+[🛠️ API-Referenz (v1)](docs/API_REFERENCE.md) •
 [🚀 Installation](#-installation--schnellstart) •
 [📜 Lizenz](#-lizenz)
 

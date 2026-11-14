@@ -1,0 +1,210 @@
+# 🛠️ PlayRig API v1 – Technische Referenz
+
+**Basis-URL:** `/api/v1`  
+**Spezifikations-Version:** v1.0.0  
+**Status:** Aktiv & Produktion  
+**Autor:** Liath • **Copyright:** © GameChiller  
+
+---
+
+## 1. Allgemeines & Standard-Envelope
+
+Alle Endpunkte antworten im einheitlichen JSON-Envelope-Format:
+
+### Erfolgreiche Antwort (HTTP 200 / 201)
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "version": "v1.0.0",
+    "timestamp": "2026-11-14T03:00:00.000Z"
+  }
+}
+```
+
+### Fehlerhafte Antwort (HTTP 400 / 401 / 403 / 404 / 413 / 500)
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Menschenlesbare Fehlerbeschreibung"
+  },
+  "meta": {
+    "timestamp": "2026-11-14T03:00:00.000Z"
+  }
+}
+```
+
+---
+
+## 2. Authentifizierungsverfahren
+
+Die API unterstützt zwei sichere Authentifizierungsmechanismen:
+
+1. **User Bearer Token (GameChiller Benutzer):**
+   ```http
+   Authorization: Bearer <session_token>
+   ```
+2. **API-Client Key (Autorisierte GameChiller-Komponenten & Services):**
+   ```http
+   X-API-Key: <client_api_key>
+   ```
+3. **Gastmodus (Fallback):**
+   Werden keine Authentifizierungs-Header mitgesendet, weist das System automatisch eine temporäre Gast-Identität (`role: "guest"`, `scopes: ["rigs:read", "storage:session"]`) zu.
+
+---
+
+## 3. Endpunkt-Übersicht
+
+### 3.1 Authentifizierung & Kontext (`/api/v1/auth`)
+
+#### `GET /api/v1/auth/me`
+Liefert das Profil und die Scopes des aktuell authentifizierten Benutzers.
+- **Erforderliche Scopes:** `public` (oder Bearer Token)
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "liath",
+    "displayName": "Liath",
+    "role": "admin",
+    "scopes": ["*"],
+    "isGuest": false
+  }
+}
+```
+
+#### `GET /api/v1/auth/guest`
+Erzeugt eine signierte Gast-Session mit temporärem Token.
+- **Response (200 OK):** Liefert Gast-Identität und Bearer Token.
+
+#### `GET /api/v1/auth/context`
+Liefert den vollständigen GameChiller Plattform-Kontext (Benutzer, Community, Server, Modul, Theme).
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": { "id": "guest", "displayName": "Gastspieler", "isGuest": true },
+    "community": { "id": "c-gamechiller-01", "name": "GameChiller Network" },
+    "game": { "id": "enshrouded", "title": "Enshrouded" },
+    "theme": "cyber-cyan"
+  }
+}
+```
+
+#### `POST /api/v1/auth/login`
+Authentifiziert einen bestehenden Benutzer.
+- **Body:** `{ "username": "...", "password": "..." }`
+- **Response (200 OK):** Enthält `token`, `user` und `expiresIn`.
+
+#### `POST /api/v1/auth/register`
+Registriert einen neuen Benutzer. Neue Konten erhalten standardmäßig die reguläre Rolle `user`.
+- **Body:** `{ "username": "...", "password": "...", "displayName": "..." }`
+- **Response (201 Created):** `{ "success": true, "data": { "token": "...", "user": { "role": "user" } } }`
+
+---
+
+### 3.2 Rig-Verwaltung (`/api/v1/rigs`)
+
+#### `GET /api/v1/rigs`
+Ruft alle registrierten Rigs ab (mit Filtermöglichkeiten).
+- **Query-Parameter:**
+  - `category` (z. B. `gaming`, `animations`)
+  - `search` (Suchbegriff)
+  - `status` (`active`, `wip`, `deprecated`)
+- **Response (200 OK):** Array aller Rig-Objekte inklusive Metadaten und `hasStandaloneDocs`.
+
+#### `GET /api/v1/rigs/:id`
+Ruft Detaildaten eines einzelnen Rigs ab.
+- **Response (200 OK):** Vollständiges Rig-Manifest aus der Datenbank.
+
+#### `GET /api/v1/rigs/:id/docs`
+Ruft die autonome Standalone-Dokumentation (`docs.json`) des Rigs ab.
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "voxel-sphere-architect",
+    "name": "Minecraft Voxel Sphere Architect",
+    "version": "v1.0.0",
+    "features": [...],
+    "permissions": ["rigs:read", "storage:user"],
+    "faq": [...]
+  }
+}
+```
+
+#### `GET /api/v1/rigs/:id/screenshot`
+Liefert das geprüfte Preview-Bild des Rigs als Binärdatei (`image/png`).
+- **Response (200 OK):** Bildinhalt (`Content-Type: image/png`). Bei fehlendem Bild greift ein SVG-Fallback.
+
+#### `POST /api/v1/rigs/status`
+Aktualisiert den Status eines Rigs (`active`, `wip`, `deprecated`).
+- **Berechtigung:** Erfordert Rolle `admin` oder `creator` (Eigentümer).
+- **Body:** `{ "id": "rig-id", "status": "deprecated" }`
+
+---
+
+### 3.3 Scoped Storage Engine (`/api/v1/storage`)
+
+Alle Storage-Keys und IDs müssen dem Schema `^[a-zA-Z0-9_.-]{1,128}$` entsprechen.
+
+#### `GET /api/v1/storage/user/:key`
+Liest eine Einstellung des aktuell authentifizierten Benutzers (oder Gastes).
+
+#### `POST /api/v1/storage/user/:key`
+Speichert eine Einstellung für den aktuellen Benutzer.
+- **Body:** `{ "value": { ... beliebige JSON-Daten ... } }`
+- **Limit:** Max. 5 MB pro Wert.
+
+#### `DELETE /api/v1/storage/user/:key`
+Löscht einen Eintrag des aktuellen Benutzers.
+
+#### `GET /api/v1/storage/rig/:rigId/:key`
+Liest rig-spezifische Konfigurationen.
+
+#### `POST /api/v1/storage/rig/:rigId/:key`
+Schreibt rig-spezifische Konfigurationen.
+- **Berechtigung:** Nur der **Eigentümer des Rigs** oder ein **Administrator** darf schreiben. Unberechtigte Aufrufe werden mit HTTP 403 abgewiesen und im Audit-Log vermerkt.
+
+#### `GET /api/v1/storage/global/:key`
+Liest plattformweite Konfigurationen (erfordert Scope `storage:global:read` oder Admin).
+
+#### `POST /api/v1/storage/global/:key`
+Schreibt plattformweite Konfigurationen.
+- **Berechtigung:** Ausschließlich Rolle `admin`.
+
+---
+
+### 3.4 Companion Services (`/api/v1/services`)
+
+#### `GET /api/v1/services`
+Liefert die Liste aller registrierten Backend-Companion-Services (z. B. `enshrouded`).
+
+#### `GET /api/v1/services/:id/status`
+Prüft den Health-Status des entsprechenden Companion-Services.
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "enshrouded",
+    "name": "Enshrouded Save & Character Engine",
+    "status": "healthy",
+    "version": "v1.1.0"
+  }
+}
+```
+
+---
+
+### 3.5 Spezifikation (`/api/v1/docs`)
+
+#### `GET /api/v1/docs`
+Gibt das vollständige, maschinenlesbare OpenAPI-Schema der PlayRig-API zurück.

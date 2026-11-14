@@ -967,6 +967,24 @@ async function deleteStorageEntry(scope, key, userId = null, rigId = null) {
   return true;
 }
 
+async function getClientByApiKey(apiKey) {
+  if (!apiKey) return null;
+  try {
+    const [rows] = await pool.query(
+      'SELECT client_id, client_secret, name, scopes, status FROM gamechiller_clients WHERE (client_secret = ? OR client_id = ?) AND status = "active"',
+      [apiKey, apiKey]
+    );
+    if (rows.length === 0) return null;
+    const client = rows[0];
+    return {
+      ...client,
+      scopes: typeof client.scopes === 'string' ? JSON.parse(client.scopes) : (client.scopes || [])
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 async function updateRigScreenshot(id, screenshotPath) {
   await pool.query('UPDATE rigs SET screenshot = ?, thumbnail = ? WHERE id = ?', [screenshotPath, screenshotPath, id]);
   return getRigById(id);
@@ -983,6 +1001,7 @@ async function updateRigStatus(id, status) {
 module.exports = {
   init,
   authenticate,
+  getClientByApiKey,
   getUserByToken,
   logout,
   registerUser,

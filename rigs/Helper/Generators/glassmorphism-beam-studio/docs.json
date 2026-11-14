@@ -36,3 +36,4 @@
   ],
   "notes": "Der Kantenstrahl nutzt hardwarebeschleunigte CSS-Interpolation für ruckelfreie 60 FPS."
 }
+

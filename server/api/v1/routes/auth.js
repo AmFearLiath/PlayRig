@@ -128,7 +128,7 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    await db.registerUser(username, displayName || username, password, 'creator');
+    await db.registerUser(username, displayName || username, password, 'user');
     const auth = await db.authenticate(username, password);
     res.status(201).json({
       success: true,
