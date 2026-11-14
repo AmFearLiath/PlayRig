@@ -38,7 +38,9 @@ const DB_CONFIG = {
   database: process.env.DB_NAME || 'playrig_db',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000
 };
 
 let pool = null;
@@ -59,6 +61,9 @@ async function init() {
     await adminConn.end();
 
     pool = mysql.createPool(DB_CONFIG);
+    pool.on('error', (err) => {
+      console.warn('[PlayRig DB Pool] Connection warning/error abgefangen:', err.code || err.message);
+    });
 
     // Create Tables
     await pool.query(`
