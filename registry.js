@@ -314,6 +314,31 @@ window.PLAYRIG_REGISTRY = [
     ],
     embedSupported: true
   }
+
+  {
+    id: "settlement-generator",
+    title: "Settlement Generator",
+    category: "Dev Lab & Showcase",
+    subcategory: "World Editor",
+    difficulty: "pro",
+    difficultyLabel: "World Editor",
+    difficultyColor: "cyan",
+    icon: "map",
+    description: "Eigenständiger World-Editor mit Azgaar Full JSON Import, gemeinsamem World Core, interaktiver 2D-Kartenansicht und Dateninspektor.",
+    path: "rigs/Dev Lab & Showcase/World Editor/Settlement Generator/index.html",
+    thumbnail: "",
+    author: "Liath",
+    copyright: "© GameChiller",
+    version: "v0.1.0",
+    featured: 1,
+    stars: 0,
+    views: 0,
+    forks: 0,
+    tags: ["World Editor", "Azgaar", "Fantasy Map", "World Core", "Settlement", "2D Map"],
+    techStack: ["Vanilla JavaScript ES Modules", "HTML5 Canvas 2D", "PlayRig World Core"],
+    features: ["Azgaar Full JSON Import", "Source-agnostic World Core", "Interaktive Weltkarte mit Zoom, Pan und Zellenauswahl", "Biome-, Höhen- und politische Layer", "World Inspector und Projekt-Export"],
+    embedSupported: true
+  },
 ];
 
 window.NEXUS_REGISTRY = window.PLAYRIG_REGISTRY;
