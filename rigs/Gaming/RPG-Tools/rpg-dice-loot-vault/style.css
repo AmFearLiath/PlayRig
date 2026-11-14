@@ -152,7 +152,8 @@ body {
   transform: translateY(-2px);
 }
 
-.dice-select-btn.active {
+.dice-select-btn.active,
+.dice-select-btn.active-d20 {
   background: rgba(245, 158, 11, 0.2);
   border-color: var(--gold-400);
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);

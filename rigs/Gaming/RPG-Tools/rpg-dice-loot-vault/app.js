@@ -790,9 +790,9 @@
   // --- UI Event Listeners ---
   document.querySelectorAll('.dice-select-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.dice-select-btn').forEach(b => b.classList.remove('active-d20', 'active-die'));
+      document.querySelectorAll('.dice-select-btn').forEach(b => b.classList.remove('active-d20', 'active', 'active-die'));
       const target = e.currentTarget;
-      target.classList.add('active-die');
+      target.classList.add('active');
       selectedSides = parseInt(target.dataset.sides, 10);
       playTickSound(1.2);
       rollDice();
@@ -839,6 +839,10 @@
 
   // Template Download
   document.getElementById('btn-download-loot-template')?.addEventListener('click', downloadLootTemplate);
+  document.getElementById('btn-clear-log')?.addEventListener('click', () => {
+    const list = document.getElementById('roll-history-list');
+    if (list) list.innerHTML = '';
+  });
 
   // Modal open/close
   const importModal = document.getElementById('loot-import-modal');
@@ -902,18 +906,31 @@
 
   window.addEventListener('resize', resizeCanvas);
 
-  // Initial Setup with small delay to ensure layout is computed
-  window.addEventListener('DOMContentLoaded', () => {
+  // Bulletproof initialization (handles normal, deferred, and iframe execution)
+  let initialized = false;
+  function init() {
+    if (initialized) return;
+    initialized = true;
     resizeCanvas();
-    animate();
-    rollDice();
-  });
+    if (!animFrameId) {
+      animate();
+    }
+    if (activeDice.length === 0) {
+      rollDice();
+    }
+  }
 
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Backup layout settling pass
   setTimeout(() => {
     resizeCanvas();
     if (activeDice.length === 0) {
-      animate();
       rollDice();
     }
-  }, 100);
+  }, 120);
 })();
