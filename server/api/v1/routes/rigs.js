@@ -661,4 +661,27 @@ router.post('/import-zip', requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/v1/rigs/sync - Synchronize Rigs on disk with database
+router.post('/sync', requireAuth, async (req, res) => {
+  try {
+    const result = await db.syncRigsFromDisk();
+    await db.logAudit?.(
+      req.user.id,
+      req.user.username,
+      'RIGS_DISK_SYNC',
+      `Rig-Katalog synchronisiert: ${result.scanned} Rigs gescannt, ${result.newlyRegistered.length} neu registriert.`
+    );
+    res.json({
+      success: true,
+      data: result,
+      meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 'SYNC_ERROR', message: 'Fehler beim Synchronisieren des Rig-Katalogs: ' + err.message }
+    });
+  }
+});
+
 module.exports = router;

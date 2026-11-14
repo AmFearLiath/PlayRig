@@ -381,7 +381,17 @@
 
     // Filter by Category
     if (currentCategory !== 'all') {
-      list = list.filter(r => r.category.toLowerCase() === currentCategory.toLowerCase());
+      list = list.filter(r => {
+        const rCat = (r.category || '').toLowerCase().trim();
+        const curCat = currentCategory.toLowerCase().trim();
+        if (rCat === curCat) return true;
+        if (curCat === 'dev-lab' && (rCat === 'dev lab & showcase' || rCat.includes('dev') || rCat.includes('lab'))) return true;
+        if (curCat === 'gaming' && (rCat.includes('game') || rCat.includes('play'))) return true;
+        if (curCat === 'animations' && rCat.includes('anim')) return true;
+        if (curCat === 'creative' && (rCat.includes('creat') || rCat.includes('art'))) return true;
+        if (curCat === 'helper' && (rCat.includes('help') || rCat.includes('util'))) return true;
+        return false;
+      });
     }
 
     // Filter by Search Query

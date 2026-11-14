@@ -62,7 +62,7 @@ PlayRig verfügt über eine umfassende, interaktive Dokumentations-Zentrale. Du 
 
 ## 🕹️ Live Flagship Rigs
 
-PlayRig wird mit 11 einsatzbereiten, hochkarätigen Rigs ausgeliefert:
+PlayRig wird mit 12 einsatzbereiten, hochkarätigen Rigs ausgeliefert:
 
 ```
 rigs/
@@ -79,6 +79,8 @@ rigs/
 │   └── Particles-FX/Particle-Gravity-Vortex/ ➜ 1.500 Partikel Orbit-Physik bei stabilen 60 FPS
 ├── Creative/
 │   └── Audio-Visual/audio-reactive-ribbon/   ➜ 3D Synthwave Audio-Visualizer mit FFT-Analyse
+├── Dev Lab & Showcase/
+│   └── World Editor/Settlement Generator/    ➜ World-Editor mit Azgaar Full JSON Import, World Core & 2D Map
 └── Helper/
     └── Generators/glassmorphism-beam-studio/ ➜ Rotierende CSS-Border-Beams & Glass-Generator
 ```

@@ -250,6 +250,22 @@ Unterstützt wahlweise das **Erstellen eines neuen Rigs** oder das **Aktualisier
 }
 ```
 
+#### `POST /api/v1/rigs/sync`
+Durchsucht das `rigs/`-Verzeichnis rekursiv nach neu hinzugefügten oder per Git/Autoupdate gezogenen Rigs und synchronisiert diese automatisch in die MySQL-Datenbank.
+- **Berechtigung:** Erfordert Rolle `creator` oder `admin`.
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "scanned": 12,
+    "newlyRegistered": ["settlement-generator"],
+    "updated": []
+  },
+  "meta": { "version": "v1.0.0", "timestamp": "2026-11-14T12:00:00.000Z" }
+}
+```
+
 ---
 
 ### 3.3 Scoped Storage Engine (`/api/v1/storage`)

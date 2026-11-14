@@ -2,45 +2,71 @@
   "$schema": "https://playrig.gamechiller.de/schemas/rig-docs-v1.json",
   "id": "emergence-laboratory",
   "name": "Emergence Laboratory",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "author": "Liath",
   "copyright": "© GameChiller",
-  "overview": "Ein interaktives Forschungslabor für zelluläre Automaten. Untersuche, wie aus lokalen Regeln globale Muster, Replikation, Oszillation und Stillstand entstehen.",
+  "overview": "Ein modulares Labor für künstliches Leben und evolvierende Ökosysteme. Beobachte Populationen, verändere Umweltbedingungen, untersuche genetische Anpassung und führe experimentell veränderte Proben in die Welt zurück.",
   "features": [
-    "Conway's Game of Life und fünf weitere etablierte Regelsets",
-    "Konfigurierbare B/S-Regeln mit Moore-Nachbarschaft",
-    "Deterministische Seeds für reproduzierbare Initialzustände",
-    "Interaktive Zellmalerei, Löschwerkzeug, feste Hindernisse und Zellinspektion",
-    "Simulation mit 1 bis 120 Generationen pro Sekunde und Einzelschritten",
-    "Populations-, Geburts-, Sterbe- und Entropiemessung",
-    "Dichte-, Alters- und Aktivitätsvisualisierung",
-    "Mutationsparameter und Stabilitäts-Stopp",
-    "Experiment-Snapshots und JSON-Export"
+    "Umschaltbarer Modus für klassische zelluläre Automaten mit benutzerdefinierten B/S-Regeln",
+    "Vollflächige Ökosystem-Simulation mit Produzenten, Konsumenten, Räubern und Zersetzern",
+    "Optimierter räumlicher Positionsindex für direkte Feldabfragen und lokale Organismensuche",
+    "Einstellbare Populationsobergrenze bis zur Kapazität der Welt, ohne bestehende Organismen zu entfernen",
+    "Individuelle Organismen mit vererbbaren genetischen Merkmalen und Abstammungsinformationen",
+    "Mutation, Vererbung, Fortpflanzung und natürliche Selektion durch Umweltbedingungen",
+    "Lokale und globale Umweltbedingungen: Temperatur, Licht, Wasser, Nährstoffe und Toxizität",
+    "Durchlässige, undurchdringbare und selektive Barrieren",
+    "Interaktives Einsetzen, Auswählen und Entfernen von Organismen",
+    "Experimentallabor mit Probenarchiv, Genom-Editor und isolierten Kulturen",
+    "Laborversuche mit veränderbaren Bedingungen und kontrolliertem Mutationsdruck",
+    "Rückführung einzelner Versuchsergebnisse oder kleiner Populationen in die Welt",
+    "Populationsanalyse, genetische Varianz und Evolutionshistorie",
+    "Verschiebbare, minimierbare und größenveränderbare Arbeitsfenster",
+    "Lokale Speicherung sowie JSON-Import und -Export von Welten und Experimenten"
   ],
   "controls": [
     {
+      "key": "Simulationsmodell",
+      "action": "Zwischen evolvierendem Ökosystem und klassischem zellulärem Automaten wechseln"
+    },
+    {
       "key": "Start / Pause",
-      "action": "Simulation starten oder anhalten"
+      "action": "Ökosystem-Simulation starten oder anhalten"
     },
     {
       "key": "Step",
-      "action": "Genau eine Generation berechnen"
+      "action": "Genau einen Simulationsschritt ausführen"
+    },
+    {
+      "key": "Maximale Population",
+      "action": "Die Obergrenze für neue Geburten und eingesetzte Organismen einstellen; bestehende Organismen bleiben erhalten"
+    },
+    {
+      "key": "Footer-Geschwindigkeit",
+      "action": "Simulationsgeschwindigkeit von 1 bis 30 Ticks pro Sekunde einstellen"
+    },
+    {
+      "key": "Leben-Menü",
+      "action": "Organismen auswählen, einsetzen, inspizieren und Proben entnehmen"
+    },
+    {
+      "key": "Umwelt-Menü",
+      "action": "Temperatur, Licht, Wasser, Nährstoffe und Toxizität verändern"
+    },
+    {
+      "key": "Strukturen-Menü",
+      "action": "Durchlässige, undurchdringbare oder selektive Barrieren zeichnen"
+    },
+    {
+      "key": "Labor-Menü",
+      "action": "Proben kultivieren, Genommerkmale verändern und Ergebnisse zurückführen"
     },
     {
       "key": "Maus ziehen",
-      "action": "Zellen zeichnen, löschen oder Hindernisse setzen"
+      "action": "Ausgewähltes Werkzeug im Simulationsfeld anwenden"
     },
     {
-      "key": "Brush",
-      "action": "Pinselgröße ändern"
-    },
-    {
-      "key": "Reset",
-      "action": "Feld leeren und Zähler zurücksetzen"
-    },
-    {
-      "key": "Seed",
-      "action": "Reproduzierbaren Zufallszustand erzeugen"
+      "key": "JSON Import / Export",
+      "action": "Weltzustand, Proben und Experimente übertragen"
     }
   ],
   "permissions": [
@@ -49,12 +75,29 @@
   ],
   "faq": [
     {
-      "q": "Ist das eine biologische Simulation?",
-      "a": "Nein. Das Rig simuliert mathematische zelluläre Automaten. Die Zustände sind abstrakte Modellzustände und keine biologischen Zellen."
+      "q": "Ist das eine vollständige biologische Simulation?",
+      "a": "Nein. Emergence Laboratory verwendet ein vereinfachtes, wissenschaftlich inspiriertes Modell. Es bildet ausgewählte ökologische und evolutionäre Prinzipien ab, aber keine vollständige Biochemie oder reale biologische Komplexität."
     },
     {
-      "q": "Was bedeutet B3/S23?",
-      "a": "Eine tote Zelle wird bei genau drei lebenden Nachbarn geboren (B3). Eine lebende Zelle überlebt bei zwei oder drei lebenden Nachbarn (S23)."
+      "q": "Wie entsteht Evolution?",
+      "a": "Organismen besitzen vererbbare Eigenschaften. Zufällige Mutationen verändern gelegentlich diese Merkmale. Umweltbedingungen beeinflussen Überleben und Fortpflanzung, wodurch bestimmte Varianten über Generationen häufiger werden können."
+    },
+    {
+      "q": "Verändert eine Probe die ursprüngliche Welt?",
+      "a": "Nein. Eine entnommene Probe wird im Labor unabhängig untersucht. Erst wenn ein Ergebnis ausdrücklich zurückgeführt wird, werden neue Organismen in der Welt erzeugt."
+    },
+    {
+      "q": "Was bewirken die Barrieren?",
+      "a": "Durchlässige Barrieren verlangsamen die Bewegung, undurchdringbare Barrieren blockieren Organismen und selektive Barrieren lassen nur Produzenten und Zersetzer passieren."
+    },
+    {
+      "q": "Wo werden Daten gespeichert?",
+      "a": "Der aktuelle Weltzustand und Experimente werden lokal im Browser gespeichert. JSON-Export und -Import ermöglichen die Übertragung zwischen Installationen."
     }
-  ]
+  ],
+  "security": {
+    "score": 100,
+    "inspectedAt": "2026-11-14T10:51:55.692Z",
+    "status": "passed"
+  }
 }

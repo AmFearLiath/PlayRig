@@ -313,8 +313,38 @@ window.PLAYRIG_REGISTRY = [
       "Atmosphärischer, prozeduraler Cosmic Space Drone via Web Audio API"
     ],
     embedSupported: true
-  }
-
+  },
+  {
+    id: "emergence-laboratory",
+    title: "Emergence Laboratory",
+    category: "Animations",
+    subcategory: "Emergence",
+    difficulty: "pro",
+    difficultyLabel: "Forschungslabor",
+    difficultyColor: "cyan",
+    icon: "sparkles",
+    description: "Ein interaktives Forschungslabor für zelluläre Automaten und emergente Systeme. Conway's Game of Life, HighLife, Seeds, Day & Night, Brian's Brain, Anneal, Entropie-Messung und Snapshot-Export.",
+    path: "rigs/Animations/Emergence/Emergence-Laboratory/index.html",
+    thumbnail: "/rigs/Animations/Emergence/Emergence-Laboratory/thumbnail.png",
+    author: "Liath",
+    copyright: "© GameChiller",
+    version: "v1.0.0",
+    featured: 1,
+    stars: 68,
+    views: 210,
+    forks: 16,
+    tags: ["Cellular-Automata", "Game-of-Life", "Emergence", "Simulation", "Science", "Canvas2D", "Entropy", "Export"],
+    techStack: ["Cellular Automata Engine", "Shannon Entropy", "HTML5 Canvas 2D", "PlayRig Core"],
+    features: [
+      "Conway's Game of Life und fünf weitere etablierte Regelsets",
+      "Konfigurierbare B/S-Regeln mit Moore-Nachbarschaft",
+      "Deterministische Seeds für reproduzierbare Initialzustände",
+      "Populations-, Geburts-, Sterbe- und Entropiemessung",
+      "Dichte-, Alters- und Aktivitätsvisualisierung",
+      "Experiment-Snapshots und JSON-Export"
+    ],
+    embedSupported: true
+  },
   {
     id: "settlement-generator",
     title: "Settlement Generator",
@@ -326,7 +356,7 @@ window.PLAYRIG_REGISTRY = [
     icon: "map",
     description: "Eigenständiger World-Editor mit Azgaar Full JSON Import, gemeinsamem World Core, interaktiver 2D-Kartenansicht und Dateninspektor.",
     path: "rigs/Dev Lab & Showcase/World Editor/Settlement Generator/index.html",
-    thumbnail: "",
+    thumbnail: "/rigs/Dev Lab & Showcase/World Editor/Settlement Generator/thumbnail.png",
     author: "Liath",
     copyright: "© GameChiller",
     version: "v0.1.0",
@@ -338,7 +368,7 @@ window.PLAYRIG_REGISTRY = [
     techStack: ["Vanilla JavaScript ES Modules", "HTML5 Canvas 2D", "PlayRig World Core"],
     features: ["Azgaar Full JSON Import", "Source-agnostic World Core", "Interaktive Weltkarte mit Zoom, Pan und Zellenauswahl", "Biome-, Höhen- und politische Layer", "World Inspector und Projekt-Export"],
     embedSupported: true
-  },
+  }
 ];
 
 window.NEXUS_REGISTRY = window.PLAYRIG_REGISTRY;

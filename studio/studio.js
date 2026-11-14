@@ -1501,6 +1501,25 @@
     }
   }
 
+  async function syncRigsFromDisk() {
+    try {
+      window.showToast('Scanne Ordner rigs/ auf Festplatte...', 'info');
+      const res = await api('/rigs/sync', { method: 'POST' });
+      const data = res.data || res;
+      const count = data.newlyRegistered?.length || 0;
+      const scanned = data.scanned || 0;
+      if (count > 0) {
+        window.showToast(`Erfolg: ${scanned} Rigs gescannt, ${count} neue Rigs registriert (${data.newlyRegistered.join(', ')})!`, 'success');
+      } else {
+        window.showToast(`Katalog ist aktuell (${scanned} Rigs auf Festplatte geprüft, keine neuen).`, 'info');
+      }
+      await loadMyTools();
+      await loadDashboard();
+    } catch (err) {
+      window.showToast('Fehler bei Festplatten-Synchronisation: ' + err.message, 'error');
+    }
+  }
+
   window.switchView = switchView;
   window.openRigEditor = openRigEditor;
   window.setImporterTab = setImporterTab;
@@ -1509,6 +1528,7 @@
   window.onTargetRigSelected = onTargetRigSelected;
   window.openStudioPushRigModal = openStudioPushRigModal;
   window.closeStudioPushRigModal = closeStudioPushRigModal;
+  window.syncRigsFromDisk = syncRigsFromDisk;
 
   document.addEventListener('DOMContentLoaded', init);
 })();

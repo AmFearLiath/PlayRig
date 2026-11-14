@@ -183,7 +183,12 @@ class PlayRigUpdater {
         logs.push(`[${new Date().toLocaleTimeString()}] Synchronisiere MySQL-Datenbank & Rigs...`);
         try {
           await db.init();
-          logs.push(`[${new Date().toLocaleTimeString()}] Datenbank-Migrationen & Rigs erfolgreich synchronisiert.`);
+          if (typeof db.syncRigsFromDisk === 'function') {
+            const syncRes = await db.syncRigsFromDisk();
+            logs.push(`[${new Date().toLocaleTimeString()}] Rig-Katalog synchronisiert: ${syncRes.scanned} Rigs geprüft, ${syncRes.newlyRegistered.length} neu registriert (${syncRes.newlyRegistered.join(', ') || 'alle aktuell'}).`);
+          } else {
+            logs.push(`[${new Date().toLocaleTimeString()}] Datenbank-Migrationen & Rigs erfolgreich synchronisiert.`);
+          }
         } catch (dbErr) {
           logs.push(`[${new Date().toLocaleTimeString()}] Hinweis DB-Sync: ${dbErr.message}`);
         }

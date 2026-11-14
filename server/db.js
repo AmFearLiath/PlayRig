@@ -1,5 +1,7 @@
 // PlayRig Database Layer - MySQL (Port 3307)
 // Powered by mysql2/promise
+const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
 
@@ -647,6 +649,49 @@ async function seedInitialData() {
     JSON.stringify({ defaultTheme: 'cyber-cyan' })
   ]);
 
+  // Seed Settlement Generator
+  await pool.query(`
+    INSERT INTO rigs (
+      id, title, description, category, subcategory, path,
+      version, author, copyright, icon, color, tags, status, access,
+      original_author, views, stars, forks, featured, thumbnail, settings
+    ) VALUES (
+      'settlement-generator',
+      'Settlement Generator',
+      'Eigenständiger World-Editor mit Azgaar Full JSON Import, gemeinsamem World Core, interaktiver 2D-Kartenansicht und Dateninspektor.',
+      'dev-lab',
+      'World Editor',
+      'rigs/Dev Lab & Showcase/World Editor/Settlement Generator/index.html',
+      'v0.1.0',
+      'Liath',
+      '© GameChiller',
+      'map',
+      '#00e5ff',
+      ?,
+      'active',
+      'public',
+      'Liath',
+      85,
+      24,
+      5,
+      1,
+      '/rigs/Dev Lab & Showcase/World Editor/Settlement Generator/thumbnail.png',
+      ?
+    )
+    ON DUPLICATE KEY UPDATE
+      title = 'Settlement Generator',
+      category = 'dev-lab',
+      subcategory = 'World Editor',
+      path = 'rigs/Dev Lab & Showcase/World Editor/Settlement Generator/index.html',
+      thumbnail = '/rigs/Dev Lab & Showcase/World Editor/Settlement Generator/thumbnail.png',
+      version = 'v0.1.0',
+      author = 'Liath',
+      copyright = '© GameChiller'
+  `, [
+    JSON.stringify(['World Editor', 'Azgaar', 'Fantasy Map', 'World Core', 'Settlement', '2D Map']),
+    JSON.stringify({ defaultTheme: 'cyber-cyan' })
+  ]);
+
   // Fix any legacy path referencing 'projects/Gaming' and set default thumbnails
   await pool.query(`
     UPDATE rigs 
@@ -659,6 +704,146 @@ async function seedInitialData() {
     SET thumbnail = '/rigs/Animations/Particles-FX/Particle-Gravity-Vortex/thumbnail.png'
     WHERE id = 'particle-gravity-vortex'
   `);
+
+  // Run automatic filesystem discovery to synchronize any other pulled/existing rigs on disk
+  await syncRigsFromDisk();
+}
+
+/**
+ * Automatically discovers, validates and registers all Rigs found in the rigs/ directory
+ */
+async function syncRigsFromDisk() {
+  const rigsBaseDir = path.resolve(__dirname, '..', 'rigs');
+  if (!fs.existsSync(rigsBaseDir)) {
+    return { scanned: 0, newlyRegistered: [], updated: [] };
+  }
+
+  // Load registry.js for rich metadata enrichment if available
+  const registryMap = new Map();
+  try {
+    const regFile = path.resolve(__dirname, '..', 'registry.js');
+    if (fs.existsSync(regFile)) {
+      const regContent = fs.readFileSync(regFile, 'utf8');
+      const match = regContent.match(/window\.PLAYRIG_REGISTRY\s*=\s*(\[[\s\S]*?\]);/);
+      if (match) {
+        const items = new Function('return ' + match[1])();
+        for (const item of items) {
+          if (item.id) registryMap.set(item.id.toLowerCase(), item);
+          if (item.path) registryMap.set(item.path.toLowerCase().replace(/\\/g, '/'), item);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[Rig Sync] Hinweis beim Lesen von registry.js:', e.message);
+  }
+
+  function findRigFolders(dir) {
+    const results = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const hasIndex = entries.some(e => e.isFile() && e.name.toLowerCase() === 'index.html');
+    if (hasIndex) {
+      results.push(dir);
+      return results;
+    }
+    for (const e of entries) {
+      if (e.isDirectory()) {
+        results.push(...findRigFolders(path.join(dir, e.name)));
+      }
+    }
+    return results;
+  }
+
+  const rigFolders = findRigFolders(rigsBaseDir);
+  const newlyRegistered = [];
+  const updated = [];
+
+  for (const rigDir of rigFolders) {
+    try {
+      const relPath = path.relative(path.resolve(__dirname, '..'), path.join(rigDir, 'index.html')).replace(/\\/g, '/');
+      const folderName = path.basename(rigDir);
+      
+      // Read docs.json if present
+      let docs = {};
+      const docsFile = path.join(rigDir, 'docs.json');
+      if (fs.existsSync(docsFile)) {
+        try {
+          docs = JSON.parse(fs.readFileSync(docsFile, 'utf8'));
+        } catch (e) {}
+      }
+
+      // Check thumbnail
+      let thumbPath = null;
+      if (fs.existsSync(path.join(rigDir, 'thumbnail.png'))) {
+        thumbPath = '/' + path.relative(path.resolve(__dirname, '..'), path.join(rigDir, 'thumbnail.png')).replace(/\\/g, '/');
+      }
+
+      // Determine ID
+      let id = docs.id || folderName.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+      // Cross-reference registry
+      const regMatch = registryMap.get(id.toLowerCase()) || registryMap.get(relPath.toLowerCase());
+      if (regMatch && regMatch.id) {
+        id = regMatch.id;
+      }
+
+      // Determine category and subcategory
+      const parts = relPath.split('/');
+      let category = docs.category || regMatch?.category || (parts[1] || 'gaming');
+      let subcategory = docs.subcategory || regMatch?.subcategory || (parts.length > 3 ? parts[2] : 'General');
+      
+      // Normalize category (e.g. "Dev Lab & Showcase" -> "dev-lab")
+      let catNorm = category.toLowerCase().trim();
+      if (catNorm.includes('dev') || catNorm.includes('showcase') || catNorm.includes('lab')) catNorm = 'dev-lab';
+      else if (catNorm.includes('anim')) catNorm = 'animations';
+      else if (catNorm.includes('creat') || catNorm.includes('art')) catNorm = 'creative';
+      else if (catNorm.includes('help') || catNorm.includes('util')) catNorm = 'helper';
+      else if (catNorm.includes('game') || catNorm.includes('play')) catNorm = 'gaming';
+
+      const title = docs.name || docs.title || regMatch?.title || folderName;
+      const description = docs.purpose || docs.overview || docs.description || regMatch?.description || `${title} - Modulares PlayRig`;
+      const version = docs.version || regMatch?.version || 'v1.0.0';
+      const author = docs.author || regMatch?.author || 'Liath';
+      const copyright = docs.copyright || regMatch?.copyright || (author === 'Liath' ? '© GameChiller' : `© ${author}`);
+      const icon = regMatch?.icon || 'sparkles';
+      const color = regMatch?.color || '#00e5ff';
+      const tags = regMatch?.tags || (Array.isArray(docs.features) ? docs.features.slice(0, 8) : [subcategory, 'PlayRig']);
+      const featured = regMatch?.featured ? 1 : 0;
+      const stars = regMatch?.stars || 0;
+      const views = regMatch?.views || 0;
+      const forks = regMatch?.forks || 0;
+      const thumbnail = thumbPath || regMatch?.thumbnail || null;
+      const settings = JSON.stringify({ defaultTheme: 'cyber-cyan' });
+
+      // Check if rig exists in DB
+      const [rows] = await pool.query('SELECT id, path, thumbnail FROM rigs WHERE id = ?', [id]);
+      if (!rows || rows.length === 0) {
+        await pool.query(`
+          INSERT INTO rigs (
+            id, title, description, category, subcategory, path,
+            version, author, copyright, icon, color, tags, status, access,
+            original_author, views, stars, forks, featured, thumbnail, settings
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 'public', ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          id, title, description, catNorm, subcategory, relPath,
+          version, author, copyright, icon, color, JSON.stringify(tags),
+          author, views, stars, forks, featured, thumbnail, settings
+        ]);
+        newlyRegistered.push(id);
+        console.log(`[PlayRig Auto-Discovery] Neues Rig registriert: '${title}' (${id}) -> ${relPath}`);
+      } else {
+        const existing = rows[0];
+        if (existing.path !== relPath || (thumbnail && !existing.thumbnail)) {
+          await pool.query('UPDATE rigs SET path = ?, thumbnail = COALESCE(?, thumbnail) WHERE id = ?', [
+            relPath, thumbnail, id
+          ]);
+          updated.push(id);
+        }
+      }
+    } catch (err) {
+      console.error(`[PlayRig Auto-Discovery] Fehler bei Rig in ${rigDir}:`, err.message);
+    }
+  }
+
+  return { scanned: rigFolders.length, newlyRegistered, updated };
 }
 
 // User & Auth operations
@@ -1066,5 +1251,6 @@ module.exports = {
   setStorageEntry,
   deleteStorageEntry,
   updateRigScreenshot,
-  updateRigStatus
+  updateRigStatus,
+  syncRigsFromDisk
 };
