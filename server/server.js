@@ -1106,4 +1106,13 @@ async function startServer() {
   }
 }
 
+// Error Safety Handlers
+process.on('uncaughtException', (err) => {
+  console.error('[PlayRig Server] Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[PlayRig Server] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 startServer();
