@@ -251,38 +251,6 @@
         }
       }
     }
-          this.vx *= 0.78;
-          this.vAngle *= 0.75;
-          this.bounces++;
-          if (this.soundCount < 5) {
-            playDiceClack(Math.min(0.3, Math.abs(this.vy) * 0.06));
-            this.soundCount++;
-          }
-        } else {
-          // Transition to Rolling / Sliding on floor
-          this.vy = 0;
-          this.vx *= 0.88;
-          this.vAngle *= 0.85;
-
-          // Natural torque alignment towards flat resting face
-          // Flat face angle interval
-          const faceInterval = this.sides === 6 ? Math.PI / 2 : (Math.PI / 3);
-          const targetAngle = Math.round(this.angle / faceInterval) * faceInterval;
-          const diff = targetAngle - this.angle;
-          this.vAngle += diff * 0.18; // Restorative spring torque
-
-          // Settle down check
-          if (Math.abs(this.vx) < 0.15 && Math.abs(this.vAngle) < 0.04) {
-            this.stopped = true;
-            this.angle = targetAngle; // Exact flat face
-            this.currentVal = this.targetVal;
-            this.vx = 0;
-            this.vy = 0;
-            this.vAngle = 0;
-          }
-        }
-      }
-    }
 
     draw() {
       ctx.save();
