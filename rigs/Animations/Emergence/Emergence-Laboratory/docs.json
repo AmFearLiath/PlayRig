@@ -1,0 +1,60 @@
+{
+  "$schema": "https://playrig.gamechiller.de/schemas/rig-docs-v1.json",
+  "id": "emergence-laboratory",
+  "name": "Emergence Laboratory",
+  "version": "1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "overview": "Ein interaktives Forschungslabor für zelluläre Automaten. Untersuche, wie aus lokalen Regeln globale Muster, Replikation, Oszillation und Stillstand entstehen.",
+  "features": [
+    "Conway's Game of Life und fünf weitere etablierte Regelsets",
+    "Konfigurierbare B/S-Regeln mit Moore-Nachbarschaft",
+    "Deterministische Seeds für reproduzierbare Initialzustände",
+    "Interaktive Zellmalerei, Löschwerkzeug, feste Hindernisse und Zellinspektion",
+    "Simulation mit 1 bis 120 Generationen pro Sekunde und Einzelschritten",
+    "Populations-, Geburts-, Sterbe- und Entropiemessung",
+    "Dichte-, Alters- und Aktivitätsvisualisierung",
+    "Mutationsparameter und Stabilitäts-Stopp",
+    "Experiment-Snapshots und JSON-Export"
+  ],
+  "controls": [
+    {
+      "key": "Start / Pause",
+      "action": "Simulation starten oder anhalten"
+    },
+    {
+      "key": "Step",
+      "action": "Genau eine Generation berechnen"
+    },
+    {
+      "key": "Maus ziehen",
+      "action": "Zellen zeichnen, löschen oder Hindernisse setzen"
+    },
+    {
+      "key": "Brush",
+      "action": "Pinselgröße ändern"
+    },
+    {
+      "key": "Reset",
+      "action": "Feld leeren und Zähler zurücksetzen"
+    },
+    {
+      "key": "Seed",
+      "action": "Reproduzierbaren Zufallszustand erzeugen"
+    }
+  ],
+  "permissions": [
+    "rigs:read",
+    "storage:user"
+  ],
+  "faq": [
+    {
+      "q": "Ist das eine biologische Simulation?",
+      "a": "Nein. Das Rig simuliert mathematische zelluläre Automaten. Die Zustände sind abstrakte Modellzustände und keine biologischen Zellen."
+    },
+    {
+      "q": "Was bedeutet B3/S23?",
+      "a": "Eine tote Zelle wird bei genau drei lebenden Nachbarn geboren (B3). Eine lebende Zelle überlebt bei zwei oder drei lebenden Nachbarn (S23)."
+    }
+  ]
+}
