@@ -1,0 +1,41 @@
+{
+  "id": "settlement-generator",
+  "name": "Settlement Generator",
+  "version": "v0.1.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Eigenständiger World-Editor-Rig zum Importieren, Anzeigen und Untersuchen von Fantasy-Weltkarten. Erste Ausbaustufe mit gemeinsamem World Core und Azgaar Full JSON Adapter.",
+  "category": "Dev Lab & Showcase",
+  "subcategory": "World Editor",
+  "features": [
+    "Azgaar Full JSON Import",
+    "Source-agnostisches PlayRig World Core Datenmodell mit erhaltener Originalquelle",
+    "Interaktive 2D-Weltansicht mit Zoom, Pan und Zellenauswahl",
+    "Biome-, Höhenrelief- und politische Darstellung",
+    "Ein-/ausblendbare Siedlungen, Flüsse, Routen und Grenzlinien",
+    "Inspector für Gelände-, Regions- und Siedlungszuordnungen",
+    "Export des vollständigen PlayRig World Projects inklusive Quelldaten"
+  ],
+  "manual": [
+    "Exportiere deine Karte in Azgaar über Export → Export to JSON → Full.",
+    "Lade die JSON-Datei über World Source.",
+    "Nutze die Layer-Steuerung für Biome, Höhenrelief oder politische Darstellung.",
+    "Klicke auf eine Kartenfläche, um ihre Daten im Inspector zu untersuchen.",
+    "Exportiere das World-Projekt über Projekt exportieren."
+  ],
+  "configuration": {
+    "worldCoreApi": "1.0.0",
+    "supportedImport": [
+      "azgaar-full-json"
+    ],
+    "nativeAzgaarMapParsing": false
+  },
+  "prerequisites": [
+    "Moderner Browser mit ES-Module- und Canvas-2D-Unterstützung"
+  ],
+  "requiredPermissions": [],
+  "supportedIntegrations": [
+    "PlayRig World Core"
+  ],
+  "notes": "Die native Azgaar .map-Datei wird in dieser Version nicht direkt geparst. Für den Import ist der Full JSON Export vorgesehen. Die vollständige JSON-Quelle wird unverändert im World-Projekt mitgeführt."
+}

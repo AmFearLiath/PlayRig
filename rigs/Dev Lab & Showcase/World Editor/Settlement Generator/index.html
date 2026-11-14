@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080e15">
+<title>Settlement Generator | PlayRig</title>
+<link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+<link rel="stylesheet" href="../../../../_shared/css/themes.css">
+<link rel="stylesheet" href="../../../../_shared/css/base.css">
+<link rel="stylesheet" href="../../../../_shared/css/components.css">
+<link rel="stylesheet" href="../../../../_shared/css/animations.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="world-app">
+<header class="world-header">
+  <div class="brand">
+    <button class="btn btn-ghost btn-sm" id="return-hub">← Hub</button>
+    <div class="brand-mark">⌘</div>
+    <div><h1>Settlement Generator</h1><p>PLAYRIG WORLD EDITOR <span>•</span> WORLD CORE <b>v0.1.0</b></p></div>
+  </div>
+  <div class="header-actions"><span id="world-status" class="status-pill"><i></i> Kein World-Projekt geladen</span><button class="btn btn-secondary btn-sm" id="export-project" disabled>Projekt exportieren</button></div>
+</header>
+<main class="workspace">
+<aside class="panel left-panel">
+  <section class="panel-section">
+    <div class="section-heading"><span>01</span><div><h2>World Source</h2><p>Weltkarte importieren</p></div></div>
+    <label class="dropzone" id="dropzone" for="world-file"><input id="world-file" type="file" accept=".json,application/json"><strong>⇧ Azgaar Full JSON laden</strong><small>Datei ablegen oder auswählen</small><em>Export → Export to JSON → Full</em></label>
+    <p class="source-note">Die originale .map-Datei bleibt als natives Azgaar-Archiv erhalten. Der aktuelle Importadapter verarbeitet den Full-JSON-Export.</p>
+  </section>
+  <section class="panel-section">
+    <div class="section-heading"><span>02</span><div><h2>Map Layers</h2><p>Darstellung steuern</p></div></div>
+    <label class="field-label" for="render-mode">Farbmodus</label>
+    <select id="render-mode" class="world-select"><option value="biome">Biome</option><option value="height">Höhenrelief</option><option value="political">Politische Karte</option></select>
+    <label class="toggle-row"><span>● Siedlungen</span><input type="checkbox" id="layer-settlements" checked></label>
+    <label class="toggle-row"><span>● Flüsse</span><input type="checkbox" id="layer-rivers" checked></label>
+    <label class="toggle-row"><span>● Routen</span><input type="checkbox" id="layer-routes"></label>
+    <label class="toggle-row"><span>● Grenzlinien</span><input type="checkbox" id="layer-borders" checked></label>
+    <button class="btn btn-ghost btn-sm full-width" id="reset-view" disabled>Ansicht zurücksetzen</button>
+  </section>
+  <section class="panel-section">
+    <div class="section-heading"><span>03</span><div><h2>World Modules</h2><p>Modulstatus</p></div></div>
+    <div class="module-row"><i class="module-indicator active"></i><div><b>World Core</b><small>API 1.0.0 · aktiv</small></div><strong>READY</strong></div>
+    <div class="module-row"><i class="module-indicator pending"></i><div><b>Settlement Layout</b><small>noch nicht installiert</small></div><strong>LATER</strong></div>
+    <div class="module-row"><i class="module-indicator pending"></i><div><b>Isometric Renderer</b><small>noch nicht installiert</small></div><strong>LATER</strong></div>
+  </section>
+</aside>
+<section class="viewport-panel">
+  <div class="viewport-toolbar"><div><small>WORLD VIEWPORT</small><strong id="map-title">Noch keine Welt geladen</strong></div><div class="viewport-hints">Scroll · Zoom　 Drag · Pan　 Klick · Zelle wählen</div></div>
+  <div class="canvas-wrap">
+    <canvas id="world-canvas" aria-label="Interaktive Weltkarte"></canvas>
+    <div class="empty-state" id="empty-state"><div>◎</div><h2>Eine Welt als Fundament.</h2><p>Importiere eine Azgaar Full JSON-Karte, um Gelände, Regionen, Flüsse und bestehende Siedlungen im World Core zu laden.</p><label class="btn btn-primary" for="world-file">Weltkarte auswählen</label></div>
+    <div class="canvas-legend" id="canvas-legend" hidden>Land　●　Wasser　●　Flüsse　●　Siedlungen</div>
+  </div>
+  <footer class="viewport-footer"><span id="coordinate-readout">X: — · Y: —</span><span id="cell-readout">Keine Zelle ausgewählt</span><span>Zoom: Scrollrad</span></footer>
+</section>
+<aside class="panel right-panel">
+  <section class="panel-section"><div class="section-heading"><span>04</span><div><h2>World Overview</h2><p>Importierte Daten</p></div></div>
+    <div class="world-name-card"><small>AKTUELLE WELT</small><strong id="overview-name">—</strong><span id="overview-seed">Seed: —</span></div>
+    <div class="stat-grid" id="world-stats"><div><strong>—</strong><small>Zellen</small></div><div><strong>—</strong><small>Vertices</small></div><div><strong>—</strong><small>Siedlungen</small></div><div><strong>—</strong><small>Regionen</small></div></div>
+  </section>
+  <section class="panel-section"><div class="section-heading"><span>05</span><div><h2>Inspector</h2><p>Ausgewähltes Kartenfeld</p></div></div>
+    <div class="inspector-empty" id="inspector-empty">Wähle eine Zelle in der Karte aus, um geografische und politische Daten zu untersuchen.</div>
+    <div id="inspector-content" hidden><div class="inspector-title"><small>CELL ID</small><strong id="cell-id">—</strong></div><dl id="cell-details"></dl></div>
+  </section>
+  <section class="panel-section source-meta"><div class="section-heading"><span>06</span><div><h2>Source Metadata</h2><p>Herkunft & Version</p></div></div>
+    <dl><dt>Adapter</dt><dd id="source-adapter">—</dd><dt>Azgaar-Version</dt><dd id="source-version">—</dd><dt>Exportiert</dt><dd id="source-date">—</dd><dt>Koordinaten</dt><dd id="source-coords">—</dd></dl>
+  </section>
+</aside>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</div>
+<script type="module" src="./app.js"></script>
+</body></html>
