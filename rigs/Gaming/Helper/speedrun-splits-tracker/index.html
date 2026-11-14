@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="royal-gold">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlayRig Speedrun Splits Tracker // Pro Delta Timer</title>
+  <title>Speedrun Splits Tracker | PlayRig</title>
+
+  <!-- PlayRig Tokens & Styles -->
   <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
   <link rel="stylesheet" href="../../../../_shared/css/themes.css">
   <link rel="stylesheet" href="../../../../_shared/css/base.css">
   <link rel="stylesheet" href="../../../../_shared/css/components.css">
   <link rel="stylesheet" href="../../../../_shared/css/animations.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="../../../../_shared/js/embed-bridge.js"></script>
 </head>
-<body>
-  <!-- Standard PlayRig Topbar -->
-  <header class="rig-topbar">
+<body class="fx-spotlight-active">
+  <!-- PlayRig Standard Topbar -->
+  <header class="rig-topbar" id="main-topbar">
     <div class="topbar-left">
       <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -22,33 +26,109 @@
       <div class="topbar-title-wrap">
         <h1 class="topbar-title">Speedrun Splits <span class="gradient-text-gold">Tracker</span></h1>
         <span class="badge badge-amber">Gaming • Helper</span>
-        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.2</span>
       </div>
     </div>
     <div class="topbar-right">
       <div class="topbar-meta-text">
         © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
       </div>
-      <button id="btn-obs-mode" class="btn btn-secondary btn-sm" title="OBS Chroma Key Overlay Mode">🎥 OBS Mode</button>
+
+      <!-- Layout Picker -->
+      <div class="topbar-layout-group">
+        <button id="btn-layout-vert" class="btn btn-secondary btn-sm active" title="Klassisches vertikales Layout">📐 Vertikal</button>
+        <button id="btn-layout-horiz" class="btn btn-secondary btn-sm" title="Horizontales Streamer-Banner (Top/Bottom Bar)">↔ Horizontal</button>
+        <button id="btn-layout-compact" class="btn btn-secondary btn-sm" title="Kompakter Mini-Widget Modus">📦 Kompakt</button>
+      </div>
+
+      <!-- OBS Mode Dropdown -->
+      <div class="obs-dropdown-wrap">
+        <button id="btn-obs-toggle" class="btn btn-secondary btn-sm" title="OBS Stream Overlay Modus">🎥 OBS Modus</button>
+      </div>
+
+      <!-- Sound & Info -->
+      <button id="btn-sound-toggle" class="btn btn-ghost btn-sm" title="Soundeffekte umschalten">🔊 Sound</button>
+      <button id="btn-open-info" class="btn btn-ghost btn-sm" title="Informationen, Bedienung & Handbuch">ℹ️ Info</button>
       <button id="btn-reset" class="btn btn-danger btn-sm" title="Timer zurücksetzen (Taste: R)">↺ Reset</button>
     </div>
   </header>
 
-  <main class="splits-container" id="splits-app">
+  <!-- OBS Overlay Floating Toolbar (Visible only in OBS Mode) -->
+  <div id="obs-floating-bar" class="obs-toolbar" style="display: none;">
+    <span class="obs-tag">🎥 OBS OVERLAY</span>
+    <select id="obs-bg-select" class="track-select-micro" title="Hintergrund für Stream Chroma/Transparenz">
+      <option value="transparent">👻 Transparent (Browser Source)</option>
+      <option value="chroma-green">🟩 Chroma Green (#00FF00)</option>
+      <option value="chroma-magenta">🟪 Chroma Magenta (#FF00FF)</option>
+      <option value="glass">🌑 Dark Glass (Halbtransparent)</option>
+    </select>
+    <button id="btn-obs-recenter" class="btn-micro" title="Position zentrieren">⌖ Zentrieren</button>
+    <button id="btn-obs-exit" class="btn-micro" title="OBS Modus beenden">✕ Zurück</button>
+  </div>
+
+  <!-- Main Drag & Drop Container -->
+  <main class="splits-container layout-vertical" id="splits-app">
+    <!-- Drag Handle Bar -->
+    <div class="tracker-drag-bar" id="drag-handle" title="Gedrückt halten & ziehen, um den Tracker frei zu verschieben">
+      <div class="drag-left">
+        <span class="drag-grip-icon">⋮⋮</span>
+        <span class="drag-title">PLAYRIG SPLITS</span>
+        <span class="drag-hint">(Verschiebbar)</span>
+      </div>
+      <div class="drag-right">
+        <button id="btn-center-pos" class="btn-pos-reset" title="Position zurücksetzen & zentrieren">⌖</button>
+      </div>
+    </div>
+
+    <!-- Segment Practice Mode Banner (Visible only during Practice Mode) -->
+    <div id="practice-banner" class="practice-active-banner" style="display: none;">
+      <div class="practice-info">
+        <span class="practice-badge">🎯 TRAININGSMODUS</span>
+        <span id="practice-segment-name" class="practice-name">Braelyn Bridge</span>
+        <span class="practice-target">Ziel (Gold): <strong id="practice-target-time">02:25.0</strong></span>
+      </div>
+      <button id="btn-exit-practice" class="btn-micro btn-exit-train" title="Normalen Run-Modus fortsetzen">✕ Beenden</button>
+    </div>
+
     <!-- Top Game & Category Info -->
     <div class="tracker-header">
       <div class="game-meta">
-        <input type="text" id="game-title" class="title-input game-name" value="Enshrouded" spellcheck="false">
-        <input type="text" id="game-category" class="title-input category-name" value="Flame Altar Any%" spellcheck="false">
+        <input type="text" id="game-title" class="title-input game-name" value="Enshrouded" spellcheck="false" title="Klicken zum Bearbeiten des Spielnamens">
+        <input type="text" id="game-category" class="title-input category-name" value="Flame Altar Any%" spellcheck="false" title="Klicken zum Bearbeiten der Kategorie">
       </div>
-      <div class="attempts-counter">
-        <span class="attempts-label">ATTEMPTS</span>
-        <span class="attempts-num" id="attempts-val">42</span>
+      <div class="meta-right-col">
+        <div class="attempts-counter">
+          <span class="attempts-label">ATTEMPTS</span>
+          <div class="attempts-stepper">
+            <button id="btn-att-dec" class="btn-att-step" title="Versuch abziehen">-</button>
+            <span class="attempts-num" id="attempts-val">42</span>
+            <button id="btn-att-inc" class="btn-att-step" title="Versuch hinzufügen">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison & Projection Bar -->
+    <div class="pace-projection-bar">
+      <div class="pace-item">
+        <span class="pace-label">VERGLEICH:</span>
+        <select id="select-comparison" class="track-select-micro">
+          <option value="pb">Personal Best (PB)</option>
+          <option value="gold">Sum of Best (Gold)</option>
+        </select>
+      </div>
+      <div class="pace-item" title="Aktuell hochgerechnete Endzeit bei aktuellem Tempo">
+        <span class="pace-label">EST. FINISH:</span>
+        <span id="est-finish-val" class="pace-val">--:--</span>
+      </div>
+      <div class="pace-item" title="Theoretische Bestzeit (Summe der schnellsten Segmente)">
+        <span class="pace-label">SUM OF BEST:</span>
+        <span id="sum-of-best-val" class="pace-val">--:--</span>
       </div>
     </div>
 
     <!-- Main Splits Table -->
-    <div class="splits-table-wrapper">
+    <div class="splits-table-wrapper" id="splits-scroll-wrap">
       <table class="splits-table" id="splits-table">
         <thead>
           <tr>
@@ -56,6 +136,7 @@
             <th class="col-name">Segment</th>
             <th class="col-delta">Delta</th>
             <th class="col-time">Split / PB</th>
+            <th class="col-actions">Optionen</th>
           </tr>
         </thead>
         <tbody id="splits-body">
@@ -64,10 +145,10 @@
       </table>
     </div>
 
-    <!-- Timer Display -->
+    <!-- Timer Display Card -->
     <div class="timer-card">
       <div class="timer-sub">
-        <span class="sub-label">PREVIOUS SEGMENT</span>
+        <span class="sub-label" id="sub-segment-label">PREVIOUS SEGMENT</span>
         <span class="sub-time" id="sub-delta-time">±0.00</span>
       </div>
       <div class="timer-main" id="main-timer-display">
@@ -77,16 +158,16 @@
 
     <!-- Control Actions & Hotkey Bar -->
     <div class="tracker-controls">
-      <button id="btn-split" class="ctrl-btn btn-primary" title="Space oder Klick">
+      <button id="btn-split" class="ctrl-btn btn-primary" title="Space, Numpad 1 oder Klick">
         <span class="btn-icon">⚡</span> <span id="split-btn-label">START / SPLIT</span>
       </button>
-      <button id="btn-pause" class="ctrl-btn btn-secondary" title="P: Pause/Resume">
+      <button id="btn-pause" class="ctrl-btn btn-secondary" title="Taste: P (Pause / Weiter)">
         <span class="btn-icon">⏸</span> Pause
       </button>
-      <button id="btn-undo" class="ctrl-btn btn-secondary" title="U: Undo Split">
+      <button id="btn-undo" class="ctrl-btn btn-secondary" title="Taste: U (Letzten Split rückgängig)">
         <span class="btn-icon">↩</span> Undo
       </button>
-      <button id="btn-skip" class="ctrl-btn btn-secondary" title="S: Skip Segment">
+      <button id="btn-skip" class="ctrl-btn btn-secondary" title="Taste: S (Segment überspringen)">
         <span class="btn-icon">⏭</span> Skip
       </button>
     </div>
@@ -97,8 +178,10 @@
         <label>Presets:</label>
         <select id="preset-select" class="track-select">
           <option value="enshrouded">Enshrouded Any%</option>
+          <option value="eldenring">Elden Ring Any%</option>
           <option value="darksouls">Dark Souls Any%</option>
           <option value="sm64">Super Mario 64 (16 Star)</option>
+          <option value="hollowknight">Hollow Knight Any%</option>
           <option value="bossrush">RPG Boss Rush</option>
         </select>
       </div>
@@ -121,8 +204,53 @@
     </div>
   </main>
 
-  <script src="../../../../_shared/js/embed-bridge.js"></script>
-  <script src="app.js"></script>
+  <!-- Info & Documentation Modal -->
+  <div id="info-modal" class="modal-overlay" style="display: none;">
+    <div class="glass-panel modal-box fx-beam">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title">Speedrun Splits Tracker</h2>
+          <span class="badge badge-amber">Gaming • Helper</span>
+          <span class="badge badge-cyan">v0.0.2</span>
+        </div>
+        <button id="btn-close-info" class="btn-close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="meta-card-info">
+          <div class="meta-row"><strong>Rig-ID:</strong> <code>speedrun-splits-tracker</code></div>
+          <div class="meta-row"><strong>Author:</strong> Liath</div>
+          <div class="meta-row"><strong>Copyright:</strong> © GameChiller • PlayRig Platform</div>
+          <div class="meta-row"><strong>Lizenz:</strong> PlayRig Proprietary & Source-Available License</div>
+        </div>
+
+        <h3 class="modal-sub">🌟 Features & Bedienung</h3>
+        <ul class="feature-list">
+          <li><strong>4 Layout-Modi:</strong> 📐 Vertikal (LiveSplit Classic), ↔ Horizontaler Streamer-Balken, 📦 Kompakt-Widget und 🎥 OBS Stream Overlay.</li>
+          <li><strong>Drag & Drop:</strong> Der Tracker kann frei auf dem Bildschirm verschoben werden (an der oberen Handle-Leiste anfassen). Position wird automatisch im Browser gespeichert!</li>
+          <li><strong>🎯 Teilabschnitt-Training (Practice Mode):</strong> Klicke bei einem beliebigen Segment auf <code>🎯 Üben</code>, um gezielt nur dieses Teilstück zu trainieren. Neue Bestzeiten werden direkt als Gold-Segment gespeichert.</li>
+          <li><strong>↺ Ab hier neu starten:</strong> Klicke bei einem Split auf <code>↺ Ab hier</code>, um deinen Run mitten in der Route an genau diesem Punkt fortzusetzen.</li>
+          <li><strong>Live Pace & SoB:</strong> Zeigt live die hochgerechnete Zielzeit (Estimated Finish) und die theoretische Bestzeit (Sum of Best).</li>
+          <li><strong>Gold Splits & Web Audio Fanfaren:</strong> Prozedurale Audio-Effekte ohne externe MP3-Abhängigkeiten.</li>
+          <li><strong>OBS Browser Source:</strong> In OBS als Browserquelle einfügen, OBS-Modus aktivieren und Transparenz oder Chroma Key nutzen.</li>
+        </ul>
+
+        <h3 class="modal-sub">⌨️ Tastatur-Shortcuts</h3>
+        <div class="shortcuts-grid">
+          <div><kbd>Space</kbd> / <kbd>Numpad 1</kbd></div><div>Start / Split</div>
+          <div><kbd>P</kbd></div><div>Pause / Fortsetzen</div>
+          <div><kbd>U</kbd></div><div>Letzten Split zurücknehmen (Undo)</div>
+          <div><kbd>S</kbd></div><div>Segment überspringen (Skip)</div>
+          <div><kbd>R</kbd></div><div>Run zurücksetzen (Reset)</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-close-info-footer" class="btn btn-primary btn-sm">Verstanden</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js?v=0.0.2"></script>
 </body>
 </html>
-
