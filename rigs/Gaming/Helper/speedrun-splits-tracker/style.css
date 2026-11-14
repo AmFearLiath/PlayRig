@@ -613,6 +613,20 @@ body.obs-mode .splits-container {
   background: rgba(239, 68, 68, 0.15) !important;
   color: #f87171 !important;
   border-color: rgba(239, 68, 68, 0.3) !important;
+  transition: all 0.2s ease;
+}
+
+.btn-danger.confirming {
+  background: #dc2626 !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6) !important;
+  animation: pulse-danger 0.8s infinite ease-in-out;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
 }
 
 .btn-danger:hover {

@@ -290,8 +290,8 @@
         <td class="col-time">${displayTime}</td>
         <td class="col-actions">
           <div class="row-action-btns">
-            <button class="btn-row-action train" data-idx="${idx}" title="Dieses Segment isoliert trainieren">🎯 Üben</button>
-            <button class="btn-row-action resume" data-idx="${idx}" title="Run ab diesem Segment starten">↺ Ab hier</button>
+            <button class="btn-row-action train" data-idx="${idx}" title="Segment isoliert trainieren">🎯</button>
+            <button class="btn-row-action resume" data-idx="${idx}" title="Run ab diesem Segment starten">↺</button>
           </div>
         </td>
       `;
@@ -430,7 +430,7 @@
         if (runSplits[i] !== undefined) s.pb = runSplits[i];
       });
       playGoldFanfare();
-      alert(`🎉 NEUER PERSONAL BEST!\nEndzeit: ${formatTime(elapsedTime)}`);
+      showCelebration(`🎉 NEUER PERSONAL BEST! Endzeit: ${formatTime(elapsedTime)}`);
     }
 
     renderSplits();
@@ -451,21 +451,42 @@
     }
   }
 
+  let resetConfirmTimer = null;
   function resetTimer(skipConfirm = false) {
-    if (skipConfirm || timerState === 'STOPPED' || confirm('Run wirklich zurücksetzen?')) {
-      cancelAnimationFrame(animFrameId);
-      timerState = 'STOPPED';
-      elapsedTime = 0;
-      currentSplitIndex = 0;
-      runSplits = [];
-      splitBtnLabel.textContent = isPracticeMode ? 'START TRAIN' : 'START / SPLIT';
-      pauseBtn.innerHTML = '<span class="btn-icon">⏸</span> Pause';
-      subDeltaEl.textContent = '±0.00';
-      subDeltaEl.className = 'sub-time';
-      mainTimerEl.innerHTML = '00:00<span class="timer-ms">.00</span>';
-      playTone(220, 'sine', 0.15, 0.25);
-      renderSplits();
+    if (skipConfirm || timerState === 'STOPPED') {
+      doReset();
+      return;
     }
+
+    // Two-step soft reset (click once to prime, click again to confirm, or instant if stopped)
+    if (resetBtn.classList.contains('confirming')) {
+      clearTimeout(resetConfirmTimer);
+      resetBtn.classList.remove('confirming');
+      resetBtn.textContent = '↺ Reset';
+      doReset();
+    } else {
+      resetBtn.classList.add('confirming');
+      resetBtn.textContent = 'Sicher? (Klick)';
+      resetConfirmTimer = setTimeout(() => {
+        resetBtn.classList.remove('confirming');
+        resetBtn.textContent = '↺ Reset';
+      }, 2500);
+    }
+  }
+
+  function doReset() {
+    cancelAnimationFrame(animFrameId);
+    timerState = 'STOPPED';
+    elapsedTime = 0;
+    currentSplitIndex = 0;
+    runSplits = [];
+    splitBtnLabel.textContent = isPracticeMode ? 'START TRAIN' : 'START / SPLIT';
+    pauseBtn.innerHTML = '<span class="btn-icon">⏸</span> Pause';
+    subDeltaEl.textContent = '±0.00';
+    subDeltaEl.className = 'sub-time';
+    mainTimerEl.innerHTML = '00:00<span class="timer-ms">.00</span>';
+    playTone(220, 'sine', 0.15, 0.25);
+    renderSplits();
   }
 
   function undoSplit() {
@@ -485,6 +506,24 @@
       runSplits[currentSplitIndex] = null;
       currentSplitIndex++;
       renderSplits();
+    }
+  }
+
+  // --- Toast / Celebration Helper ---
+  function showCelebration(msg) {
+    if (window.showToast) {
+      window.showToast(msg, 'success');
+    } else {
+      const banner = document.createElement('div');
+      banner.className = 'practice-active-banner';
+      banner.style.position = 'fixed';
+      banner.style.top = '70px';
+      banner.style.left = '50%';
+      banner.style.transform = 'translateX(-50%)';
+      banner.style.zIndex = '99999';
+      banner.innerHTML = `<span style="font-weight:800; color:#fbbf24;">${msg}</span>`;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 4000);
     }
   }
 
@@ -514,7 +553,7 @@
     if (!prevBest || elapsedTime < prevBest) {
       splitObj.bestSegment = elapsedTime;
       playGoldFanfare();
-      alert(`✨ NEUES GOLD-SEGMENT FÜR "${splitObj.name}"!\nZeit: ${formatTime(elapsedTime)} (Vorher: ${formatTime(prevBest)})`);
+      showCelebration(`✨ NEUES GOLD-SEGMENT FÜR "${splitObj.name}"! Zeit: ${formatTime(elapsedTime)}`);
       saveToStorage();
     } else {
       playTone(480, 'sine', 0.2, 0.2);
@@ -532,21 +571,19 @@
 
   // Restart run from mid-route segment
   function restartFromSegment(idx) {
-    if (confirm(`Run ab Segment "${currentSplits[idx].name}" starten?`)) {
-      resetTimer(true);
-      currentSplitIndex = idx;
-      // Pre-fill previous splits with their respective PB times
-      for (let i = 0; i < idx; i++) {
-        runSplits[i] = currentSplits[i].pb;
-      }
-      const prevTime = idx > 0 ? currentSplits[idx - 1].pb : 0;
-      elapsedTime = prevTime;
-      startTime = performance.now() - (prevTime * 1000);
-      timerState = 'RUNNING';
-      animFrameId = requestAnimationFrame(tick);
-      splitBtnLabel.textContent = 'SPLIT';
-      renderSplits();
+    resetTimer(true);
+    currentSplitIndex = idx;
+    // Pre-fill previous splits with their respective PB times
+    for (let i = 0; i < idx; i++) {
+      runSplits[i] = currentSplits[i].pb;
     }
+    const prevTime = idx > 0 ? currentSplits[idx - 1].pb : 0;
+    elapsedTime = prevTime;
+    startTime = performance.now() - (prevTime * 1000);
+    timerState = 'RUNNING';
+    animFrameId = requestAnimationFrame(tick);
+    splitBtnLabel.textContent = 'SPLIT';
+    renderSplits();
   }
 
   // --- Drag & Drop Floating Window Engine ---
@@ -571,7 +608,7 @@
     dragHandle.addEventListener('pointerdown', (e) => {
       if (e.target.closest('button')) return; // Ignore clicks on reset button
       isDragging = true;
-      dragHandle.setPointerCapture(e.pointerId);
+      try { dragHandle.setPointerCapture(e.pointerId); } catch (err) {}
 
       const rect = container.getBoundingClientRect();
       dragStartX = e.clientX;
@@ -579,6 +616,8 @@
       elemStartX = rect.left;
       elemStartY = rect.top;
 
+      container.style.left = `${elemStartX}px`;
+      container.style.top = `${elemStartY}px`;
       container.classList.add('is-floating');
     });
 
@@ -819,6 +858,13 @@
     } else if (e.code === 'Escape') {
       closeInfoModal();
       if (isPracticeMode) exitPracticeMode();
+    }
+  });
+
+  // Global Click Blur (prevent Space/Enter from activating last-clicked buttons)
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button')) {
+      e.target.closest('button').blur();
     }
   });
 

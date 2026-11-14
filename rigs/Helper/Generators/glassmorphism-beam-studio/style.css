@@ -1,6 +1,24 @@
 /**
- * GLASSMORPHISM & BEAM STUDIO - STYLESHEET
+ * PLAYRIG - GLASSMORPHISM & BORDER-BEAM STUDIO STYLESHEET
+ * High-End Perimeter Border Beam Engine (CSS @property & SVG Tracer),
+ * Glass Optics, Surface FX & 3D Tilt Parallax.
+ *
+ * Author: Liath • Copyright: © GameChiller
  */
+
+/* CSS @property registered for smooth conic angle perimeter interpolation */
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  --beam-c1: #00f0ff;
+  --beam-c2: #6366f1;
+  --beam-speed: 4s;
+  --beam-width: 2px;
+}
 
 body {
   margin: 0;
@@ -11,13 +29,14 @@ body {
   min-height: 100vh;
 }
 
+/* Topbar */
 .rig-topbar {
   height: 58px;
   padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(10, 15, 29, 0.85);
+  background: rgba(10, 15, 29, 0.88);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
@@ -49,58 +68,111 @@ body {
   font-family: var(--font-mono);
 }
 
+/* Studio 3-Column Layout */
 .studio-layout {
-  max-width: 1540px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 24px 32px;
   display: grid;
-  grid-template-columns: 320px 1fr 340px;
+  grid-template-columns: 330px 1fr 340px;
   gap: 24px;
   min-height: calc(100vh - 58px);
   box-sizing: border-box;
 }
 
-.panel-heading {
-  margin: 0 0 16px;
-  font-size: 1.15rem;
-  font-weight: 800;
-}
-
-.panel-subheading {
-  margin: 16px 0 12px;
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--cyan-400);
-}
-
+/* Controls Sidebar */
 .controls-sidebar {
-  padding: 24px;
+  padding: 20px;
   border-radius: var(--radius-2xl);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
   height: fit-content;
+  max-height: calc(100vh - 106px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-badge {
+  background: var(--cyan-500);
+  color: #000;
+  font-weight: 800;
+  font-size: 0.68rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
 .slider-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
 }
 
 .slider-val {
   font-size: 0.8rem;
   font-family: var(--font-mono);
   color: var(--cyan-400);
+  font-weight: 700;
 }
 
-.section-divider {
-  height: 1px;
-  background: var(--border-subtle);
-  margin: 8px 0;
+.nexus-select {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  outline: none;
+  cursor: pointer;
 }
 
+.nexus-select:focus {
+  border-color: var(--cyan-400);
+}
+
+/* Background Selector */
 .bg-selector-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -108,21 +180,28 @@ body {
 }
 
 .bg-thumb-btn {
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);
   color: #fff;
   border-radius: var(--radius-md);
   padding: 8px;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.bg-thumb-btn.active {
-  border-color: var(--cyan-400);
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+.bg-thumb-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
+.bg-thumb-btn.active {
+  border-color: var(--cyan-400);
+  background: rgba(6, 182, 212, 0.2);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.35);
+}
+
+/* Beam Color Buttons */
 .beam-colors-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -138,15 +217,21 @@ body {
   padding: 6px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.beam-color-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .beam-color-btn.active {
   border-color: var(--cyan-400);
-  background: rgba(6, 182, 212, 0.15);
+  background: rgba(6, 182, 212, 0.2);
   color: #fff;
 }
 
-/* Stage Area */
+/* Center Stage Area */
 .stage-section {
   border-radius: var(--radius-2xl);
   display: flex;
@@ -158,6 +243,7 @@ body {
   transition: background 0.4s ease;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
   perspective: 1000px;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8);
 }
 
 .stage-section.bg-sunset {
@@ -174,43 +260,165 @@ body {
 
 .preview-card-wrap {
   transform-style: preserve-3d;
-  transition: transform 0.1s ease-out;
+  transition: transform 0.12s ease-out;
 }
 
-/* The Glass Card */
+/* --- The Glass Card --- */
 .custom-glass-card {
   width: 440px;
-  padding: 36px;
+  min-height: 280px;
+  padding: 34px;
   position: relative;
   box-sizing: border-box;
   background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
   overflow: hidden;
 }
 
-/* Border Beam Overlay */
+/* ==============================================================
+   TRUE PERIMETER BORDER-BEAM ENGINES
+   ============================================================== */
+
+/* 1. Conic Perimeter Beam (@property Conic Mask) */
+@keyframes beam-conic-travel {
+  from { --beam-angle: 0deg; }
+  to { --beam-angle: 360deg; }
+}
+
 .custom-beam-border {
   position: absolute;
-  inset: -2px;
+  inset: 0;
   border-radius: inherit;
-  padding: 2px;
-  background: conic-gradient(from 0deg, transparent 70%, #00d2ff, #6366f1);
+  padding: var(--beam-width, 2px);
+  background: conic-gradient(from var(--beam-angle, 0deg), transparent 0deg, transparent 70%, var(--beam-c1, #00f0ff) 88%, var(--beam-c2, #6366f1) 98%, transparent 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: beam-spin 6s linear infinite;
+  animation: beam-conic-travel var(--beam-speed, 4s) linear infinite;
+  z-index: 1;
 }
 
-@keyframes beam-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Dual Orbit Mode */
+.custom-beam-border.mode-dual {
+  background: conic-gradient(from var(--beam-angle, 0deg), transparent 0deg, transparent 65%, var(--beam-c1, #00f0ff) 84%, transparent 100%, transparent 180%, transparent 245%, var(--beam-c2, #6366f1) 264%, transparent 280%);
 }
 
+/* Rainbow Prism Mode */
+.custom-beam-border.mode-rainbow {
+  background: conic-gradient(from var(--beam-angle, 0deg), #ff0055, #ffaa00, #00ff66, #00ffff, #0066ff, #aa00ff, #ff0055);
+}
+
+/* Neon Pulse Mode */
+@keyframes neon-pulse-anim {
+  0%, 100% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 2px var(--beam-c1, #00f0ff));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--beam-c1, #00f0ff)) drop-shadow(0 0 16px var(--beam-c2, #6366f1));
+  }
+}
+
+.custom-beam-border.mode-pulse {
+  background: linear-gradient(135deg, var(--beam-c1, #00f0ff), var(--beam-c2, #6366f1));
+  animation: neon-pulse-anim var(--beam-speed, 2.5s) ease-in-out infinite;
+}
+
+/* 2. SVG Geometric Edge Tracer Overlay */
+.beam-svg-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.svg-tracer-path {
+  fill: none;
+  stroke: url(#svg-beam-grad);
+  stroke-width: var(--beam-width, 2.5px);
+  stroke-linecap: round;
+  stroke-dasharray: 140 1400;
+  animation: svg-dash-travel var(--beam-speed, 4s) linear infinite;
+}
+
+@keyframes svg-dash-travel {
+  from { stroke-dashoffset: 1540; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* 3. Cyberpunk Corner HUD Brackets */
+.cyber-brackets-wrap {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cyber-brackets-wrap .corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--beam-c1, #00f0ff);
+  border-style: solid;
+  transition: all 0.2s ease;
+  filter: drop-shadow(0 0 5px var(--beam-c1, #00f0ff));
+}
+
+.cyber-brackets-wrap .corner.tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-top-left-radius: inherit; }
+.cyber-brackets-wrap .corner.tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-top-right-radius: inherit; }
+.cyber-brackets-wrap .corner.bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-bottom-left-radius: inherit; }
+.cyber-brackets-wrap .corner.br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-bottom-right-radius: inherit; }
+
+/* 4. Liquid Specular Sheen Layer */
+.liquid-sheen-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.22) 50%, transparent 60%);
+  background-size: 250% 100%;
+  animation: liquid-sheen-sweep 5s infinite ease-in-out;
+  border-radius: inherit;
+}
+
+@keyframes liquid-sheen-sweep {
+  0% { background-position: 200% 0; }
+  45%, 100% { background-position: -150% 0; }
+}
+
+/* 5. Analog Noise Grain */
+.noise-grain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* 6. Hexagonal Honeycomb */
+.hex-grid-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: radial-gradient(var(--beam-c1, #00f0ff) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Card Inner Content */
 .card-content {
   position: relative;
   z-index: 2;
@@ -232,8 +440,8 @@ body {
 
 .card-text {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  line-height: 1.55;
   margin: 0;
 }
 
@@ -244,9 +452,15 @@ body {
   margin-top: 10px;
 }
 
-/* Code Output */
+.card-spec-tag {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+/* Code Output Panel */
 .code-export-panel {
-  padding: 24px;
+  padding: 20px;
   border-radius: var(--radius-2xl);
   display: flex;
   flex-direction: column;
@@ -257,7 +471,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+.panel-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
 .code-format-tabs {
@@ -265,17 +485,19 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-full);
   padding: 2px;
+  gap: 2px;
 }
 
 .code-tab {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
   cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .code-tab.active {
@@ -291,10 +513,27 @@ body {
   border-radius: var(--radius-lg);
   color: #38bdf8;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   line-height: 1.5;
   padding: 14px;
   box-sizing: border-box;
   resize: vertical;
 }
 
+.code-tips-box {
+  margin-top: 12px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  color: #bae6fd;
+  line-height: 1.45;
+}
+
+.code-tips-box code {
+  color: #38bdf8;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
