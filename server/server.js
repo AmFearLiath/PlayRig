@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const JSZip = require('jszip');
 const db = require('./db');
+const { ensurePortAvailable } = require('./port-helper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1035,6 +1036,9 @@ app.get('/favicon.ico', (req, res) => {
 // Start Database & Server
 async function startServer() {
   try {
+    // Check and resolve any port collision before initializing
+    await ensurePortAvailable(PORT);
+
     console.log('[PlayRig Engine] Verbinde mit MySQL Datenbank (Port 3307)...');
     await db.init();
 
