@@ -1151,4 +1151,14 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('[PlayRig Server] Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
+process.on('SIGINT', () => {
+  console.log('[PlayRig Server] Beende Server (SIGINT)...');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('[PlayRig Server] Beende Server (SIGTERM)...');
+  process.exit(0);
+});
+
 startServer();
