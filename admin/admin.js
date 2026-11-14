@@ -30,7 +30,10 @@
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status}`);
+      const errMsg = (typeof data.error === 'object' && data.error !== null)
+        ? (data.error.message || data.error.code || JSON.stringify(data.error))
+        : (data.error || `HTTP ${res.status}`);
+      throw new Error(errMsg);
     }
     return data;
   }
@@ -65,6 +68,7 @@
     updateUserUI();
     loadCategories();
     switchView('dashboard');
+    checkUpdateNotification();
   }
 
   function showLoginModal() {
@@ -104,7 +108,8 @@
       'users': 'Benutzerverwaltung (MySQL)',
       'categories': 'Kategorien & FX',
       'logs': 'MySQL Audit-Logs',
-      'server': 'MySQL & Server Status'
+      'server': 'MySQL & Server Status',
+      'updater': 'System-Updater & GitHub Sync'
     };
     document.getElementById('breadcrumb-view-title').textContent = viewTitles[viewName] || 'Admin';
 
@@ -123,6 +128,7 @@
     if (viewName === 'categories') loadCategoriesView();
     if (viewName === 'logs') loadLogsView();
     if (viewName === 'server') loadServerView();
+    if (viewName === 'updater') loadUpdaterView();
   }
 
   function bindNavigation() {
@@ -242,12 +248,17 @@
           </td>
           <td style="text-align:right;">
             <div style="display:inline-flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm btn-push-rig" data-id="${rig.id}" title="Rig in isoliertem Branch zu GitHub pushen">🐙 Push</button>
               <a href="/studio" class="btn btn-primary btn-sm" title="Im Studio bearbeiten">⚡ Studio</a>
               <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau im selben Fenster">↗</a>
               <button class="btn btn-ghost btn-sm btn-del-rig" data-id="${rig.id}" style="color:var(--rose-400);">✕</button>
             </div>
           </td>
         `;
+
+        tr.querySelector('.btn-push-rig')?.addEventListener('click', () => {
+          openPushRigModal(rig);
+        });
 
         tr.querySelector('.btn-del-rig').addEventListener('click', async () => {
           if (confirm(`Rig '${rig.title}' unwiderruflich aus MySQL und von der Festplatte löschen?`)) {
@@ -435,8 +446,287 @@
         }
       });
     }
+
+    bindUpdaterForms();
+  }
+
+  // ==========================================
+  // UPDATER & GITHUB SYNC
+  // ==========================================
+  async function checkUpdateNotification() {
+    try {
+      const res = await api('/v1/updater/status');
+      const data = res.data || res;
+      updateNotificationBadges(data);
+    } catch (e) {
+      console.warn('Update-Prüfung im Hintergrund fehlgeschlagen:', e.message);
+    }
+  }
+
+  function updateNotificationBadges(data) {
+    const pill = document.getElementById('admin-update-pill');
+    const pillText = document.getElementById('admin-update-pill-text');
+    const banner = document.getElementById('dashboard-update-banner');
+    const bannerBadge = document.getElementById('banner-update-count-badge');
+    const bannerDesc = document.getElementById('dashboard-update-summary');
+    const sideBadge = document.getElementById('sidebar-update-badge');
+
+    if (data && data.hasUpdate && data.behind > 0) {
+      const countText = `${data.behind} neue${data.behind > 1 ? 'r' : ''} Commit${data.behind > 1 ? 's' : ''}`;
+      if (pill) {
+        pill.style.display = 'inline-flex';
+        pillText.textContent = `🚀 Update verfügbar (${data.behind})`;
+      }
+      if (banner) {
+        banner.style.display = 'flex';
+        if (bannerBadge) bannerBadge.textContent = countText;
+        if (bannerDesc) bannerDesc.textContent = `Auf GitHub (origin/main) sind ${data.behind} neue Commits verfügbar.`;
+      }
+      if (sideBadge) {
+        sideBadge.style.display = 'inline-block';
+        sideBadge.textContent = `${data.behind} NEU`;
+      }
+    } else {
+      if (pill) pill.style.display = 'none';
+      if (banner) banner.style.display = 'none';
+      if (sideBadge) sideBadge.style.display = 'none';
+    }
+  }
+
+  async function checkUpdates(force = false) {
+    const btn = document.getElementById('btn-force-check-update');
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Prüfe GitHub...';
+      }
+      window.showToast('Prüfe GitHub auf Updates...', 'info');
+
+      const res = await api('/v1/updater/check', { method: 'POST' });
+      const data = res.data || res;
+      updateNotificationBadges(data);
+      renderUpdaterUI(data);
+
+      if (data.hasUpdate) {
+        window.showToast(`${data.behind} neue Commits auf GitHub verfügbar!`, 'success');
+      } else {
+        window.showToast('System und Rigs sind auf dem neuesten Stand.', 'info');
+      }
+    } catch (err) {
+      window.showToast('Fehler bei Update-Prüfung: ' + err.message, 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🔄 Jetzt prüfen';
+      }
+    }
+  }
+
+  async function loadUpdaterView() {
+    try {
+      const res = await api('/v1/updater/status');
+      const data = res.data || res;
+      updateNotificationBadges(data);
+      renderUpdaterUI(data);
+    } catch (err) {
+      window.showToast('Fehler beim Laden des Update-Status: ' + err.message, 'error');
+    }
+  }
+
+  function renderUpdaterUI(data) {
+    if (!data) return;
+
+    const localHash = document.getElementById('updater-local-hash');
+    const localMsg = document.getElementById('updater-local-msg');
+    const remoteHash = document.getElementById('updater-remote-hash');
+    const remoteMsg = document.getElementById('updater-remote-msg');
+    const statusText = document.getElementById('updater-status-text');
+    const behindAhead = document.getElementById('updater-behind-ahead');
+    const worktreeStatus = document.getElementById('updater-worktree-status');
+    const lastChecked = document.getElementById('updater-last-checked');
+    const actionHeading = document.getElementById('updater-action-heading');
+    const actionDesc = document.getElementById('updater-action-desc');
+    const btnApply = document.getElementById('btn-apply-update');
+    const incomingContainer = document.getElementById('updater-incoming-container');
+    const incomingTbody = document.getElementById('updater-incoming-tbody');
+
+    if (localHash) localHash.textContent = data.local?.hash || '--';
+    if (localMsg) localMsg.textContent = data.local?.message || 'Kein Commit';
+    if (remoteHash) remoteHash.textContent = data.remote?.hash || '--';
+    if (remoteMsg) remoteMsg.textContent = data.remote?.message || 'Kein Remote';
+
+    if (statusText) {
+      if (data.hasUpdate) {
+        statusText.innerHTML = '<span style="color: var(--neon-cyan)">Update verfügbar</span>';
+      } else if (data.ahead > 0) {
+        statusText.innerHTML = '<span style="color: var(--neon-purple)">Lokale Commits (Ahead)</span>';
+      } else {
+        statusText.innerHTML = '<span style="color: var(--neon-emerald)">Synchronisiert ✓</span>';
+      }
+    }
+
+    if (behindAhead) {
+      behindAhead.textContent = `${data.behind || 0} Behind • ${data.ahead || 0} Ahead (Branch: ${data.branch || 'main'})`;
+    }
+
+    if (worktreeStatus) {
+      if (data.isClean) {
+        worktreeStatus.innerHTML = '<span style="color: var(--neon-emerald); font-size: 1rem;">Sauber (Keine Diffs)</span>';
+      } else {
+        worktreeStatus.innerHTML = `<span style="color: var(--neon-amber); font-size: 1rem;">${data.modifiedCount || 0} lokale Dateien modifiziert</span>`;
+      }
+    }
+
+    if (lastChecked) {
+      const timeStr = data.lastChecked ? new Date(data.lastChecked).toLocaleTimeString() : '--';
+      lastChecked.textContent = `Zuletzt geprüft: ${timeStr}`;
+    }
+
+    if (actionHeading && actionDesc && btnApply) {
+      if (data.hasUpdate) {
+        actionHeading.textContent = `Update verfügbar: ${data.behind} neue Commits`;
+        actionDesc.textContent = `Synchronisiere alle neuen Rigs, Kern-Module und Datenbank-Definitionen von GitHub.`;
+        btnApply.style.display = 'inline-block';
+        btnApply.className = 'btn btn-primary fx-ripple';
+        btnApply.textContent = `🚀 System & Rigs jetzt aktualisieren (${data.behind} Commits)`;
+      } else {
+        actionHeading.textContent = 'System & Rigs sind aktuell';
+        actionDesc.textContent = 'Dein System stimmt mit dem offiziellen Stand auf GitHub überein.';
+        btnApply.className = 'btn btn-secondary';
+        btnApply.textContent = '🔄 System erneut synchronisieren';
+      }
+    }
+
+    if (incomingContainer && incomingTbody) {
+      if (data.incomingCommits && data.incomingCommits.length > 0) {
+        incomingContainer.style.display = 'block';
+        incomingTbody.innerHTML = data.incomingCommits.map(c => `
+          <tr>
+            <td><code class="badge badge-cyan font-mono">${c.hash}</code></td>
+            <td style="color:#fff; font-size:0.85rem;">${c.author}</td>
+            <td style="color:var(--text-dim); font-size:0.8rem;">${c.relativeTime}</td>
+            <td style="color:var(--text-primary); font-size:0.88rem;">${c.message}</td>
+          </tr>
+        `).join('');
+      } else {
+        incomingContainer.style.display = 'none';
+        incomingTbody.innerHTML = '';
+      }
+    }
+  }
+
+  async function applyUpdate() {
+    const btn = document.getElementById('btn-apply-update');
+    const consoleContainer = document.getElementById('updater-console-container');
+    const consoleOut = document.getElementById('updater-console-output');
+
+    if (!confirm('Möchtest du das PlayRig-System und alle Rigs jetzt mit GitHub synchronisieren?')) {
+      return;
+    }
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Aktualisiere System & Rigs...';
+      }
+      if (consoleContainer) consoleContainer.style.display = 'block';
+      if (consoleOut) consoleOut.textContent = 'Starte Update via Git Rebase & DB-Sync...\n';
+
+      window.showToast('Lade neueste Version von GitHub herunter...', 'info');
+
+      const res = await api('/v1/updater/apply', { method: 'POST' });
+      const data = res.data || res;
+
+      if (consoleOut && data.logs) {
+        consoleOut.textContent = data.logs.join('\n');
+      }
+
+      window.showToast('System und Rigs erfolgreich aktualisiert!', 'success');
+      await checkUpdates(true);
+    } catch (err) {
+      if (consoleOut) consoleOut.textContent += `\nFEHLER: ${err.message}`;
+      window.showToast('Fehler bei Aktualisierung: ' + err.message, 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🚀 System & Rigs jetzt aktualisieren';
+      }
+    }
+  }
+
+  // ==========================================
+  // PUSH RIG TO GITHUB BRANCH MODAL
+  // ==========================================
+  function openPushRigModal(rig) {
+    const modal = document.getElementById('modal-push-rig');
+    const idInput = document.getElementById('push-rig-id');
+    const branchInput = document.getElementById('push-rig-branch');
+    const msgInput = document.getElementById('push-rig-message');
+    const titleSpan = document.getElementById('modal-push-rig-title');
+    const resultBox = document.getElementById('push-rig-result');
+
+    if (!modal) return;
+    if (idInput) idInput.value = rig.id;
+    if (titleSpan) titleSpan.textContent = `Rig '${rig.title}' zu GitHub pushen`;
+    if (branchInput) branchInput.value = `rig/${rig.id}`;
+    if (msgInput) msgInput.value = `feat(rig): update ${rig.title} (${rig.id})`;
+    if (resultBox) resultBox.style.display = 'none';
+
+    modal.classList.add('active');
+  }
+
+  function closePushRigModal() {
+    const modal = document.getElementById('modal-push-rig');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function bindUpdaterForms() {
+    const form = document.getElementById('form-push-rig');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rigId = document.getElementById('push-rig-id').value;
+        const branchName = document.getElementById('push-rig-branch').value.trim();
+        const commitMessage = document.getElementById('push-rig-message').value.trim();
+        const submitBtn = document.getElementById('btn-submit-push-rig');
+        const resultBox = document.getElementById('push-rig-result');
+        const prLink = document.getElementById('push-rig-pr-link');
+
+        try {
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Pushe zu GitHub...';
+          }
+          window.showToast(`Erstelle Branch '${branchName}' & übertrage Rig...`, 'info');
+
+          const res = await api('/v1/updater/push-rig', {
+            method: 'POST',
+            body: JSON.stringify({ rigId, branchName, commitMessage })
+          });
+
+          const data = res.data || res;
+          window.showToast(`Branch '${data.branch}' erfolgreich zu GitHub übertragen!`, 'success');
+
+          if (resultBox && prLink) {
+            resultBox.style.display = 'block';
+            prLink.href = data.pullRequestUrl || 'https://github.com/AmFearLiath/PlayRig/pulls';
+          }
+        } catch (err) {
+          window.showToast('Fehler beim Pushen: ' + err.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Branch erstellen & pushen';
+          }
+        }
+      });
+    }
   }
 
   window.switchView = switchView;
+  window.checkUpdates = checkUpdates;
+  window.applyUpdate = applyUpdate;
+  window.openPushRigModal = openPushRigModal;
+  window.closePushRigModal = closePushRigModal;
   document.addEventListener('DOMContentLoaded', init);
 })();

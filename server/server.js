@@ -528,6 +528,12 @@ app.post('/api/rigs/import-zip', requireAuth, (req, res, next) => {
   apiV1(req, res, next);
 });
 
+// Updater Legacy Aliases
+app.use('/api/updater', (req, res, next) => {
+  req.url = '/updater' + req.url;
+  apiV1(req, res, next);
+});
+
 // Fork (Clone) Rig
 async function handleForkRig(req, res) {
   try {

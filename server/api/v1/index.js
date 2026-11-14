@@ -18,6 +18,7 @@ router.use('/rigs', require('./routes/rigs'));
 router.use('/storage', require('./routes/storage'));
 router.use('/services', require('./routes/services'));
 router.use('/docs', require('./routes/docs'));
+router.use('/updater', require('./routes/updater'));
 
 // Root V1 Info
 router.get('/', (req, res) => {
@@ -33,7 +34,8 @@ router.get('/', (req, res) => {
         rigs: '/api/v1/rigs',
         storage: '/api/v1/storage',
         services: '/api/v1/services',
-        docs: '/api/v1/docs'
+        docs: '/api/v1/docs',
+        updater: '/api/v1/updater'
       }
     },
     meta: {

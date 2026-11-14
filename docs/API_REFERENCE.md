@@ -297,3 +297,82 @@ Prüft den Health-Status des entsprechenden Companion-Services.
 #### `GET /api/v1/docs`
 Gibt das vollständige, maschinenlesbare OpenAPI-Schema der PlayRig-API zurück.
 
+---
+
+### 3.6 GitHub & System Updater (`/api/v1/updater`)
+
+Echtzeit-Synchronisation des Systems und der Rigs mit dem offiziellen GitHub-Repository (`https://github.com/AmFearLiath/PlayRig`).
+
+#### `GET /api/v1/updater/status`
+Prüft den Synchronisationsstatus mit `origin/main` (gecached für 30s).
+- **Berechtigung:** Öffentlich (kein Token erforderlich).
+- **Query-Parameter:** `force=true` (optional, erzwingt frischen Remote-Fetch).
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "hasUpdate": true,
+    "behind": 2,
+    "ahead": 0,
+    "branch": "main",
+    "repoUrl": "https://github.com/AmFearLiath/PlayRig",
+    "local": { "hash": "d6383f0", "message": "feat: merge PR..." },
+    "remote": { "hash": "e819ac2", "message": "feat: new rig..." },
+    "incomingCommits": [
+      { "hash": "e819ac2", "author": "Liath", "relativeTime": "2 hours ago", "message": "feat: new rig..." }
+    ],
+    "isClean": true,
+    "modifiedCount": 0,
+    "lastChecked": "2026-11-14T11:00:00.000Z"
+  }
+}
+```
+
+#### `POST /api/v1/updater/check`
+Erzwingt eine sofortige Prüfung gegen `origin/main`.
+- **Response (200 OK):** Identisch mit `GET /updater/status`.
+
+#### `POST /api/v1/updater/apply`
+Führt die System- und Rig-Aktualisierung durch (`git pull --rebase origin main`, gefolgt von automatischem Re-Sync der MySQL-Datenbank).
+- **Berechtigung:** Erfordert Rolle `admin`.
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "success": true,
+    "status": { "hasUpdate": false, "behind": 0, ... },
+    "logs": [
+      "[11:30:00] Starte Aktualisierung von https://github.com/AmFearLiath/PlayRig...",
+      "[11:30:02] Ziehe Änderungen von origin/main per Rebase...",
+      "[11:30:04] Synchronisiere MySQL-Datenbank & Rigs...",
+      "[11:30:05] System ist jetzt auf Stand: e819ac2"
+    ]
+  }
+}
+```
+
+#### `POST /api/v1/updater/push-rig`
+Überträgt ein einzelnes Rig in einen isolierten Feature-Branch auf GitHub für Pull-Requests.
+- **Berechtigung:** Erfordert Rolle `creator` oder `admin`.
+- **Payload:**
+```json
+{
+  "rigId": "rpg-dice-loot-vault",
+  "branchName": "rig/rpg-dice-loot-vault-v2",
+  "commitMessage": "feat(rpg): neue Loot-Tabellen hinzugefügt"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "branch": "rig/rpg-dice-loot-vault-v2",
+    "pullRequestUrl": "https://github.com/AmFearLiath/PlayRig/pull/new/rig%2Frpg-dice-loot-vault-v2",
+    "rig": { "id": "rpg-dice-loot-vault", "title": "Retro RPG Dice & Loot Vault" }
+  }
+}
+```
+

@@ -116,6 +116,7 @@
     bindNavigation();
     bindForms();
     bindRigEditorShortcuts();
+    bindStudioPushRigForms();
 
     if (state.token) {
       try {
@@ -370,6 +371,9 @@
         </td>
         <td style="text-align: right;">
           <div style="display: inline-flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm btn-push-rig-branch" data-id="${rig.id}" title="Rig in eigenem Branch zu GitHub pushen">
+              🐙 Push
+            </button>
             <button class="btn btn-primary btn-sm btn-edit-rig" data-id="${rig.id}" title="Im Vollbild Rig-Editor öffnen & Code bearbeiten">
               ⚡ Code & Studio
             </button>
@@ -390,6 +394,10 @@
           </div>
         </td>
       `;
+
+      tr.querySelector('.btn-push-rig-branch')?.addEventListener('click', () => {
+        openStudioPushRigModal(rig);
+      });
 
       const visBtn = tr.querySelector('.visibility-toggle-btn');
       if (visBtn) {
@@ -1297,10 +1305,81 @@
     }
   }
 
+  // ==========================================
+  // PUSH RIG TO GITHUB BRANCH (STUDIO)
+  // ==========================================
+  function openStudioPushRigModal(rig) {
+    const modal = document.getElementById('modal-studio-push-rig');
+    const idInput = document.getElementById('studio-push-rig-id');
+    const branchInput = document.getElementById('studio-push-rig-branch');
+    const msgInput = document.getElementById('studio-push-rig-message');
+    const titleSpan = document.getElementById('studio-push-rig-title');
+    const resultBox = document.getElementById('studio-push-rig-result');
+
+    if (!modal) return;
+    if (idInput) idInput.value = rig.id;
+    if (titleSpan) titleSpan.textContent = `Rig '${rig.title}' zu GitHub pushen`;
+    if (branchInput) branchInput.value = `rig/${rig.id}`;
+    if (msgInput) msgInput.value = `feat(rig): update ${rig.title} (${rig.id})`;
+    if (resultBox) resultBox.style.display = 'none';
+
+    modal.classList.add('active');
+  }
+
+  function closeStudioPushRigModal() {
+    const modal = document.getElementById('modal-studio-push-rig');
+    if (modal) modal.classList.remove('active');
+  }
+
+  function bindStudioPushRigForms() {
+    const form = document.getElementById('form-studio-push-rig');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rigId = document.getElementById('studio-push-rig-id').value;
+        const branchName = document.getElementById('studio-push-rig-branch').value.trim();
+        const commitMessage = document.getElementById('studio-push-rig-message').value.trim();
+        const submitBtn = document.getElementById('btn-submit-studio-push-rig');
+        const resultBox = document.getElementById('studio-push-rig-result');
+        const prLink = document.getElementById('studio-push-rig-pr-link');
+
+        try {
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Pushe zu GitHub...';
+          }
+          window.showToast(`Erstelle Branch '${branchName}' & pushe Rig zu GitHub...`, 'info');
+
+          const res = await api('/v1/updater/push-rig', {
+            method: 'POST',
+            body: JSON.stringify({ rigId, branchName, commitMessage })
+          });
+
+          const data = res.data || res;
+          window.showToast(`Branch '${data.branch}' erfolgreich zu GitHub übertragen!`, 'success');
+
+          if (resultBox && prLink) {
+            resultBox.style.display = 'block';
+            prLink.href = data.pullRequestUrl || 'https://github.com/AmFearLiath/PlayRig/pulls';
+          }
+        } catch (err) {
+          window.showToast('Fehler beim Pushen: ' + err.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🚀 Branch erstellen & pushen';
+          }
+        }
+      });
+    }
+  }
+
   window.switchView = switchView;
   window.openRigEditor = openRigEditor;
   window.setImporterTab = setImporterTab;
   window.resetZipImport = resetZipImport;
+  window.openStudioPushRigModal = openStudioPushRigModal;
+  window.closeStudioPushRigModal = closeStudioPushRigModal;
 
   document.addEventListener('DOMContentLoaded', init);
 })();

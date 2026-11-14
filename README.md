@@ -30,6 +30,7 @@ Traditionelle Web-Tools leiden unter Tab-Sprawl, fehlender Persistenz und Abhän
 - **🎯 Zero Tab Sprawl (In-Window First):** Kein lästiges Fenster-Chaos. Sämtliche Navigationen, Editoren und Vorschauen bleiben exakt im selben Browserfenster.
 - **🧩 100 % Autark (Standalone First):** Jedes Rig läuft vollständig lokal und unabhängig. Fällt das Host-Netzwerk aus, greift nahtlos der integrierte Offline- und Session-Fallback.
 - **📦 1-Klick ZIP-Projekt-Importer & Sicherheits-Scanner:** Lade vollständige Rig-Projekte als ZIP-Archiv hoch. Das System scannt auf Schadcode, eval(), Backdoors und Zip-Slip und schaltet das Rig nach Freigabe sofort lauffähig frei.
+- **🔄 GitHub & System Updater:** Vollautomatische Synchronisation mit dem zentralen GitHub-Repository (`https://github.com/AmFearLiath/PlayRig`). 1-Klick Updates im Admin-Panel mit Update-Benachrichtigungen und isoliertem Branch-Push für einzelne Rigs.
 - **⚡ Blitzschnelle Screenshots:** Das PlayRig Deck nutzt statische, gecachte Snapshots (`thumbnail.png`) für das Spotlight. Keine schweren WebGL-Kontexte beim bloßen Durchstöbern des Katalogs!
 - **🔊 Prozedurale Web Audio SFX:** Echte Audio-Synthese in Echtzeit – keine externen MP3s, keine Ladezeiten, null 404-Fehler.
 - **🤖 Standard & Prompt für KI-Agenten:** Verbindliche Design- und Performance-Leitlinien für KI-Systeme, um Rigs in AAA-Qualität zu generieren.

@@ -236,6 +236,32 @@ const API_SPEC = {
       method: 'GET',
       summary: 'Status und Diagnose eines Companion Services abrufen',
       requiredScope: 'none'
+    },
+    // GitHub & System Updater
+    {
+      path: '/api/v1/updater/status',
+      method: 'GET',
+      summary: 'Synchronisations-Status mit GitHub abfragen (Ahead/Behind, Commits, Arbeitsverzeichnis)',
+      requiredScope: 'none'
+    },
+    {
+      path: '/api/v1/updater/check',
+      method: 'POST',
+      summary: 'Sofortige Überprüfung gegen GitHub origin/main erzwingen',
+      requiredScope: 'none'
+    },
+    {
+      path: '/api/v1/updater/apply',
+      method: 'POST',
+      summary: 'System und Rigs mit GitHub origin/main synchronisieren (Git pull rebase & DB sync)',
+      requiredScope: 'admin'
+    },
+    {
+      path: '/api/v1/updater/push-rig',
+      method: 'POST',
+      summary: 'Einzelnes Rig in einen isolierten Feature-Branch auf GitHub für Pull-Requests pushen',
+      parameters: { rigId: 'string', branchName: 'string (optional)', commitMessage: 'string (optional)' },
+      requiredScope: 'creator / admin'
     }
   ]
 };
