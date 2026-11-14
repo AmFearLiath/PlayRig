@@ -51,7 +51,35 @@ function findPIDsOnPort(port) {
         }
       }
     } catch (e) {
-      // lsof returned non-zero (no processes found)
+      // lsof not installed or returned non-zero
+    }
+
+    // Fallback via ss (Standard in iproute2 auf Debian)
+    if (pids.size === 0) {
+      try {
+        const output = execSync(`ss -tlpn "sport = :${port}"`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const matches = output.matchAll(/pid=(\d+)/g);
+        for (const m of matches) {
+          const pid = parseInt(m[1], 10);
+          if (!isNaN(pid) && pid > 0 && pid !== currentPid) {
+            pids.add(pid);
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Fallback via fuser
+    if (pids.size === 0) {
+      try {
+        const output = execSync(`fuser ${port}/tcp`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const parts = output.trim().split(/\s+/);
+        for (const p of parts) {
+          const pid = parseInt(p.trim(), 10);
+          if (!isNaN(pid) && pid > 0 && pid !== currentPid) {
+            pids.add(pid);
+          }
+        }
+      } catch (e) {}
     }
   }
 

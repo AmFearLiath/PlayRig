@@ -1108,10 +1108,10 @@ async function startServer() {
     await serviceManager.initAll({ rootDir: ROOT_DIR, db });
     serviceManager.registerRoutes(app);
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`
   ==============================================================
-   🚀 PLAYRIG ENGINE SERVER GESTARTET (MySQL 3307)
+   🚀 PLAYRIG ENGINE SERVER GESTARTET
   ==============================================================
    ➜ PlayRig Deck:          http://localhost:${PORT}
    ➜ PlayRig Studio:        http://localhost:${PORT}/studio
@@ -1123,6 +1123,18 @@ async function startServer() {
    • Creator:  creator / creator123
   ==============================================================
       `);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`\n[PlayRig Server] KRITISCHER STARTFEHLER: Port ${PORT} ist bereits belegt (EADDRINUSE)!`);
+        console.error(`Ein anderer Prozess oder Dienst belegt diesen Port.`);
+        console.error(`Tipp: Beende den blockierenden Prozess ('fuser -k ${PORT}/tcp') oder passe 'PORT=...' in der .env-Datei an.\n`);
+        process.exit(1);
+      } else {
+        console.error('[PlayRig Server] Server-Fehler:', err);
+        process.exit(1);
+      }
     });
   } catch (err) {
     console.error('[PlayRig Engine] Fataler Startfehler:', err.message);

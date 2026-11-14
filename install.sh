@@ -30,7 +30,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="/var/www/playrig"
+if [[ "$INSTALL_DIR" == *playrig* ]]; then
+  TARGET_DIR="$INSTALL_DIR"
+else
+  TARGET_DIR="/var/www/playrig"
+fi
 DOMAIN="playrig.amfearliath.de"
 
 echo -e "${BLUE}[1/8] Prüfe Systempakete & erstelle Systembenutzer...${NC}"
@@ -38,8 +42,8 @@ echo -e "${BLUE}[1/8] Prüfe Systempakete & erstelle Systembenutzer...${NC}"
 # Paketquellen aktualisieren
 apt-get update -y
 
-# Erforderliche Basispakete installieren
-apt-get install -y curl wget git unzip tar build-essential mariadb-server nginx certbot python3-certbot-nginx
+# Erforderliche Basispakete installieren (inkl. lsof & psmisc für Port-Management)
+apt-get install -y curl wget git unzip tar build-essential mariadb-server nginx certbot python3-certbot-nginx lsof psmisc
 
 # Systembenutzer 'playrig' anlegen falls nicht vorhanden
 if ! id "playrig" &>/dev/null; then
@@ -103,12 +107,26 @@ mariadb -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost'
 mariadb -e "FLUSH PRIVILEGES;"
 echo -e "${GREEN}✓ MariaDB-Datenbank '${DB_NAME}' und Benutzer '${DB_USER}' bereitgestellt.${NC}"
 
+# Port-Prüfung: Falls Port 3000 belegt ist, Port 3005 wählen
+APP_PORT=3000
+if [ -f "$TARGET_DIR/.env" ]; then
+  EXISTING_PORT=$(grep -E '^PORT=' "$TARGET_DIR/.env" | cut -d'=' -f2- | tr -d ' ' | tr -d '"')
+  if [ -n "$EXISTING_PORT" ]; then
+    APP_PORT="$EXISTING_PORT"
+  fi
+fi
+
+if ss -tlpn "sport = :${APP_PORT}" 2>/dev/null | grep -q ":${APP_PORT} "; then
+  echo -e "${YELLOW}[HINWEIS] Port ${APP_PORT} ist bereits belegt! Verwende Port 3005 für PlayRig...${NC}"
+  APP_PORT=3005
+fi
+
 # .env Konfigurationsdatei schreiben
 cat > "$TARGET_DIR/.env" <<EOF
 # ==============================================================================
 # PlayRig Engine - Produktions-Konfiguration
 # ==============================================================================
-PORT=3000
+PORT=${APP_PORT}
 NODE_ENV=production
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -118,7 +136,7 @@ DB_NAME=${DB_NAME}
 PUBLIC_URL=https://${DOMAIN}
 EOF
 chmod 600 "$TARGET_DIR/.env"
-echo -e "${GREEN}✓ Konfigurationsdatei $TARGET_DIR/.env erfolgreich geschrieben.${NC}"
+echo -e "${GREEN}✓ Konfigurationsdatei $TARGET_DIR/.env (Port: ${APP_PORT}) erfolgreich geschrieben.${NC}"
 
 # 5. Node.js Abhängigkeiten installieren & DB initialisieren
 echo -e "${BLUE}[5/8] Installiere NPM-Dependencies & initialisiere PlayRig...${NC}"
@@ -146,7 +164,30 @@ chown -R playrig:playrig "$TARGET_DIR"
 
 # 6. Systemd Service einrichten & starten
 echo -e "${BLUE}[6/8] Richte Systemd-Dienst 'playrig.service' ein...${NC}"
-cp "$TARGET_DIR/deploy/systemd/playrig.service" /etc/systemd/system/playrig.service
+cat > /etc/systemd/system/playrig.service <<EOF
+[Unit]
+Description=PlayRig Engine Server & Modular Gaming Platform
+After=network.target mysql.service mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=playrig
+Group=playrig
+WorkingDirectory=${TARGET_DIR}
+ExecStart=/usr/bin/node server/server.js
+Restart=always
+RestartSec=5
+EnvironmentFile=-${TARGET_DIR}/.env
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=playrig
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl daemon-reload
 systemctl enable playrig.service
 systemctl restart playrig.service
@@ -163,7 +204,11 @@ echo -e "${BLUE}[7/8] Konfiguriere NGINX Reverse-Proxy für ${DOMAIN}...${NC}"
 NGINX_CONF="/etc/nginx/sites-available/${DOMAIN}.conf"
 cp "$TARGET_DIR/deploy/nginx/playrig.amfearliath.de.conf" "$NGINX_CONF"
 
-# Symlink erstellen
+# Port anpassen
+sed -i "s/127.0.0.1:[0-9]\+/127.0.0.1:${APP_PORT}/g" "$NGINX_CONF"
+
+# Symlink erstellen & Standard-Konflikte entfernen
+rm -f /etc/nginx/sites-enabled/default
 ln -sf "$NGINX_CONF" "/etc/nginx/sites-enabled/${DOMAIN}.conf"
 
 # NGINX Konfiguration prüfen & neu laden
@@ -202,3 +247,4 @@ echo -e " • Admin:    ${BOLD}admin${NC} / ${BOLD}admin123${NC}"
 echo -e " • Creator:  ${BOLD}creator${NC} / ${BOLD}creator123${NC}"
 echo -e "=============================================================="
 echo ""
+
