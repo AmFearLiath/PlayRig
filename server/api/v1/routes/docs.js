@@ -163,6 +163,27 @@ const API_SPEC = {
       parameters: { id: 'string', status: 'string' },
       requiredScope: 'rigs:admin / creator'
     },
+    {
+      path: '/api/v1/rigs/validate-zip',
+      method: 'POST',
+      summary: 'Vollständiges ZIP-Projekt vorab scannen und auf Schadcode, Backdoors, eval() und Zip-Slip prüfen',
+      parameters: { zipBase64: 'string (Base64-kodiertes ZIP-Archiv)' },
+      requiredScope: 'none (Öffentlicher Pre-Flight Scan)'
+    },
+    {
+      path: '/api/v1/rigs/import-zip',
+      method: 'POST',
+      summary: 'Geprüftes ZIP-Projekt entpacken, Bridge & Tokens injizieren und sofort lauffähig in PlayRig registrieren',
+      parameters: {
+        zipBase64: 'string (Base64)',
+        title: 'string (optional)',
+        category: 'string (gaming, animations, creative, helper, dev-lab)',
+        subcategory: 'string (optional)',
+        author: 'string (optional, Standard: Account-Name)',
+        copyright: 'string (optional, Standard: © Autor bzw. © GameChiller für Liath)'
+      },
+      requiredScope: 'creator / admin (Authentifizierter Benutzer)'
+    },
     // Scoped Cloud Storage
     {
       path: '/api/v1/storage/user/:key',

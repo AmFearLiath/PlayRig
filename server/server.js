@@ -517,6 +517,17 @@ app.post('/api/tools/import', requireAuth, (req, res) => {
   res.redirect(307, '/api/rigs/import');
 });
 
+// ZIP Project Import & Validation Legacy Aliases
+app.post('/api/rigs/validate-zip', (req, res, next) => {
+  req.url = '/rigs/validate-zip';
+  apiV1(req, res, next);
+});
+
+app.post('/api/rigs/import-zip', requireAuth, (req, res, next) => {
+  req.url = '/rigs/import-zip';
+  apiV1(req, res, next);
+});
+
 // Fork (Clone) Rig
 async function handleForkRig(req, res) {
   try {

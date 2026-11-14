@@ -115,4 +115,19 @@ PlayRig nutzt standardmäßig einen lokalen **MySQL-Server auf Port 3307** (`pla
    - Input-Validierung: Alle Keys und IDs werden mit `/^[a-zA-Z0-9_.-]{1,128}$/` validiert.
 5. **In-Window Navigation:** Keine unkontrollierte Tab-Vermehrung durch Verbot von `target="_blank"`.
 6. **Graceful Shutdown & Port-Helper:** Automatisches Beenden blockierender Instanzen mit Sicherheitsprüfung bei Neustarts.
+7. **Statische ZIP-Sicherheitsanalyse (`RigSecurityScanner`):** Schutz vor Zip-Slip, Executables, dynamischem Code (`eval`, `new Function`), Process-Spawn (`child_process`), Token/Cookie-Exfiltration und Cryptominern mit Score-Klassifizierung und Audit-Logging.
+
+---
+
+## 6. Projekt- & ZIP-Import-Engine
+
+Die Import-Engine erlaubt das Einspielen kompletter Projektarchive:
+1. **Validierungsphase:** Pre-Flight Scan via `POST /api/v1/rigs/validate-zip`. Überprüfung aller komprimierten Dateien auf Gefahrenmuster und Vorhandensein des Einstiegspunkts (`index.html`).
+2. **Entpackung & Verzeichnisstruktur:** Sichere Extraktion nach `rigs/<Kategorie>/<Unterkategorie>/<Slug>/`.
+3. **Automatische Runtime-Anbindung:**
+   - Automatische Injektion von `tokens.css`, `themes.css`, `base.css` und `components.css`.
+   - Automatische Einbindung der `playrig-bridge.js`.
+   - Fallback-Generierung einer validen `docs.json` Manifestdatei.
+4. **Katalog-Registrierung:** Speicherung des Rigs in der MySQL-Tabelle `rigs` mit sofortiger Verfügbarkeit im PlayRig Deck und Studio.
+5. **Autorenschutz:** Wahrung der Urheberrechte des jeweiligen Autors (Standardmäßig Liath/GameChiller nur für die 10 Plattform-Core-Rigs).
 

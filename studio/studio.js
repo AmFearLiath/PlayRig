@@ -103,7 +103,10 @@
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status}`);
+      const errMsg = (typeof data.error === 'object' && data.error !== null)
+        ? (data.error.message || data.error.code || JSON.stringify(data.error))
+        : (data.error || `HTTP ${res.status}`);
+      throw new Error(errMsg);
     }
     return data;
   }
@@ -949,10 +952,355 @@
         }
       });
     }
+
+    initZipImporter();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ZIP Project Importer & Security Scanner UI
+  let currentZipBase64 = null;
+  let currentScanReport = null;
+
+  function setImporterTab(tab) {
+    const tabZip = document.getElementById('importer-tab-zip');
+    const tabUrl = document.getElementById('importer-tab-url');
+    const btnZip = document.getElementById('btn-tab-import-zip');
+    const btnUrl = document.getElementById('btn-tab-import-url');
+
+    if (tab === 'zip') {
+      if (tabZip) tabZip.style.display = 'block';
+      if (tabUrl) tabUrl.style.display = 'none';
+      if (btnZip) btnZip.className = 'btn btn-primary btn-sm';
+      if (btnUrl) btnUrl.className = 'btn btn-secondary btn-sm';
+    } else {
+      if (tabZip) tabZip.style.display = 'none';
+      if (tabUrl) tabUrl.style.display = 'block';
+      if (btnZip) btnZip.className = 'btn btn-secondary btn-sm';
+      if (btnUrl) btnUrl.className = 'btn btn-primary btn-sm';
+    }
+  }
+
+  function resetZipImport() {
+    currentZipBase64 = null;
+    currentScanReport = null;
+    const fileInput = document.getElementById('zip-file-input');
+    if (fileInput) fileInput.value = '';
+    const resultsPanel = document.getElementById('zip-scan-results');
+    if (resultsPanel) resultsPanel.style.display = 'none';
+    const dropzone = document.getElementById('zip-dropzone');
+    if (dropzone) {
+      dropzone.style.display = 'block';
+      dropzone.style.borderColor = 'var(--border-strong)';
+      dropzone.style.background = 'rgba(3, 7, 18, 0.6)';
+      dropzone.innerHTML = `
+        <div style="font-size: 2.4rem; margin-bottom: 8px;">📦</div>
+        <h3 style="margin: 0 0 6px 0; color: #fff; font-size: 1.15rem;">ZIP-Datei hier ablegen oder durchsuchen</h3>
+        <p style="margin: 0; color: var(--text-dim); font-size: 0.85rem;">Unterstützt .zip mit index.html, Assets, Scripts und optionalem docs.json Manifest (Max. 50 MB)</p>
+        <input type="file" id="zip-file-input" accept=".zip,application/zip" style="display: none;">
+      `;
+      const newFileInput = document.getElementById('zip-file-input');
+      if (newFileInput) {
+        newFileInput.addEventListener('change', () => {
+          const f = newFileInput.files?.[0];
+          if (f) handleZipFile(f);
+        });
+      }
+    }
+  }
+
+  function initZipImporter() {
+    const dropzone = document.getElementById('zip-dropzone');
+    const fileInput = document.getElementById('zip-file-input');
+    const confirmForm = document.getElementById('form-confirm-zip-import');
+    if (!dropzone || !fileInput) return;
+
+    dropzone.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'INPUT') {
+        const input = document.getElementById('zip-file-input');
+        if (input) input.click();
+      }
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'var(--neon-cyan)';
+      dropzone.style.background = 'rgba(0, 240, 255, 0.08)';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = 'var(--border-strong)';
+      dropzone.style.background = 'rgba(3, 7, 18, 0.6)';
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'var(--border-strong)';
+      dropzone.style.background = 'rgba(3, 7, 18, 0.6)';
+      const file = e.dataTransfer?.files?.[0];
+      if (file) handleZipFile(file);
+    });
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files?.[0];
+      if (file) handleZipFile(file);
+    });
+
+    if (confirmForm) {
+      confirmForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentZipBase64) {
+          window.showToast('Kein ZIP-Archiv zum Importieren vorhanden.', 'warning');
+          return;
+        }
+
+        const title = document.getElementById('zip-import-title').value.trim();
+        const category = document.getElementById('zip-import-cat').value;
+        const author = document.getElementById('zip-import-author')?.value.trim();
+        const copyright = document.getElementById('zip-import-copyright')?.value.trim();
+        const submitBtn = document.getElementById('btn-submit-zip-import');
+
+        try {
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Entpacke & initialisiere Rig...';
+          }
+          window.showToast('Entpacke ZIP und registriere Rig in PlayRig...', 'info');
+
+          const res = await api('/rigs/import-zip', {
+            method: 'POST',
+            body: JSON.stringify({
+              zipBase64: currentZipBase64,
+              title,
+              category,
+              author,
+              copyright
+            })
+          });
+
+          const rigData = res.data?.rig || res.rig;
+          window.showToast(`Rig '${rigData?.title || title}' erfolgreich importiert und verifiziert!`, 'success');
+
+          resetZipImport();
+          await loadMyTools();
+          if (rigData) {
+            openRigEditor(rigData);
+          } else {
+            switchView('view-my-tools');
+          }
+        } catch (err) {
+          window.showToast('Import fehlgeschlagen: ' + err.message, 'error');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '🚀 Projekt freigeben & in meine Rigs importieren';
+          }
+        }
+      });
+    }
+  }
+
+  async function handleZipFile(file) {
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      window.showToast('Bitte lade eine gültige .zip Datei hoch.', 'warning');
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      window.showToast('Die Datei überschreitet das Limit von 50 MB.', 'warning');
+      return;
+    }
+
+    const dropzone = document.getElementById('zip-dropzone');
+    if (dropzone) {
+      dropzone.innerHTML = `
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">⏳</div>
+        <h3 style="margin: 0 0 6px 0; color: #fff; font-size: 1.1rem;">Prüfe Archiv '${escapeHtml(file.name)}'...</h3>
+        <p style="margin: 0; color: var(--neon-cyan); font-size: 0.85rem;">Sicherheits-Scan auf Backdoors, Schadcode und Zip-Slip läuft...</p>
+      `;
+    }
+
+    window.showToast(`Analysiere '${file.name}' auf Sicherheitsbedrohungen...`, 'info');
+
+    const reader = new FileReader();
+    reader.onerror = () => {
+      window.showToast('Fehler beim Lesen der lokalen ZIP-Datei.', 'error');
+      resetZipImport();
+    };
+
+    reader.onload = async () => {
+      try {
+        const base64Data = reader.result;
+        currentZipBase64 = base64Data;
+
+        const res = await api('/rigs/validate-zip', {
+          method: 'POST',
+          body: JSON.stringify({ zipBase64: base64Data })
+        });
+
+        const report = res.data?.report || res.report || res.data;
+        currentScanReport = report;
+
+        renderScanResults(file, report);
+      } catch (err) {
+        window.showToast('Sicherheitsprüfung fehlgeschlagen: ' + err.message, 'error');
+        resetZipImport();
+      } finally {
+        if (dropzone) {
+          dropzone.innerHTML = `
+            <div style="font-size: 2.4rem; margin-bottom: 8px;">📦</div>
+            <h3 style="margin: 0 0 6px 0; color: #fff; font-size: 1.15rem;">ZIP-Datei hier ablegen oder durchsuchen</h3>
+            <p style="margin: 0; color: var(--text-dim); font-size: 0.85rem;">Unterstützt .zip mit index.html, Assets, Scripts und optionalem docs.json Manifest (Max. 50 MB)</p>
+            <input type="file" id="zip-file-input" accept=".zip,application/zip" style="display: none;">
+          `;
+          const newFileInput = document.getElementById('zip-file-input');
+          if (newFileInput) {
+            newFileInput.addEventListener('change', () => {
+              const f = newFileInput.files?.[0];
+              if (f) handleZipFile(f);
+            });
+          }
+        }
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  function renderScanResults(file, report) {
+    const resultsPanel = document.getElementById('zip-scan-results');
+    const titleEl = document.getElementById('scan-status-title');
+    const filesSummaryEl = document.getElementById('scan-files-summary');
+    const badgeEl = document.getElementById('scan-score-badge');
+    const issuesListEl = document.getElementById('scan-issues-list');
+    const submitBtn = document.getElementById('btn-submit-zip-import');
+
+    if (!resultsPanel) return;
+    resultsPanel.style.display = 'block';
+
+    const isPassed = report.valid && report.status === 'passed';
+    const isWarning = report.valid && report.status === 'warning';
+    const isRejected = !report.valid || report.status === 'rejected';
+
+    if (isPassed) {
+      if (titleEl) titleEl.innerHTML = '<span style="color: var(--neon-emerald)">Sicherheitsprüfung bestanden</span>';
+      if (badgeEl) {
+        badgeEl.className = 'badge badge-success';
+        badgeEl.textContent = `Score: ${report.score}/100 • Geprüft`;
+        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
+        badgeEl.style.color = '#10b981';
+        badgeEl.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+      }
+    } else if (isWarning) {
+      if (titleEl) titleEl.innerHTML = '<span style="color: var(--neon-amber)">Bestanden mit Hinweisen</span>';
+      if (badgeEl) {
+        badgeEl.className = 'badge badge-warning';
+        badgeEl.textContent = `Score: ${report.score}/100 • Warnung`;
+        badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
+        badgeEl.style.color = '#f59e0b';
+        badgeEl.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+      }
+    } else {
+      if (titleEl) titleEl.innerHTML = '<span style="color: var(--neon-rose)">Blockiert: Schadcode / Verstoß</span>';
+      if (badgeEl) {
+        badgeEl.className = 'badge badge-danger';
+        badgeEl.textContent = `Score: ${report.score}/100 • Abgewiesen`;
+        badgeEl.style.background = 'rgba(244, 63, 94, 0.2)';
+        badgeEl.style.color = '#f43f5e';
+        badgeEl.style.border = '1px solid rgba(244, 63, 94, 0.4)';
+      }
+    }
+
+    if (filesSummaryEl) {
+      filesSummaryEl.textContent = `Archiv: ${file.name} (${(file.size / 1024).toFixed(1)} KB) • ${report.filesScanned || 0} Dateien gescannt • Einstieg: ${report.entryFile || 'index.html'}`;
+    }
+
+    // Issues list rendering
+    if (issuesListEl) {
+      if (!report.issues || report.issues.length === 0) {
+        issuesListEl.innerHTML = `
+          <div style="padding: 10px 14px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm); color: #34d399; display: flex; align-items: center; gap: 8px;">
+            <span>✓</span> Keine bösartigen Signaturen, Backdoors, Zip-Slip oder eval()-Aufrufe entdeckt. Projekt ist bereit für PlayRig.
+          </div>
+        `;
+      } else {
+        let issuesHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+        for (const issue of report.issues) {
+          let badgeColor = '#f43f5e';
+          let badgeBg = 'rgba(244, 63, 94, 0.15)';
+          if (issue.level === 'warning') {
+            badgeColor = '#f59e0b';
+            badgeBg = 'rgba(245, 158, 11, 0.15)';
+          } else if (issue.level === 'info') {
+            badgeColor = '#00f0ff';
+            badgeBg = 'rgba(0, 240, 255, 0.15)';
+          }
+
+          issuesHtml += `
+            <div style="padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-weight: 600; color: #fff;">${escapeHtml(issue.message)}</span>
+                <span style="font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono);">${issue.file ? escapeHtml(issue.file) : 'Archiv'}${issue.snippet ? ` — Code: "${escapeHtml(issue.snippet)}"` : ''}</span>
+              </div>
+              <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: ${badgeColor}; background: ${badgeBg}; padding: 3px 8px; border-radius: 4px; border: 1px solid ${badgeColor};">
+                ${issue.level || 'danger'}
+              </span>
+            </div>
+          `;
+        }
+        issuesHtml += '</div>';
+        issuesListEl.innerHTML = issuesHtml;
+      }
+    }
+
+    // Pre-fill form fields
+    const titleInput = document.getElementById('zip-import-title');
+    const catInput = document.getElementById('zip-import-cat');
+    const authorInput = document.getElementById('zip-import-author');
+    const copyrightInput = document.getElementById('zip-import-copyright');
+
+    if (titleInput) {
+      titleInput.value = report.metadata?.title || file.name.replace(/\.zip$/i, '').replace(/[-_]/g, ' ');
+    }
+    if (catInput && report.metadata?.category) {
+      catInput.value = report.metadata.category;
+    }
+    if (authorInput) {
+      authorInput.value = report.metadata?.author || (state.user ? (state.user.name || state.user.username) : '');
+    }
+    if (copyrightInput) {
+      if (report.metadata?.copyright) {
+        copyrightInput.value = report.metadata.copyright;
+      } else {
+        const auth = authorInput ? authorInput.value : '';
+        const isLiath = auth.toLowerCase() === 'liath' || (state.user && state.user.username === 'creator');
+        copyrightInput.value = isLiath ? '© GameChiller' : (auth ? `© ${auth}` : '© GameChiller');
+      }
+    }
+
+    // Toggle button state based on validity
+    if (submitBtn) {
+      submitBtn.disabled = isRejected;
+      if (isRejected) {
+        submitBtn.title = 'Projekt kann aufgrund von Sicherheitsverletzungen nicht importiert werden.';
+      } else {
+        submitBtn.title = 'Projekt freigeben und in PlayRig importieren';
+      }
+    }
   }
 
   window.switchView = switchView;
   window.openRigEditor = openRigEditor;
+  window.setImporterTab = setImporterTab;
+  window.resetZipImport = resetZipImport;
 
   document.addEventListener('DOMContentLoaded', init);
 })();

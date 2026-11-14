@@ -344,53 +344,125 @@
       <section id="view-codepen-import" class="studio-view-panel">
         <div class="view-header">
           <div class="view-title-group">
-            <h2>Rig-Importer & <span class="gradient-text">Web Ingest</span></h2>
-            <p>Importiere externe Projekte von CodePen, JSFiddle, Gist oder reinem Quellcode in PlayRig.</p>
+            <h2>Projekt- & <span class="gradient-text">ZIP-Importer</span></h2>
+            <p>Lade vollständige Rig-Projekte als ZIP-Archiv hoch oder importiere externe CodePen-Snippets mit automatischer Sicherheitsanalyse.</p>
           </div>
         </div>
 
-        <div class="glass-panel" style="padding: 32px; max-width: 880px;">
-          <form id="admin-form-codepen-import" style="display: flex; flex-direction: column; gap: 24px;">
-            <div class="form-group">
-              <label class="form-label" style="font-size: 0.92rem; font-weight: 700;">CodePen oder Projekt URL *</label>
-              <input type="url" id="admin-import-url" class="nexus-input"
-                placeholder="https://codepen.io/username/pen/xxxxxx" style="padding: 12px 16px; font-size: 0.95rem;">
-              <span class="form-help" style="margin-top: 6px; line-height: 1.5;">Unterstützt öffentliche CodePen-Pens.
-                Das System extrahiert HTML, CSS und JavaScript automatisch.</span>
+        <div class="glass-panel" style="padding: 24px; max-width: 900px;">
+          <!-- Importer Tabs -->
+          <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--border-default); padding-bottom: 12px; margin-bottom: 24px;">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-tab-import-zip" onclick="setImporterTab('zip')">
+              📦 ZIP-Projekt hochladen & scannen
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-tab-import-url" onclick="setImporterTab('url')">
+              🌐 CodePen / URL Ingest
+            </button>
+          </div>
+
+          <!-- TAB 1: ZIP UPLOAD & SECURITY SCAN -->
+          <div id="importer-tab-zip">
+            <div id="zip-dropzone" style="border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 36px 20px; text-align: center; background: rgba(3, 7, 18, 0.6); cursor: pointer; transition: all var(--transition-fast);">
+              <div style="font-size: 2.4rem; margin-bottom: 8px;">📦</div>
+              <h3 style="margin: 0 0 6px 0; color: #fff; font-size: 1.15rem;">ZIP-Datei hier ablegen oder durchsuchen</h3>
+              <p style="margin: 0; color: var(--text-dim); font-size: 0.85rem;">Unterstützt .zip mit index.html, Assets, Scripts und optionalem docs.json Manifest (Max. 50 MB)</p>
+              <input type="file" id="zip-file-input" accept=".zip,application/zip" style="display: none;">
             </div>
 
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Titel des Rigs (Optional)</label>
-                <input type="text" id="admin-import-title" class="nexus-input" placeholder="Mein importiertes Rig"
-                  style="padding: 10px 14px;">
+            <!-- Security Scan Report Display (Hidden until file selected) -->
+            <div id="zip-scan-results" style="display: none; margin-top: 24px; padding: 20px; border-radius: var(--radius-md); background: #030712; border: 1px solid var(--border-default);">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 14px;">
+                <div>
+                  <h4 style="margin: 0; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    🛡️ <span id="scan-status-title">Sicherheitsprüfung</span>
+                  </h4>
+                  <span id="scan-files-summary" style="font-size: 0.78rem; color: var(--text-dim);"></span>
+                </div>
+                <div id="scan-score-badge" class="badge" style="font-size: 0.85rem; font-family: var(--font-mono); padding: 6px 12px;"></div>
               </div>
+
+              <div id="scan-issues-list" style="margin-bottom: 16px; font-size: 0.85rem;"></div>
+
+              <form id="form-confirm-zip-import" style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Titel des Rigs *</label>
+                    <input type="text" id="zip-import-title" class="nexus-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ziel-Kategorie *</label>
+                    <select id="zip-import-cat" class="nexus-select">
+                      <option value="gaming">Gaming & Sandbox</option>
+                      <option value="animations">Animations & Visual FX</option>
+                      <option value="creative" selected>Creative & Art</option>
+                      <option value="helper">Helper & Utility</option>
+                      <option value="dev-lab">Dev Lab & Showcase</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Autor / Entwickler</label>
+                    <input type="text" id="zip-import-author" class="nexus-input" placeholder="Dein Name oder Handle">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Copyright / Lizenz</label>
+                    <input type="text" id="zip-import-copyright" class="nexus-input" placeholder="z.B. © Dein Name">
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+                  <button type="button" class="btn btn-secondary" onclick="resetZipImport()">Zurücksetzen</button>
+                  <button type="submit" id="btn-submit-zip-import" class="btn btn-primary fx-ripple" style="padding: 12px 24px;">
+                    🚀 Projekt freigeben & in meine Rigs importieren
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- TAB 2: CODEPEN / URL INGEST -->
+          <div id="importer-tab-url" style="display: none;">
+            <form id="admin-form-codepen-import" style="display: flex; flex-direction: column; gap: 20px;">
               <div class="form-group">
-                <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Ziel-Kategorie</label>
-                <select id="admin-import-cat" class="nexus-select" style="padding: 10px 14px;">
-                  <option value="animations">Animations & Visual FX</option>
-                  <option value="gaming">Gaming & Sandbox</option>
-                  <option value="creative" selected>Creative & Art</option>
-                  <option value="helper">Helper & Utility</option>
-                  <option value="dev-lab">Dev Lab & Showcase</option>
-                </select>
+                <label class="form-label" style="font-size: 0.92rem; font-weight: 700;">CodePen oder Projekt URL *</label>
+                <input type="url" id="admin-import-url" class="nexus-input"
+                  placeholder="https://codepen.io/username/pen/xxxxxx" style="padding: 12px 16px; font-size: 0.95rem;">
+                <span class="form-help" style="margin-top: 6px; line-height: 1.5;">Unterstützt öffentliche CodePen-Pens. Das System extrahiert HTML, CSS und JavaScript automatisch.</span>
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Zusätzliche CDN-Bibliotheken (eine
-                URL pro Zeile)</label>
-              <textarea id="admin-import-cdns" class="nexus-input"
-                style="height: 80px; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6;"
-                placeholder="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&#10;https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></textarea>
-            </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Titel des Rigs (Optional)</label>
+                  <input type="text" id="admin-import-title" class="nexus-input" placeholder="Mein importiertes Rig" style="padding: 10px 14px;">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Ziel-Kategorie</label>
+                  <select id="admin-import-cat" class="nexus-select" style="padding: 10px 14px;">
+                    <option value="animations">Animations & Visual FX</option>
+                    <option value="gaming">Gaming & Sandbox</option>
+                    <option value="creative" selected>Creative & Art</option>
+                    <option value="helper">Helper & Utility</option>
+                    <option value="dev-lab">Dev Lab & Showcase</option>
+                  </select>
+                </div>
+              </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
-              <button type="submit" class="btn btn-primary fx-ripple" style="padding: 12px 24px;">
-                ⚡ Projekt importieren & im Editor öffnen
-              </button>
-            </div>
-          </form>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 0.9rem; font-weight: 600;">Zusätzliche CDN-Bibliotheken (eine URL pro Zeile)</label>
+                <textarea id="admin-import-cdns" class="nexus-input"
+                  style="height: 80px; font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6;"
+                  placeholder="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&#10;https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+                <button type="submit" class="btn btn-primary fx-ripple" style="padding: 12px 24px;">
+                  ⚡ Snippet importieren & im Editor öffnen
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </section>
 

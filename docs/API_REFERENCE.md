@@ -149,6 +149,94 @@ Aktualisiert den Status eines Rigs (`active`, `wip`, `deprecated`).
 - **Berechtigung:** Erfordert Rolle `admin` oder `creator` (Eigentümer).
 - **Body:** `{ "id": "rig-id", "status": "deprecated" }`
 
+#### `POST /api/v1/rigs/validate-zip`
+Führt eine tiefe statische Sicherheitsanalyse und Strukturprüfung eines vollständigen ZIP-Archivs durch, **ohne** Dateien auf der Festplatte abzulegen.
+- **Berechtigung:** Öffentlich (kein Token erforderlich).
+- **Payload:**
+```json
+{
+  "zipBase64": "data:application/zip;base64,UEsDBBQAAAA..."
+}
+```
+- **Prüfkriterien des Scanners:**
+  - **Zip-Slip & Pfad-Traversal:** Verhindert das Ausbrechen aus dem Zielverzeichnis (`../`, absolute Pfade).
+  - **Gefährliche Dateitypen:** Sofortige Ablehnung von ausführbaren Dateien (`.exe`, `.dll`, `.bat`, `.cmd`, `.sh`, `.php`, `.vbs`, etc.).
+  - **Dynamischer Code:** Erkennung von `eval()`, `new Function()`, `setTimeout(string)`.
+  - **Prozess-Ausführung:** Blockiert Aufrufe von `require('child_process')`, `process.exit`, `child_process.exec`.
+  - **Token- und Cookie-Exfiltration:** Blockiert unautorisierte Zugriffe auf `document.cookie` oder `localStorage.getItem('token')`.
+  - **Cryptominer:** Erkennung bekannter Mining-Signaturen (`coinhive`, `monero-miner`).
+  - **Einstiegspunkt:** Prüft das Vorhandensein einer `index.html` (im Root oder einem einheitlichen Unterordner).
+- **Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "valid": true,
+    "score": 95,
+    "status": "passed",
+    "report": {
+      "valid": true,
+      "score": 95,
+      "status": "passed",
+      "filesScanned": 8,
+      "entryFile": "index.html",
+      "metadata": {
+        "title": "Voxel Galaxy Lab",
+        "category": "gaming",
+        "author": "CommunityModder",
+        "copyright": "© CommunityModder"
+      },
+      "issues": []
+    },
+    "fileCount": 8
+  },
+  "meta": { "version": "v1.0.0", "timestamp": "2026-11-14T09:30:00.000Z" }
+}
+```
+
+#### `POST /api/v1/rigs/import-zip`
+Importiert ein geprüftes ZIP-Archiv, entpackt es sicher, bindet automatisch die PlayRig Bridge und Design Tokens ein, erzeugt bei Bedarf ein konformes `docs.json` und registriert das Rig mit Standardeinstellungen in der MySQL-Datenbank.
+- **Berechtigung:** Erfordert Rolle `creator` oder `admin`.
+- **Payload:**
+```json
+{
+  "zipBase64": "data:application/zip;base64,UEsDBBQAAAA...",
+  "title": "Mein Super Rig",
+  "category": "gaming",
+  "subcategory": "Sandbox",
+  "author": "Alex Creator",
+  "copyright": "© Alex Creator"
+}
+```
+- **Besonderheiten:**
+  - **Autoren- und Copyright-Integrität:** Eigene Rigs behalten immer den angegebenen Namen und ihr eigenes Copyright. Lediglich von Liath für GameChiller entwickelte Core-Rigs tragen die Signatur `Liath` / `© GameChiller`.
+  - **Sofort lauffähig (Out-of-the-Box):** Das System scannt `index.html`. Falls die PlayRig Design-Tokens (`tokens.css`, `themes.css`, etc.) oder die Bridge (`playrig-bridge.js`) fehlen, werden sie mit korrekten relativen Pfaden automatisch injiziert.
+  - **Sicherheits-Blockierung:** Rigs mit einem Score unter 70 oder kritischen Verstößen (Zip-Slip, Binaries, Backdoors) werden mit HTTP 400 (`SECURITY_SCAN_FAILED`) abgewiesen und im Audit-Log vermerkt.
+- **Response (201 Created):**
+```json
+{
+  "success": true,
+  "data": {
+    "rig": {
+      "id": "rig-mein-super-rig-x9z2",
+      "title": "Mein Super Rig",
+      "category": "gaming",
+      "subcategory": "Sandbox",
+      "path": "rigs/gaming/Sandbox/rig-mein-super-rig-x9z2/index.html",
+      "version": "v1.0.0",
+      "author": "Alex Creator",
+      "copyright": "© Alex Creator",
+      "status": "active",
+      "access": "public"
+    },
+    "report": { "score": 100, "status": "passed" },
+    "directUrl": "/rigs/gaming/Sandbox/rig-mein-super-rig-x9z2/index.html",
+    "studioUrl": "/studio"
+  },
+  "meta": { "version": "v1.0.0", "timestamp": "2026-11-14T09:30:00.000Z" }
+}
+```
+
 ---
 
 ### 3.3 Scoped Storage Engine (`/api/v1/storage`)

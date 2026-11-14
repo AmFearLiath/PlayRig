@@ -29,8 +29,10 @@ Traditionelle Web-Tools leiden unter Tab-Sprawl, fehlender Persistenz und Abhän
 
 - **🎯 Zero Tab Sprawl (In-Window First):** Kein lästiges Fenster-Chaos. Sämtliche Navigationen, Editoren und Vorschauen bleiben exakt im selben Browserfenster.
 - **🧩 100 % Autark (Standalone First):** Jedes Rig läuft vollständig lokal und unabhängig. Fällt das Host-Netzwerk aus, greift nahtlos der integrierte Offline- und Session-Fallback.
+- **📦 1-Klick ZIP-Projekt-Importer & Sicherheits-Scanner:** Lade vollständige Rig-Projekte als ZIP-Archiv hoch. Das System scannt auf Schadcode, eval(), Backdoors und Zip-Slip und schaltet das Rig nach Freigabe sofort lauffähig frei.
 - **⚡ Blitzschnelle Screenshots:** Das PlayRig Deck nutzt statische, gecachte Snapshots (`thumbnail.png`) für das Spotlight. Keine schweren WebGL-Kontexte beim bloßen Durchstöbern des Katalogs!
 - **🔊 Prozedurale Web Audio SFX:** Echte Audio-Synthese in Echtzeit – keine externen MP3s, keine Ladezeiten, null 404-Fehler.
+- **🤖 Standard & Prompt für KI-Agenten:** Verbindliche Design- und Performance-Leitlinien für KI-Systeme, um Rigs in AAA-Qualität zu generieren.
 - **🛡️ Getestete Enterprise-Sicherheit:** Nonce-gesicherte Bridge, strikte Origin-Allowlist, serverseitiges Storage-Gating und RBAC-Rollenmodell.
 
 ---
@@ -156,6 +158,44 @@ Jedes Rig unterstützt den autarken Embed-Modus ohne störende Plattform-Menüs:
   allow="autoplay; fullscreen">
 </iframe>
 ```
+
+---
+
+### 4. ZIP-Projekt Pre-Flight Scan & Import via REST-API
+Vollständige Projekte können automatisiert per Skript oder CI/CD über die REST-Schnittstelle geprüft und registriert werden:
+
+```bash
+# 1. ZIP-Archiv vorab auf Schadcode, eval() und Zip-Slip scannen (ohne Speichern)
+curl -X POST http://localhost:3000/api/v1/rigs/validate-zip \
+  -H "Content-Type: application/json" \
+  -d '{"zipBase64": "data:application/zip;base64,UEsDBBQAAAA..."}'
+
+# 2. Nach Freigabe: Rig entpacken, Bridge injizieren und in PlayRig registrieren
+curl -X POST http://localhost:3000/api/v1/rigs/import-zip \
+  -H "Authorization: Bearer <DEIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "zipBase64": "data:application/zip;base64,UEsDBBQAAAA...",
+    "title": "Neon Asteroids Lab",
+    "category": "gaming",
+    "author": "DeinName",
+    "copyright": "© DeinName"
+  }'
+```
+
+---
+
+## 🤖 Für Entwickler & KI-Agenten: Rigs auf höchstem Niveau
+
+PlayRig definiert verbindliche Qualitätsmaßstäbe für Rigs, die von Entwicklern oder **KI-Agenten** (wie Google Antigravity, Claude, GPT) generiert werden:
+
+- **Visuelle Identität:** Deep Slate Dark Theme (`#07090e`), leuchtende Cyber-Cyan- und Electric-Purple-Akzente, Glassmorphism-Panels und gestochen scharfe Typografie (`JetBrains Mono` für Zahlen/HUD, `Inter` für Text).
+- **Flüssige Performance:** Stabile 60 FPS via `requestAnimationFrame` mit kontinuierlicher Delta-Time. Three.js InstancedMesh für Tausende Partikel oder Voxel ohne Garbage-Collection-Stottern.
+- **Prozedurales Audio (Web Audio API):** Reines Sound-Design durch Oszillatoren, Biquad-Filter und Gain-Envelopes – null Abhängigkeit von externen MP3-Dateien.
+- **Sicherheit & Isolation:** Kein `eval()`, kein `target="_blank"`, strikte In-Window Navigation und synchrone Persistenz via `window.PlayRig.storage`.
+
+👉 **Vollständiger Leitfaden & kopierbarer AI-Agenten-Prompt:**  
+Lies das Kapitel **[🤖 Leitfaden & System-Prompt für KI-Agenten](docs/DEVELOPER_GUIDE.md#6--verbindlicher-leitfaden--system-prompt-f%C3%BCr-ki-agenten-ai-agent-rig-creation-standard)** im Entwickler-Handbuch.
 
 ---
 

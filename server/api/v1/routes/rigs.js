@@ -9,8 +9,10 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const fs = require('fs');
+const JSZip = require('jszip');
 const db = require('../../../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const RigSecurityScanner = require('../../../security-scanner');
 
 const ROOT_DIR = path.resolve(__dirname, '../../../..');
 
@@ -308,6 +310,246 @@ router.post('/:id/screenshot', requireAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       error: { code: 'SAVE_FAILED', message: err.message }
+    });
+  }
+});
+
+// Helper to extract ZIP buffer into file map
+async function extractZipEntries(zipBuffer) {
+  const zip = await JSZip.loadAsync(zipBuffer);
+  const files = {};
+  for (const filename of Object.keys(zip.files)) {
+    const entry = zip.files[filename];
+    if (entry.dir) continue;
+    // Safe relative normalized path
+    const safePath = filename.replace(/\\/g, '/').replace(/^\/+/, '');
+    files[safePath] = await entry.async('nodebuffer');
+  }
+  return files;
+}
+
+// POST /api/v1/rigs/validate-zip - Inspect & Scan ZIP archive without saving
+router.post('/validate-zip', async (req, res) => {
+  try {
+    const { zipBase64 } = req.body;
+    if (!zipBase64) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_PAYLOAD', message: 'Kein ZIP-Archiv übermittelt (zipBase64 erforderlich).' }
+      });
+    }
+
+    const cleanBase64 = zipBase64.replace(/^data:application\/(?:zip|x-zip-compressed);base64,/, '').trim();
+    const zipBuffer = Buffer.from(cleanBase64, 'base64');
+    const zipFiles = await extractZipEntries(zipBuffer);
+    const scanReport = RigSecurityScanner.scanProject(zipFiles);
+
+    res.json({
+      success: true,
+      data: {
+        report: scanReport,
+        fileCount: Object.keys(zipFiles).length
+      },
+      meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      error: { code: 'ZIP_PARSE_ERROR', message: 'Das ZIP-Archiv konnte nicht gelesen werden: ' + err.message }
+    });
+  }
+});
+
+// POST /api/v1/rigs/import-zip - Authenticated Import of complete ZIP project
+router.post('/import-zip', requireAuth, async (req, res) => {
+  try {
+    const { zipBase64, title, category, subcategory, author, copyright } = req.body;
+    if (!zipBase64) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'MISSING_PAYLOAD', message: 'Kein ZIP-Archiv übermittelt.' }
+      });
+    }
+
+    const cleanBase64 = zipBase64.replace(/^data:application\/(?:zip|x-zip-compressed);base64,/, '').trim();
+    const zipBuffer = Buffer.from(cleanBase64, 'base64');
+    const zipFiles = await extractZipEntries(zipBuffer);
+
+    // Deep Security & Validity Inspection
+    const scanReport = RigSecurityScanner.scanProject(zipFiles);
+    if (!scanReport.valid) {
+      await db.logAudit?.(
+        req.user.id,
+        req.user.username,
+        'RIG_IMPORT_SECURITY_BLOCK',
+        `ZIP-Import wegen Sicherheitsverletzungen abgewiesen (Score: ${scanReport.score})`
+      );
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'SECURITY_SCAN_FAILED',
+          message: 'Das ZIP-Projekt hat die Sicherheits- und Validitätsprüfung nicht bestanden.',
+          score: scanReport.score,
+          issues: scanReport.issues
+        }
+      });
+    }
+
+    // Determine Metadata & Hierarchy
+    const targetTitle = title || scanReport.metadata.title || 'Importiertes Rig';
+    const targetCat = category || scanReport.metadata.category || 'creative';
+    const targetSubcat = subcategory || scanReport.metadata.subcategory || 'Imported';
+    
+    const importAuthor = author || scanReport.metadata.author || (req.user ? (req.user.name || req.user.username) : 'Community Creator');
+    const isLiath = importAuthor.toLowerCase() === 'liath' || (req.user && (req.user.username === 'creator' || req.user.name === 'Liath'));
+    const importCopyright = copyright || scanReport.metadata.copyright || (isLiath ? '© GameChiller' : `© ${importAuthor}`);
+
+    const baseSlug = targetTitle.toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-');
+    const rigSlug = 'rig-' + baseSlug.substring(0, 32) + '-' + Date.now().toString(36).slice(-4);
+    const relRigDir = path.join('rigs', targetCat, targetSubcat, rigSlug).replace(/\\/g, '/');
+    const targetDir = path.join(ROOT_DIR, relRigDir);
+
+    // Unzip safe files into directory
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    // Determine entry point directory prefix if zip wrapped in root folder
+    let prefixToRemove = '';
+    if (scanReport.entryFile && scanReport.entryFile.includes('/')) {
+      const parts = scanReport.entryFile.split('/');
+      parts.pop(); // remove index.html
+      prefixToRemove = parts.join('/') + '/';
+    }
+
+    for (const [relPath, buffer] of Object.entries(zipFiles)) {
+      let finalRelPath = relPath;
+      if (prefixToRemove && finalRelPath.startsWith(prefixToRemove)) {
+        finalRelPath = finalRelPath.substring(prefixToRemove.length);
+      }
+      if (!finalRelPath) continue;
+
+      const destPath = path.join(targetDir, finalRelPath);
+      fs.mkdirSync(path.dirname(destPath), { recursive: true });
+      fs.writeFileSync(destPath, buffer);
+    }
+
+    // Ready-to-Run Enhancement: Ensure index.html connects to PlayRig Bridge and tokens
+    const indexHtmlPath = path.join(targetDir, 'index.html');
+    if (fs.existsSync(indexHtmlPath)) {
+      let html = fs.readFileSync(indexHtmlPath, 'utf8');
+
+      // Relative path to _shared
+      const depth = relRigDir.split('/').length;
+      const sharedRel = '../'.repeat(depth) + '_shared';
+
+      let modified = false;
+
+      // Inject Tokens & CSS if missing
+      if (!html.includes('tokens.css')) {
+        const cssTags = `
+  <!-- PlayRig Tokens & Themes -->
+  <link rel="stylesheet" href="${sharedRel}/css/tokens.css">
+  <link rel="stylesheet" href="${sharedRel}/css/themes.css">
+  <link rel="stylesheet" href="${sharedRel}/css/base.css">
+  <link rel="stylesheet" href="${sharedRel}/css/components.css">
+  <link rel="stylesheet" href="${sharedRel}/css/animations.css">`;
+        if (html.includes('</head>')) {
+          html = html.replace('</head>', `${cssTags}\n</head>`);
+          modified = true;
+        }
+      }
+
+      // Inject PlayRig Bridge if missing
+      if (!html.includes('playrig-bridge.js') && !html.includes('embed-bridge.js')) {
+        const jsTags = `
+  <!-- PlayRig Runtime Bridge -->
+  <script src="${sharedRel}/js/toast.js"></script>
+  <script src="${sharedRel}/js/playrig-bridge.js"></script>`;
+        if (html.includes('</body>')) {
+          html = html.replace('</body>', `${jsTags}\n</body>`);
+          modified = true;
+        } else {
+          html += jsTags;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        fs.writeFileSync(indexHtmlPath, html, 'utf8');
+      }
+    }
+
+    // Ensure docs.json exists
+    const docsJsonPath = path.join(targetDir, 'docs.json');
+    if (!fs.existsSync(docsJsonPath)) {
+      const docsManifest = {
+        "$schema": "https://playrig.gamechiller.de/schemas/rig-docs-v1.json",
+        "id": rigSlug,
+        "name": targetTitle,
+        "version": scanReport.metadata.version || "v1.0.0",
+        "author": importAuthor,
+        "copyright": importCopyright,
+        "overview": `Vollständig importiertes Projekt (${scanReport.filesScanned} Dateien). Erfolgreich auf Schadcode und Backdoors geprüft.`,
+        "features": [
+          "Importiertes vollwertiges Web-Rig",
+          "Automatisches PlayRig Bridge Binding",
+          "Sofort lauffähig im Deck & Studio"
+        ],
+        "permissions": ["rigs:read", "storage:user"],
+        "security": {
+          "score": scanReport.score,
+          "inspectedAt": new Date().toISOString(),
+          "status": scanReport.status
+        }
+      };
+      fs.writeFileSync(docsJsonPath, JSON.stringify(docsManifest, null, 2), 'utf8');
+    }
+
+    // Register Rig in Database
+    const newRig = await db.createRig({
+      id: rigSlug,
+      title: targetTitle,
+      description: `Importiertes ZIP-Projekt mit ${scanReport.filesScanned} Dateien. Sicherheitsprüfung: Status ${scanReport.status.toUpperCase()} (Score: ${scanReport.score}/100).`,
+      category: targetCat,
+      subcategory: targetSubcat,
+      path: `${relRigDir}/index.html`,
+      version: scanReport.metadata.version || 'v1.0.0',
+      author: importAuthor,
+      copyright: importCopyright,
+      icon: 'archive',
+      color: '#00f0ff',
+      tags: ['ZIP-Import', targetCat, 'Verified'],
+      status: 'active',
+      access: 'public',
+      settings: {
+        imported: true,
+        importSource: 'zip-upload',
+        securityScore: scanReport.score,
+        filesCount: scanReport.filesScanned
+      }
+    }, req.user);
+
+    await db.logAudit?.(
+      req.user.id,
+      req.user.username,
+      'RIG_ZIP_IMPORT_SUCCESS',
+      `Rig '${targetTitle}' (${rigSlug}) erfolgreich aus ZIP importiert (Score: ${scanReport.score})`
+    );
+
+    res.status(201).json({
+      success: true,
+      data: {
+        rig: newRig,
+        report: scanReport,
+        directUrl: `/${newRig.path}`,
+        studioUrl: `/studio`
+      },
+      meta: { version: 'v1.0.0', timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: { code: 'IMPORT_EXECUTION_ERROR', message: 'Fehler beim Entpacken und Importieren: ' + err.message }
     });
   }
 });

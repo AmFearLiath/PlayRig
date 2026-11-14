@@ -113,3 +113,16 @@ _HTML_Tools/
    Rigs deklarieren ihre benötigten Services im Manifest (`docs.json` bzw. DB-Spalte `services`). Das Deck visualisiert Service-Anforderungen transparent mit Status-Badges.
 3. **Lifecycle:**  
    Der `ServiceManager` (`server/services/index.js`) initialisiert Services dynamisch, bindet ihre REST-Endpunkte ein und überwacht deren Health-Status.
+
+---
+
+## § 8. ZIP-Import, Sicherheitsvalidierung & Standards für KI-Agenten
+
+1. **Verbindliche Sicherheits-Vorabprüfung:**  
+   Jedes importierte ZIP-Archiv muss vor dem Entpacken durch den statischen `RigSecurityScanner` validiert werden. Archive mit Zip-Slip Pfad-Traversierung, ausführbaren Binärdateien (`.exe`, `.dll`, `.bat`, `.sh`, `.php`), dynamischem Code (`eval`, `new Function`), Process-Spawn (`child_process`), Token-Sniffing oder Cryptominern werden strikt abgewiesen und im Audit-Log vermerkt.
+2. **Sofortige Lauffähigkeit nach Freigabe:**  
+   Genehmigte Projekte werden in das Zielverzeichnis extrahiert. Fehlende Token-Verweise (`tokens.css`) und Bridge-Skripte (`playrig-bridge.js`) werden automatisch injiziert, damit das Rig ohne manuelle Konfiguration direkt im Deck und Studio nutzbar ist.
+3. **Autoren- und Copyright-Schutz:**  
+   Eigene und importierte Rigs tragen stets den Namen und das Copyright des jeweiligen Erstellers. Standardmäßig `Liath` und `© GameChiller` gilt ausschließlich für die von uns entwickelten Plattform-Core-Rigs.
+4. **Verbindlicher Standard für KI-Agenten:**  
+   Automatisierte Generatoren und KI-Agenten müssen Rigs nach den Vorgaben des Entwickler-Leitfadens (Deep Slate Dark Theme, responsive 60 FPS Canvas/WebGL, prozedurale Web Audio SFX ohne externe MP3-Abhängigkeiten, In-Window Navigation und valides `docs.json` Manifest) auf höchstem technischen und visuellem Level erstellen.
