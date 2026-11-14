@@ -1,0 +1,21 @@
+[Unit]
+Description=PlayRig Engine Server & Modular Gaming Platform
+After=network.target mysql.service mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=playrig
+Group=playrig
+WorkingDirectory=/var/www/playrig
+ExecStart=/usr/bin/node server/server.js
+Restart=always
+RestartSec=5
+EnvironmentFile=-/var/www/playrig/.env
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=playrig
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

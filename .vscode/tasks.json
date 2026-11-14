@@ -84,6 +84,17 @@
       },
       "detail": "Installiert alle node_modules-Pakete aus package.json."
     },
+    {
+      "label": "📦 [Build] Server-Installationspaket erstellen (dist/)",
+      "type": "shell",
+      "command": "node scripts/build-distribution-package.js",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "detail": "Baut playrig-debian-server.tar.gz und .zip in dist/ für den Debian-Servertransfer."
+    },
 
     // ============================================================
     // 2. ⬆️ GITHUB: UPLOAD & SYNC (Commit, Push, Status)
