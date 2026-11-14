@@ -148,9 +148,19 @@
 
   function resizeCanvas() {
     const rect = canvas.getBoundingClientRect();
-    width = canvas.width = rect.width * (window.devicePixelRatio || 1);
-    height = canvas.height = rect.height * (window.devicePixelRatio || 1);
-    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
+    const logicalW = Math.max(300, rect.width || canvas.clientWidth || 800);
+    const logicalH = Math.max(260, rect.height || canvas.clientHeight || 380);
+
+    canvas.width = Math.round(logicalW * dpr);
+    canvas.height = Math.round(logicalH * dpr);
+
+    width = logicalW;
+    height = logicalH;
+
+    if (ctx.resetTransform) ctx.resetTransform();
+    else ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
   }
 
   // --- Physics Polyhedral Die ---
@@ -160,13 +170,13 @@
       this.x = x;
       this.y = y;
       this.vx = (Math.random() - 0.5) * 11;
-      this.vy = -Math.random() * 7 - 5;
+      this.vy = -Math.random() * 6 - 4;
       this.gravity = 0.75;
       this.angle = Math.random() * Math.PI * 2;
       this.vAngle = (Math.random() - 0.5) * 0.35;
       this.targetVal = targetVal;
       this.currentVal = Math.floor(Math.random() * sides) + 1;
-      this.size = 52; // Substantial size
+      this.size = 50; // High visibility size
       this.bounces = 0;
       this.stopped = false;
       this.soundCount = 0;
@@ -175,8 +185,8 @@
     update() {
       if (this.stopped) return;
 
-      const boundW = canvas.width / (window.devicePixelRatio || 1);
-      const boundH = canvas.height / (window.devicePixelRatio || 1);
+      const boundW = width;
+      const boundH = height;
       const floorY = boundH - 24 - this.size;
 
       this.x += this.vx;
@@ -185,8 +195,8 @@
       this.angle += this.vAngle;
 
       // Wall collisions
-      const leftBound = 20 + this.size;
-      const rightBound = boundW - 20 - this.size;
+      const leftBound = 24 + this.size;
+      const rightBound = boundW - 24 - this.size;
 
       if (this.x < leftBound) {
         this.x = leftBound;
@@ -211,8 +221,36 @@
         this.y = floorY;
 
         if (Math.abs(this.vy) > 1.8) {
-          // Energetic bounce
           this.vy = -this.vy * 0.45;
+          this.vx *= 0.78;
+          this.vAngle *= 0.75;
+          this.bounces++;
+          if (this.soundCount < 5) {
+            playDiceClack(Math.min(0.3, Math.abs(this.vy) * 0.06));
+            this.soundCount++;
+          }
+        } else {
+          // Rolling / sliding on floor
+          this.vy = 0;
+          this.vx *= 0.88;
+          this.vAngle *= 0.85;
+
+          const faceInterval = this.sides === 6 ? Math.PI / 2 : (Math.PI / 3);
+          const targetAngle = Math.round(this.angle / faceInterval) * faceInterval;
+          const diff = targetAngle - this.angle;
+          this.vAngle += diff * 0.18; // Snap to flat edge/face
+
+          if (Math.abs(this.vx) < 0.15 && Math.abs(this.vAngle) < 0.04) {
+            this.stopped = true;
+            this.angle = targetAngle;
+            this.currentVal = this.targetVal;
+            this.vx = 0;
+            this.vy = 0;
+            this.vAngle = 0;
+          }
+        }
+      }
+    }
           this.vx *= 0.78;
           this.vAngle *= 0.75;
           this.bounces++;
@@ -490,10 +528,8 @@
   // --- Perform Roll Action ---
   function rollDice() {
     if (isRolling) return;
+    resizeCanvas(); // Ensure non-zero logical dimensions before roll
     isRolling = true;
-
-    const boundW = canvas.width / (window.devicePixelRatio || 1);
-    const boundH = canvas.height / (window.devicePixelRatio || 1);
 
     activeDice = [];
     particles = [];
@@ -512,11 +548,12 @@
       dieCount = 2;
     }
 
+    const spawnY = Math.min(90, height * 0.25);
     if (dieCount === 1) {
-      activeDice.push(new PhysicsDie(selectedSides, boundW / 2, 70, finalRoll));
+      activeDice.push(new PhysicsDie(selectedSides, width / 2, spawnY, finalRoll));
     } else {
-      activeDice.push(new PhysicsDie(selectedSides, boundW / 2 - 60, 70, roll1));
-      activeDice.push(new PhysicsDie(selectedSides, boundW / 2 + 60, 70, roll2));
+      activeDice.push(new PhysicsDie(selectedSides, width / 2 - 60, spawnY, roll1));
+      activeDice.push(new PhysicsDie(selectedSides, width / 2 + 60, spawnY, roll2));
     }
 
     playDiceClack(0.25);
@@ -535,7 +572,7 @@
       // Critical Hit / Fumble Handling
       if (selectedSides === 20 && finalRoll === 20) {
         playCritSound();
-        spawnCritExplosion(boundW / 2, boundH / 2);
+        spawnCritExplosion(width / 2, height / 2);
         const banner = document.getElementById('crit-banner');
         banner.innerHTML = '<span class="crit-text">✨ NAT 20! KRITISCHER ERFOLG ✨</span>';
         banner.classList.add('show');
@@ -564,8 +601,9 @@
     list.prepend(item);
   }
 
-  // --- RPG LOOT VAULT GENERATOR ---
-  const LOOT_DATA = {
+  // --- RPG LOOT VAULT GENERATOR & CUSTOM SESSION TABLES ---
+  const DEFAULT_LOOT_DATA = {
+    name: 'Offizielles PlayRig RPG Set',
     weapons: ['Großschwert', 'Kriegsaxt', 'Runendolch', 'Bogen', 'Astralstab', 'Schlaghammer', 'Hellebarde', 'Zauberstab'],
     armor: ['Drachenpanzer', 'Schattenrobe', 'Titanenhelm', 'Astralstiefel', 'Mithril-Handschuhe', 'Geisterkappe'],
     prefixes: ['Sternenfeuer', 'Blutdurstiger', 'Ätherischer', 'Verdammter', 'Uralter', 'Gewitternder', 'Sonnengekrönter', 'Leeren'],
@@ -579,6 +617,11 @@
       '+18 Mana-Regeneration pro Sekunde',
       '+30% Rüstungsdurchdringung'
     ],
+    penalties: [
+      '-15% Physische Rüstung',
+      'Fluch der Trägheit (-10% Tempo)',
+      'Blutzoll (Verbraucht 5 Lebenspunkte pro Treffer)'
+    ],
     lores: [
       '„Geschmiedet in den Tiefen einer kollabierenden Supernova.“',
       '„Trägt die unauslöschliche Glut der ersten Krieger.“',
@@ -587,8 +630,10 @@
     ]
   };
 
+  let activeLootData = JSON.parse(JSON.stringify(DEFAULT_LOOT_DATA));
+
   function summonLoot() {
-    const rarityChoice = document.getElementById('select-loot-rarity').value;
+    const rarityChoice = document.getElementById('select-loot-rarity')?.value || 'any';
     const rarities = ['Gewöhnlich', 'Selten', 'Episch', 'Legendär', 'Mythisch'];
     let chosenRarity = 'Legendär';
 
@@ -598,45 +643,179 @@
     else if (rarityChoice === 'mythic') chosenRarity = 'Mythisch';
     else chosenRarity = rarities[Math.floor(Math.random() * rarities.length)];
 
+    const weaponsList = activeLootData.weapons?.length ? activeLootData.weapons : DEFAULT_LOOT_DATA.weapons;
+    const armorList = activeLootData.armor?.length ? activeLootData.armor : DEFAULT_LOOT_DATA.armor;
+    const prefixList = activeLootData.prefixes?.length ? activeLootData.prefixes : DEFAULT_LOOT_DATA.prefixes;
+    const suffixList = activeLootData.suffixes?.length ? activeLootData.suffixes : DEFAULT_LOOT_DATA.suffixes;
+    const statsList = activeLootData.stats?.length ? activeLootData.stats : DEFAULT_LOOT_DATA.stats;
+    const loresList = activeLootData.lores?.length ? activeLootData.lores : DEFAULT_LOOT_DATA.lores;
+
     const isWeapon = Math.random() < 0.6;
     const baseName = isWeapon 
-      ? LOOT_DATA.weapons[Math.floor(Math.random() * LOOT_DATA.weapons.length)]
-      : LOOT_DATA.armor[Math.floor(Math.random() * LOOT_DATA.armor.length)];
+      ? weaponsList[Math.floor(Math.random() * weaponsList.length)]
+      : armorList[Math.floor(Math.random() * armorList.length)];
 
-    const prefix = LOOT_DATA.prefixes[Math.floor(Math.random() * LOOT_DATA.prefixes.length)];
-    const suffix = LOOT_DATA.suffixes[Math.floor(Math.random() * LOOT_DATA.suffixes.length)];
+    const prefix = prefixList[Math.floor(Math.random() * prefixList.length)];
+    const suffix = suffixList[Math.floor(Math.random() * suffixList.length)];
     const fullName = `${prefix} ${baseName} ${suffix}`;
 
     const numStats = chosenRarity === 'Mythisch' ? 4 : chosenRarity === 'Legendär' ? 3 : chosenRarity === 'Episch' ? 2 : 1;
-    const shuffledStats = [...LOOT_DATA.stats].sort(() => 0.5 - Math.random()).slice(0, numStats);
-    const lore = LOOT_DATA.lores[Math.floor(Math.random() * LOOT_DATA.lores.length)];
+    const shuffledStats = [...statsList].sort(() => 0.5 - Math.random()).slice(0, numStats);
 
-    const card = document.getElementById('loot-result-card');
-    const badge = document.getElementById('loot-rarity-badge');
-    const title = document.getElementById('loot-item-name');
-    const statsList = document.getElementById('loot-stats-list');
-    const loreEl = document.getElementById('loot-lore');
+    // If item has penalties and rolled lower or cursed
+    if (activeLootData.penalties?.length && (chosenRarity === 'Gewöhnlich' || Math.random() < 0.25)) {
+      const penalty = activeLootData.penalties[Math.floor(Math.random() * activeLootData.penalties.length)];
+      shuffledStats.push(`<span style="color:#ef4444;">⚠️ Nachteil: ${penalty}</span>`);
+    }
 
-    badge.textContent = chosenRarity.toUpperCase();
-    badge.className = 'badge ' + (
-      chosenRarity === 'Mythisch' ? 'badge-rose' :
-      chosenRarity === 'Legendär' ? 'badge-amber' :
-      chosenRarity === 'Episch' ? 'badge-purple' :
-      chosenRarity === 'Selten' ? 'badge-cyan' : 'badge-slate'
+    const lore = loresList[Math.floor(Math.random() * loresList.length)];
+
+    const card = document.getElementById('loot-item-display');
+    if (!card) return;
+
+    card.className = 'loot-item-card rarity-' + (
+      chosenRarity === 'Mythisch' ? 'mythic' :
+      chosenRarity === 'Legendär' ? 'legendary' :
+      chosenRarity === 'Episch' ? 'epic' :
+      chosenRarity === 'Selten' ? 'rare' : 'common'
     );
 
-    title.textContent = fullName;
-    statsList.innerHTML = shuffledStats.map(s => `<li>${s}</li>`).join('');
-    loreEl.textContent = lore;
-
-    card.classList.remove('hidden');
-    card.classList.add('pop-anim');
-    setTimeout(() => card.classList.remove('pop-anim'), 400);
+    card.innerHTML = `
+      <div class="loot-beam"></div>
+      <div class="loot-item-header">
+        <span class="loot-item-type">${isWeapon ? 'Waffe' : 'Rüstung'} • ${chosenRarity}</span>
+        <span class="loot-rarity-badge">${chosenRarity}</span>
+      </div>
+      <h4 class="loot-item-title">${fullName}</h4>
+      <div class="loot-stats-list">
+        ${shuffledStats.map(s => `<div class="stat-line">${s}</div>`).join('')}
+        <div class="stat-line lore">${lore}</div>
+      </div>
+    `;
 
     if (chosenRarity === 'Mythisch' || chosenRarity === 'Legendär') {
       playCritSound();
     } else {
       playDiceClack(0.2);
+    }
+  }
+
+  // --- JSON TEMPLATE DOWNLOAD & SESSION IMPORT ENGINE ---
+  function downloadLootTemplate() {
+    const template = {
+      name: "Beispiel RPG Beutetabelle & Schicksal",
+      author: "GameChiller",
+      version: "1.0",
+      description: "Anpassbare Loot-Tabelle für Waffen, Rüstungen, Attribute und Nachteile.",
+      weapons: [
+        "Drachentöter-Zweihänder",
+        "Schattenklinge",
+        "Runen-Langbogen",
+        "Astral-Kriegshammer",
+        "Titanenspalter"
+      ],
+      armor: [
+        "Sternenlicht-Panzer",
+        "Vortex-Robe",
+        "Titanen-Helm",
+        "Dämonenleder-Stiefel",
+        "Aegis-Schild"
+      ],
+      prefixes: [
+        "Glühender",
+        "Uralter",
+        "Verfluchter",
+        "Göttlicher",
+        "Frosthauch",
+        "Gewitternder"
+      ],
+      suffixes: [
+        "des Phoenix",
+        "der ewigen Nacht",
+        "der Vernichtung",
+        "des Schicksals",
+        "der Unendlichkeit"
+      ],
+      stats: [
+        "+28% Kritischer Schaden",
+        "+85 Physische Angriffskraft",
+        "+350 Lebenspunkte",
+        "+22% Angriffsgeschwindigkeit",
+        "+40 Astral-Feuerschaden"
+      ],
+      penalties: [
+        "-15% Rüstungswert",
+        "Fluch der Trägheit (-10% Tempo)",
+        "Blutzoll (Verbraucht 6 LP pro Hieb)"
+      ],
+      lores: [
+        "„In den Feuern des Schicksalsbergs geschmiedet.“",
+        "„Nur die Würdigen können dieses Relikt führen.“",
+        "„Ein Flüstern der Leere liegt auf der Klinge.“"
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'loot_table_template.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function validateLootJSON(data) {
+    if (typeof data !== 'object' || data === null) {
+      throw new Error('Das Dokument muss ein gültiges JSON-Objekt sein.');
+    }
+    const hasItems = (Array.isArray(data.weapons) && data.weapons.length > 0) ||
+                     (Array.isArray(data.armor) && data.armor.length > 0);
+    if (!hasItems) {
+      throw new Error('Die Tabelle muss mindestens ein Array "weapons" oder "armor" mit Einträgen enthalten.');
+    }
+    if (!Array.isArray(data.prefixes) || data.prefixes.length === 0) {
+      throw new Error('Es muss ein Array "prefixes" (z. B. ["Uralter", "Glühender"]) vorhanden sein.');
+    }
+    if (!Array.isArray(data.suffixes) || data.suffixes.length === 0) {
+      throw new Error('Es muss ein Array "suffixes" (z. B. ["des Phoenix", "der Nacht"]) vorhanden sein.');
+    }
+    if (!Array.isArray(data.stats) || data.stats.length === 0) {
+      throw new Error('Es muss ein Array "stats" mit Attributen vorhanden sein.');
+    }
+    return true;
+  }
+
+  function applyCustomLootTable(parsed) {
+    validateLootJSON(parsed);
+    activeLootData = parsed;
+
+    const statusBadge = document.getElementById('session-loot-status');
+    const resetBtn = document.getElementById('btn-reset-loot-data');
+    if (statusBadge) {
+      statusBadge.textContent = '🟢 Eigene Tabelle aktiv (Session)';
+      statusBadge.className = 'badge badge-amber';
+    }
+    if (resetBtn) resetBtn.style.display = 'block';
+
+    if (window.showToast) {
+      window.showToast('Beutetabelle verifiziert & für diese Sitzung aktiviert!', 'success');
+    } else {
+      alert('✅ Beutetabelle verifiziert & für diese Sitzung aktiviert!');
+    }
+  }
+
+  function resetLootTable() {
+    activeLootData = JSON.parse(JSON.stringify(DEFAULT_LOOT_DATA));
+    const statusBadge = document.getElementById('session-loot-status');
+    const resetBtn = document.getElementById('btn-reset-loot-data');
+    if (statusBadge) {
+      statusBadge.textContent = 'Standard aktiv';
+      statusBadge.className = 'badge badge-slate';
+    }
+    if (resetBtn) resetBtn.style.display = 'none';
+
+    if (window.showToast) {
+      window.showToast('Auf offizielle Standard-Beutetabelle zurückgesetzt.', 'info');
     }
   }
 
@@ -687,10 +866,66 @@
     soundBtn.textContent = soundEnabled ? '🔊 Sound: An' : '🔇 Sound: Aus';
   });
 
-  document.getElementById('btn-open-chest').addEventListener('click', summonLoot);
+  const summonBtn = document.getElementById('btn-summon-loot') || document.getElementById('btn-open-chest');
+  if (summonBtn) summonBtn.addEventListener('click', summonLoot);
+
+  // Template Download
+  document.getElementById('btn-download-loot-template')?.addEventListener('click', downloadLootTemplate);
+
+  // Modal open/close
+  const importModal = document.getElementById('loot-import-modal');
+  const errorEl = document.getElementById('loot-import-error');
+  const fileInput = document.getElementById('file-loot-import');
+  const textArea = document.getElementById('text-loot-import');
+
+  function openImportModal() {
+    if (!importModal) return;
+    if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+    if (fileInput) fileInput.value = '';
+    if (textArea) textArea.value = '';
+    importModal.style.display = 'flex';
+  }
+
+  function closeImportModal() {
+    if (importModal) importModal.style.display = 'none';
+  }
+
+  document.getElementById('btn-open-loot-import')?.addEventListener('click', openImportModal);
+  document.getElementById('btn-close-loot-modal')?.addEventListener('click', closeImportModal);
+  document.getElementById('btn-cancel-loot-modal')?.addEventListener('click', closeImportModal);
+  document.getElementById('btn-reset-loot-data')?.addEventListener('click', resetLootTable);
+
+  // File upload input change
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (textArea) textArea.value = evt.target.result;
+    };
+    reader.readAsText(file);
+  });
+
+  // Verify and Submit import
+  document.getElementById('btn-submit-loot-import')?.addEventListener('click', () => {
+    try {
+      const rawText = textArea?.value?.trim();
+      if (!rawText) throw new Error('Bitte lade eine JSON-Datei hoch oder füge den JSON-Code in das Textfeld ein.');
+      const parsed = JSON.parse(rawText);
+      applyCustomLootTable(parsed);
+      closeImportModal();
+    } catch (err) {
+      if (errorEl) {
+        errorEl.textContent = 'Fehler: ' + err.message;
+        errorEl.style.display = 'block';
+      } else {
+        alert('Fehler: ' + err.message);
+      }
+    }
+  });
 
   window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
     if (e.code === 'Space') {
       e.preventDefault();
       rollDice();
@@ -699,8 +934,18 @@
 
   window.addEventListener('resize', resizeCanvas);
 
-  // Initial Setup
-  resizeCanvas();
-  animate();
-  rollDice();
+  // Initial Setup with small delay to ensure layout is computed
+  window.addEventListener('DOMContentLoaded', () => {
+    resizeCanvas();
+    animate();
+    rollDice();
+  });
+
+  setTimeout(() => {
+    resizeCanvas();
+    if (activeDice.length === 0) {
+      animate();
+      rollDice();
+    }
+  }, 100);
 })();

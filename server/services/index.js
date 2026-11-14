@@ -127,3 +127,4 @@ const manager = new ServiceManager();
 manager.autoDiscover();
 
 module.exports = manager;
+

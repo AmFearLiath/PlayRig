@@ -147,6 +147,25 @@
           ✨ Loot aus dem Astral-Tresor beschwören
         </button>
 
+        <!-- Custom Loot Table Session Tools -->
+        <div class="custom-loot-tools" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-subtle); display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted);">Eigene Beutetabellen</span>
+            <span id="session-loot-status" class="badge badge-slate" style="font-size: 0.65rem;">Standard aktiv</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <button id="btn-download-loot-template" class="btn btn-secondary btn-sm" style="font-size: 0.74rem;">
+              📥 Beispiel-JSON
+            </button>
+            <button id="btn-open-loot-import" class="btn btn-secondary btn-sm" style="font-size: 0.74rem;">
+              📤 Tabelle laden
+            </button>
+          </div>
+          <button id="btn-reset-loot-data" class="btn btn-ghost btn-sm" style="font-size: 0.72rem; display: none; color: var(--rose-400);">
+            ↺ Zurück auf Standard-Beute
+          </button>
+        </div>
+
         <!-- Generated Loot Item Card -->
         <div id="loot-item-display" class="loot-item-card rarity-legendary">
           <div class="loot-beam"></div>
@@ -176,6 +195,39 @@
       </div>
     </aside>
   </main>
+
+  <!-- Custom Loot Table Import Modal -->
+  <div id="loot-import-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="glass-panel fx-beam" style="max-width: 520px; width: 92%; padding: 24px; border-radius: var(--radius-xl); display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">📤 Eigene Beutetabelle importieren</h3>
+        <button id="btn-close-loot-modal" class="btn btn-ghost btn-sm" style="font-size: 1.2rem; line-height: 1;">✕</button>
+      </div>
+
+      <!-- Warning / Privacy Note -->
+      <div style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 8px; padding: 12px; font-size: 0.82rem; color: #bae6fd; line-height: 1.45;">
+        <strong style="color: #38bdf8;">🛡️ Temporäre Session-Nutzung:</strong><br>
+        Deine importierten Daten werden nach erfolgreicher Strukturprüfung <strong>ausschließlich temporär im Arbeitsspeicher deines Browsers</strong> für diese Sitzung verwendet. Es findet <strong>keine permanente Speicherung</strong> auf dem Server statt. Nach dem Schließen oder Klick auf "Zurücksetzen" sind wieder die offiziellen Daten aktiv.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">JSON Datei auswählen:</label>
+        <input type="file" id="file-loot-import" accept=".json" class="btn btn-secondary" style="font-size: 0.8rem; padding: 8px;">
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Oder JSON-Code direkt einfügen:</label>
+        <textarea id="text-loot-import" rows="6" class="mod-input" style="width: 100%; border-radius: 8px; padding: 10px; font-family: var(--font-mono); font-size: 0.78rem; resize: vertical;" placeholder='{ "weapons": [...], "armor": [...], "prefixes": [...], "suffixes": [...], "stats": [...] }'></textarea>
+      </div>
+
+      <div id="loot-import-error" style="display: none; color: #f87171; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); padding: 8px 12px; border-radius: 6px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+        <button id="btn-cancel-loot-modal" class="btn btn-secondary btn-sm">Abbrechen</button>
+        <button id="btn-submit-loot-import" class="btn btn-primary btn-sm fx-ripple">Prüfen & Freigeben</button>
+      </div>
+    </div>
+  </div>
 
   <script src="./app.js"></script>
 </body>

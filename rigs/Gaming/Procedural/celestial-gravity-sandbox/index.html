@@ -1,73 +1,182 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="cyber-cyan">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlayRig Celestial Gravity // N-Body Orbital Physics Sandbox</title>
+  <title>PlayRig Celestial Gravity // Astrophysik & N-Körper Orbital-Labor</title>
+  
+  <!-- PlayRig Tokens & Design System -->
+  <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../../_shared/css/base.css">
   <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../../_shared/css/animations.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <!-- Standard PlayRig Hub Bar -->
-  <header class="playrig-hub-bar">
-    <div class="hub-bar-brand">
-      <a href="/" class="hub-back-btn" title="Zurück zum PlayRig Deck">
-        <span class="hub-back-arrow">‹</span>
-        <span class="hub-logo-dot"></span>
-        <span class="hub-brand-name">PlayRig</span>
+<body class="fx-spotlight-active">
+  <!-- Standard PlayRig Topbar -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
       </a>
-      <span class="hub-separator">/</span>
-      <span class="hub-module-name">Celestial Gravity Sandbox</span>
-      <span class="hub-version-tag">v0.0.1</span>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Celestial Gravity <span class="gradient-text-cyan">Astrophysik-Labor</span></h1>
+        <span class="badge badge-indigo">Gaming • Procedural</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+      </div>
     </div>
-    <div class="hub-bar-meta">
-      <span class="hub-badge-author">Author: Liath</span>
-      <span class="hub-badge-copyright">© GameChiller</span>
-      <button id="btn-toggle-sound" class="hub-action-btn" title="Kosmischen Raum-Sound an/aus">🔊 Ambient Sound</button>
-      <button id="btn-clear-space" class="hub-action-btn btn-danger" title="Universum leeren">☄ Clear Space</button>
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-toggle-sound" class="btn btn-secondary btn-sm" title="Kosmischen Raum-Sound an/aus">
+        🔊 Raum-Ambient
+      </button>
+      <button id="btn-clear-space" class="btn btn-danger btn-sm" title="Universum leeren">
+        ☄ Clear Space
+      </button>
     </div>
   </header>
 
-  <!-- Fullscreen Physics Canvas -->
+  <!-- Fullscreen Physics Canvas Container -->
   <div class="canvas-container" id="canvas-wrapper">
     <canvas id="gravity-canvas"></canvas>
     
-    <!-- Top HUD Overlays -->
-    <div class="hud-stats">
-      <div class="hud-item"><span class="hud-label">KÖRPER:</span> <span id="stat-bodies" class="hud-val">0</span></div>
-      <div class="hud-item"><span class="hud-label">GESAMT-MASSE:</span> <span id="stat-mass" class="hud-val">0</span></div>
-      <div class="hud-item"><span class="hud-label">FPS:</span> <span id="stat-fps" class="hud-val">60</span></div>
+    <!-- Top HUD Overlays & Quick Toggles -->
+    <div class="hud-top-bar">
+      <div class="hud-stats-group">
+        <div class="hud-pill"><span class="hud-label">Himmelskörper:</span> <span id="stat-bodies" class="hud-val">0</span></div>
+        <div class="hud-pill"><span class="hud-label">Gesamtmasse:</span> <span id="stat-mass" class="hud-val">0 M☉</span></div>
+        <div class="hud-pill"><span class="hud-label">FPS:</span> <span id="stat-fps" class="hud-val">60</span></div>
+      </div>
+
+      <div class="hud-quick-toggles">
+        <button id="btn-toggle-vectors" class="btn btn-ghost btn-sm active" title="Geschwindigkeits-Vektoren anzeigen">↗ Vektoren</button>
+        <button id="btn-toggle-trails" class="btn btn-ghost btn-sm active" title="Umlaufbahnen zeichnen">💫 Orbit-Spuren</button>
+        <button id="btn-toggle-grid" class="btn btn-ghost btn-sm active" title="Kosmisches Raumzeit-Gitter">🌐 Gitter</button>
+        <button id="btn-recenter" class="btn btn-ghost btn-sm" title="Kamera auf Schwerpunkt zentrieren">🎯 Zentrieren</button>
+      </div>
     </div>
 
-    <!-- Mouse Sling Velocity Guide -->
-    <div class="sling-hint" id="sling-hint">Ziehen & Loslassen, um neuen Planeten zu schleudern</div>
+    <!-- Mouse Sling / Action Hint -->
+    <div class="sling-hint" id="sling-hint">Klicke einen Körper an zum Bearbeiten • Ziehen & Loslassen für neuen Orbit</div>
 
-    <!-- Control Floating Panel -->
-    <div class="floating-controls glass-panel">
+    <!-- LEFT: Scientific Body Inspector Drawer -->
+    <aside class="body-inspector glass-panel fx-beam" id="body-inspector" style="display: none;">
+      <div class="inspector-header">
+        <div>
+          <span class="badge badge-amber" id="insp-type-badge">PLANET</span>
+          <input type="text" id="insp-name-input" class="insp-title-input" value="Erde">
+        </div>
+        <button id="btn-close-inspector" class="btn btn-ghost btn-sm" style="font-size: 1.1rem; padding: 2px 8px;">✕</button>
+      </div>
+
+      <div class="inspector-body">
+        <!-- Live Telemetry -->
+        <div class="telemetry-grid">
+          <div class="tel-item"><span class="tel-label">Position:</span> <span id="insp-pos" class="tel-val">X: 0, Y: 0</span></div>
+          <div class="tel-item"><span class="tel-label">Tempo:</span> <span id="insp-vel" class="tel-val">1.45 AU/s</span></div>
+        </div>
+
+        <!-- Lock / Orbit Toggles -->
+        <div class="insp-row toggle-row">
+          <label class="insp-label" title="Körper wird fixiert und bewegt sich nicht durch Gravitation (ausser Schwarzes Loch)">
+            📌 Im System fixieren (Ankern)
+          </label>
+          <input type="checkbox" id="insp-lock-toggle" class="insp-checkbox">
+        </div>
+
+        <div class="insp-row toggle-row">
+          <label class="insp-label">💫 Umlaufbahn-Schweif zeichnen</label>
+          <input type="checkbox" id="insp-trail-toggle" class="insp-checkbox" checked>
+        </div>
+
+        <!-- Mass & Radius -->
+        <div class="insp-row">
+          <div class="insp-label-bar">
+            <span>Masse:</span> <span id="insp-mass-val" class="insp-val-tag">15</span>
+          </div>
+          <input type="range" id="insp-mass-slider" min="1" max="1500" step="1" value="15" class="nexus-slider">
+        </div>
+
+        <div class="insp-row">
+          <div class="insp-label-bar">
+            <span>Radius / Größe:</span> <span id="insp-radius-val" class="insp-val-tag">6 px</span>
+          </div>
+          <input type="range" id="insp-radius-slider" min="2" max="36" step="1" value="6" class="nexus-slider">
+        </div>
+
+        <!-- Velocity adjustment -->
+        <div class="insp-row">
+          <div class="insp-label-bar">
+            <span>Geschwindigkeit:</span> <span id="insp-speed-val" class="insp-val-tag">1.0x</span>
+          </div>
+          <input type="range" id="insp-speed-slider" min="0" max="3.0" step="0.05" value="1.0" class="nexus-slider">
+          <button id="btn-auto-circularize" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 6px; font-size: 0.75rem;">
+            🔄 Perfekten Kreis-Orbit einstellen
+          </button>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="insp-row">
+          <span class="insp-label">Farbe & Textur:</span>
+          <div class="color-palette-grid">
+            <button class="col-pick-btn" data-color="#fbbf24" style="background: #fbbf24;" title="Sonne / Gold"></button>
+            <button class="col-pick-btn" data-color="#38bdf8" style="background: #38bdf8;" title="Erde / Cyan"></button>
+            <button class="col-pick-btn" data-color="#10b981" style="background: #10b981;" title="Habitabel / Smaragd"></button>
+            <button class="col-pick-btn" data-color="#ef4444" style="background: #ef4444;" title="Mars / Rubin"></button>
+            <button class="col-pick-btn" data-color="#f59e0b" style="background: #f59e0b;" title="Jupiter / Amber"></button>
+            <button class="col-pick-btn" data-color="#c084fc" style="background: #c084fc;" title="Eisriese / Violett"></button>
+            <button class="col-pick-btn" data-color="#ffffff" style="background: #ffffff;" title="Mond / Weiß"></button>
+            <button class="col-pick-btn" data-color="#000000" style="background: #000000; border: 1px solid #38bdf8;" title="Schwarzes Loch"></button>
+          </div>
+        </div>
+
+        <!-- Special Action: Add Moon -->
+        <div class="inspector-actions" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          <button id="btn-add-moon" class="btn btn-primary btn-sm fx-ripple" style="width: 100%;">
+            🌙 Mond im stabilen Orbit erzeugen
+          </button>
+          <button id="btn-delete-body" class="btn btn-danger btn-sm" style="width: 100%;">
+            🗑️ Körper aus System entfernen
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Floating Control Panel -->
+    <div class="floating-controls glass-panel fx-beam">
+      <!-- Scientific Presets -->
       <div class="panel-section">
-        <div class="section-title">Presets</div>
+        <div class="section-title">Wissenschaftliche Presets</div>
         <div class="preset-grid">
-          <button class="preset-btn active" data-preset="solar">Sonnensystem</button>
-          <button class="preset-btn" data-preset="binary">Doppelstern</button>
-          <button class="preset-btn" data-preset="chaos">3-Körper Chaos</button>
-          <button class="preset-btn" data-preset="ring">Asteroiden-Gürtel</button>
+          <button class="preset-btn active" data-preset="solarsystem">Sonnensystem + Monde</button>
+          <button class="preset-btn" data-preset="binary">Doppelstern-Baryzentrum</button>
+          <button class="preset-btn" data-preset="figure8">3-Körper Figure-8</button>
+          <button class="preset-btn" data-preset="blackhole">Schwarzes Loch & Scheibe</button>
         </div>
       </div>
 
+      <!-- Spawn Tool Selection -->
       <div class="panel-section">
-        <div class="section-title">Spawn-Werkzeug</div>
+        <div class="section-title">Neuen Körper platzieren</div>
         <div class="spawn-type-selector">
-          <button class="type-btn active" data-type="planet">Planet (Masse 10)</button>
-          <button class="type-btn" data-type="star">Stern (Masse 300)</button>
-          <button class="type-btn" data-type="blackhole">Schwarzes Loch (Masse 1500)</button>
+          <button class="type-btn" data-type="moon">Mond (Masse 2)</button>
+          <button class="type-btn active" data-type="planet">Terrestrischer Planet (Masse 12)</button>
+          <button class="type-btn" data-type="giant">Gasriese (Masse 60)</button>
+          <button class="type-btn" data-type="star">Sonnen-Stern (Masse 500)</button>
+          <button class="type-btn" data-type="blackhole">Schwarzes Loch (Masse 1800)</button>
         </div>
       </div>
 
+      <!-- Physics Constants -->
       <div class="panel-section">
-        <div class="section-title">Physik-Parameter</div>
+        <div class="section-title">Simulations-Parameter</div>
         <div class="param-row">
           <label>Gravitation G</label>
-          <input type="range" id="param-g" min="0.1" max="5.0" step="0.1" value="1.0">
+          <input type="range" id="param-g" min="0.1" max="4.0" step="0.1" value="1.0">
           <span id="val-g" class="param-val">1.0</span>
         </div>
         <div class="param-row">
@@ -76,15 +185,19 @@
           <span id="val-trail" class="param-val">0.08</span>
         </div>
         <div class="param-row">
-          <label>Simulation Speed</label>
-          <input type="range" id="param-speed" min="0.2" max="3.0" step="0.2" value="1.0">
+          <label>Zeitraffer</label>
+          <input type="range" id="param-speed" min="0.1" max="3.0" step="0.1" value="1.0">
           <span id="val-speed" class="param-val">1.0x</span>
         </div>
       </div>
 
       <div class="panel-actions">
-        <button id="btn-pause-sim" class="hud-btn"><span id="pause-icon">⏸</span> Pause</button>
-        <button id="btn-recenter" class="hud-btn">🎯 Zentrieren</button>
+        <button id="btn-pause-sim" class="btn btn-secondary btn-sm" style="flex: 1;">
+          <span id="pause-icon">⏸</span> Pause
+        </button>
+        <button id="btn-reset-preset" class="btn btn-secondary btn-sm" style="flex: 1;">
+          ↺ Reset
+        </button>
       </div>
     </div>
   </div>
@@ -93,4 +206,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-

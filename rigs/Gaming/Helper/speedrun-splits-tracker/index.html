@@ -4,27 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PlayRig Speedrun Splits Tracker // Pro Delta Timer</title>
+  <link rel="stylesheet" href="../../../../_shared/css/tokens.css">
+  <link rel="stylesheet" href="../../../../_shared/css/themes.css">
+  <link rel="stylesheet" href="../../../../_shared/css/base.css">
   <link rel="stylesheet" href="../../../../_shared/css/components.css">
+  <link rel="stylesheet" href="../../../../_shared/css/animations.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Standard PlayRig Hub Bar -->
-  <header class="playrig-hub-bar">
-    <div class="hub-bar-brand">
-      <a href="/" class="hub-back-btn" title="Zurück zum PlayRig Deck">
-        <span class="hub-back-arrow">‹</span>
-        <span class="hub-logo-dot"></span>
-        <span class="hub-brand-name">PlayRig</span>
+  <!-- Standard PlayRig Topbar -->
+  <header class="rig-topbar">
+    <div class="topbar-left">
+      <a href="/" class="btn btn-ghost btn-sm btn-back-deck">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        PlayRig Deck
       </a>
-      <span class="hub-separator">/</span>
-      <span class="hub-module-name">Speedrun Splits Tracker</span>
-      <span class="hub-version-tag">v0.0.1</span>
+      <div class="topbar-title-wrap">
+        <h1 class="topbar-title">Speedrun Splits <span class="gradient-text-gold">Tracker</span></h1>
+        <span class="badge badge-amber">Gaming • Helper</span>
+        <span class="badge badge-cyan topbar-version-badge">v0.0.1</span>
+      </div>
     </div>
-    <div class="hub-bar-meta">
-      <span class="hub-badge-author">Author: Liath</span>
-      <span class="hub-badge-copyright">© GameChiller</span>
-      <button id="btn-obs-mode" class="hub-action-btn" title="OBS Chroma Key Overlay Mode">🎥 OBS Mode</button>
-      <button id="btn-reset" class="hub-action-btn btn-danger" title="Timer zurücksetzen (Taste: R)">↺ Reset</button>
+    <div class="topbar-right">
+      <div class="topbar-meta-text">
+        © GameChiller • Author: <strong style="color: #fff;">Liath</strong>
+      </div>
+      <button id="btn-obs-mode" class="btn btn-secondary btn-sm" title="OBS Chroma Key Overlay Mode">🎥 OBS Mode</button>
+      <button id="btn-reset" class="btn btn-danger btn-sm" title="Timer zurücksetzen (Taste: R)">↺ Reset</button>
     </div>
   </header>
 
