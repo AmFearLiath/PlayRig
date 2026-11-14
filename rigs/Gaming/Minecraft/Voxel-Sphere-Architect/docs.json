@@ -1,0 +1,37 @@
+{
+  "id": "minecraft-voxel-sphere-architect",
+  "name": "Minecraft Voxel Sphere Architect",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "3D Voxel-Kugel- und Ellipsoid-Generator für Minecraft mit interaktiver Schichten-Vorschau (Layer Slice) und Material-Rechner.",
+  "category": "Gaming",
+  "subcategory": "Minecraft",
+  "features": [
+    "Mathematisch exakte Voxel-Diskretisierung für Sphären, Ellipsoide und Kuppeln",
+    "Interaktive Schichten-Vorschau (Layer Slider) zum schrittweisen Nachbauen im Spiel",
+    "Blockzähler und Ressourcen-Kalkulator für verschiedene Minecraft-Baumaterialien",
+    "3D Three.js Orbit-Kamera mit Raycasting und Hohlraum-Option (Hollow Mode)",
+    "Block-Schematic und Koordinaten-Export"
+  ],
+  "manual": [
+    "1. Stelle den gewünschten Kugel-Radius (X, Y, Z) oder die Kuppelform über die Schieberegler ein.",
+    "2. Wähle zwischen Vollkugel oder hohler Schale (Hollow).",
+    "3. Nutze den Schichten-Schieberegler, um die Blöcke Ebene für Ebene von unten nach oben nachzubauen."
+  ],
+  "configuration": {
+    "maxRadius": 128,
+    "defaultBlock": "stone"
+  },
+  "prerequisites": [
+    "Webbrowser mit WebGL 2.0 Unterstützung"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "PlayRig Deck Spotlight"
+  ],
+  "notes": "Bei Radien über 80 Blöcken kann das Rendering auf mobilen Geräten rechenintensiv werden."
+}

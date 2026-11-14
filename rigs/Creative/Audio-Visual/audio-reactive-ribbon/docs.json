@@ -1,0 +1,36 @@
+{
+  "id": "audio-reactive-ribbon",
+  "name": "Audio-Reactive Ribbon Visualizer",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Audio-reaktives 3D Band- und Wellenvisualisierungssystem mit Web Audio Analyser und fluiden Harmoniewellen.",
+  "category": "Creative",
+  "subcategory": "Audio-Visual",
+  "features": [
+    "Echtzeit-FFT Frequenzanalyse via Web Audio API mit Mikrofon- oder Synthesizer-Eingang",
+    "Flüssige 3D Sinusband-Modulation mit Schattierung und dynamischen Lichtpunkten",
+    "Farbpaletten: Cyberpunk Neon, Aurora Borealis, Golden Sun und Deep Ocean",
+    "Sensitivitäts- und Dämpfungsregler für sanfte oder explosive Musikreaktionen"
+  ],
+  "manual": [
+    "1. Klicke auf 'Audio starten', um den internen Synthesizer oder die Audio-Eingabe zu aktivieren.",
+    "2. Wähle das gewünschte Farbschema und passe die Wellen-Amplitude an."
+  ],
+  "configuration": {
+    "fftSize": 512,
+    "smoothingTimeConstant": 0.8
+  },
+  "prerequisites": [
+    "Web Audio API & HTML5 Canvas"
+  ],
+  "requiredPermissions": [
+    "storage:user",
+    "audio:playback"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Streamer Audio Visualizer",
+    "OBS Music Overlay"
+  ],
+  "notes": "Browser verlangen eine erste Benutzerinteraktion (Klick), bevor Audioausgabe abgespielt werden darf."
+}

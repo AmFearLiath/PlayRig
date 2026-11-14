@@ -1,0 +1,36 @@
+{
+  "id": "particle-gravity-vortex",
+  "name": "Particle Gravity Vortex",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Interaktiver Partikel-Gravitationsstrudel mit Mehrfach-Attraktoren, Federkräften und fluiden physikalischen Schweifen.",
+  "category": "Animations",
+  "subcategory": "Particles-FX",
+  "features": [
+    "Echtzeit-Simulation von bis zu 8.000 Partikeln mit 60 FPS",
+    "Platzierbare Gravitations-Attraktoren und Repulsoren (Abstoßungs-Kerne)",
+    "Farbverläufe mit Geschwindigkeits-Vektor-Färbung und Glow-Effekt",
+    "Maus-Interaktion: Ziehen mit Klick erzeugt rotierende Raumzeit-Verzerrungen"
+  ],
+  "manual": [
+    "1. Bewege die Maus über die Arbeitsfläche, um den Gravitations-Hauptfokus zu steuern.",
+    "2. Klicke links, um neue Strudel-Kerne im Raum zu verankern.",
+    "3. Nutze die Regler, um Partikelanzahl, Dämpfung und Lebensdauer abzustimmen."
+  ],
+  "configuration": {
+    "particleCount": 4000,
+    "friction": 0.98
+  },
+  "prerequisites": [
+    "HTML5 Canvas 2D"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "PlayRig Deck Spotlight"
+  ],
+  "notes": "Auf mobilen Endgeräten wird die Partikelanzahl zur Akkuschonung automatisch optimiert."
+}

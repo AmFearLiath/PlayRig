@@ -1,0 +1,38 @@
+{
+  "id": "rpg-dice-loot-vault",
+  "name": "RPG Dice & Loot Vault",
+  "version": "v0.0.2",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Physikalischer 3D Polyhedral-Würfelgenerator mit verlangsamendem Ticker, Holz-Akustik und prozeduralem RPG-Beutetresor.",
+  "category": "Gaming",
+  "subcategory": "RPG-Tools",
+  "features": [
+    "Polyhedral-Physik für D4, D6, D8, D10, D12, D20 und D100 mit Gravitation und Flat-Face Resttorque",
+    "Exponentiell verzögernder Odometrie-Ticker mit hölzernem Klackern und Stopp-Lock",
+    "Goldene Nat-20 Fanfare und düstere Nat-1 Schicksals-Reaktion",
+    "Prozeduraler Beutegenerator für Waffen, Rüstungen, Affixe, Flüche und Lore-Texte",
+    "Downloadbare JSON-Vorlage (loot_table_template.json) und sicherer Sitzungs-Import für eigene Tabellen"
+  ],
+  "manual": [
+    "1. Wähle den gewünschten Würfel (D4 bis D100) oder stelle Vor-/Nachteil ein.",
+    "2. Klicke auf 'Jetzt Würfeln' oder drücke die Leertaste.",
+    "3. Im rechten Bereich können seltene Beutestücke generiert oder eigene JSON-Beutetabellen geladen werden."
+  ],
+  "configuration": {
+    "defaultDie": "D20",
+    "soundEnabled": true,
+    "maxHistory": 50
+  },
+  "prerequisites": [
+    "Web Audio API Unterstützung"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "Tabletop RPG Live Sessions"
+  ],
+  "notes": "Eigene importierte Beutetabellen verbleiben aus Datenschutzgründen rein flüchtig im Arbeitsspeicher der Browsersitzung."
+}

@@ -1,0 +1,41 @@
+{
+  "id": "speedrun-splits-tracker",
+  "name": "Speedrun Splits Tracker",
+  "version": "v0.0.2",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Professioneller Speedrun Delta Timer & Segment Tracker für Live-Streams, Speedruns und isoliertes Teilabschnitt-Training.",
+  "category": "Gaming",
+  "subcategory": "Helper",
+  "features": [
+    "4 Layout-Modi: 📐 Vertikal (LiveSplit Classic), ↔ Horizontales Streamer-Banner, 📦 Kompakt-Widget und 🎥 OBS Stream Overlay",
+    "Drag & Drop Freepositionierung mit automatischer lokaler Positions-Speicherung",
+    "🎯 Teilabschnitt-Training (Practice Mode) zum gezielten Üben einzelner Bosse oder Teilstrecken",
+    "↺ Ab hier neu starten: Ermöglicht das Fortsetzen eines Runs mitten auf der Route",
+    "Live Pace & Estimated Finish Berechnung sowie Sum of Best (theoretische Bestzeit)",
+    "OBS Browser Source Optimierung mit Chroma Green (#00FF00), Chroma Magenta (#FF00FF) und Alpha Transparenz",
+    "Prozedurale Web Audio Signale für Gold Splits, Personal Bests und Mute-Schalter"
+  ],
+  "manual": [
+    "1. Wähle ein Spiel-Preset oder importiere deine eigenen Splits als JSON.",
+    "2. Starte den Lauf mit [Leertaste] oder [Numpad 1]. Jeder weitere Tastendruck setzt einen Split.",
+    "3. Klicke auf '🎯' bei einer Split-Zeile, um diesen Abschnitt isoliert zu trainieren."
+  ],
+  "configuration": {
+    "defaultPreset": "enshrouded",
+    "comparison": "pb",
+    "soundEnabled": true
+  },
+  "prerequisites": [
+    "Moderner Webbrowser oder OBS Browser Source"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Streamer Hub",
+    "OBS Studio / Streamlabs Desktop",
+    "Twitch / YouTube Live Streaming"
+  ],
+  "notes": "Im OBS-Modus schaltet die Oberfläche auf rahmenlose Darstellung um und lässt sich per Drag & Drop frei auf der Leinwand platzieren."
+}

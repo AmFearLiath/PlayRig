@@ -1,0 +1,41 @@
+{
+  "id": "enshrouded-save-editor",
+  "name": "Enshrouded Character & Savegame Studio",
+  "version": "v1.1.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Web-basierter Spielstands- und Charakter-Editor für Enshrouded mit Zstandard-Dekomprimierung, Skilltree-Manipulation und Inventarverwaltung.",
+  "category": "Gaming",
+  "subcategory": "Enshrouded",
+  "features": [
+    "Vollständige Dekomprimierung und Re-Kompression von Enshrouded .charactersave Dateien via Zstandard (Zstd)",
+    "Fähigkeitenpunkte (Skill Points) und Attribut-Modifikatoren stufenlos anpassen",
+    "Inventar-Explorer mit Suchfunktion und Mengenanpassung",
+    "Automatische Prüfsummen- und Header-Validierung",
+    "Direkter lokaler Datei-Upload oder Anbindung an den Enshrouded Companion Service"
+  ],
+  "manual": [
+    "1. Lade deine .charactersave Datei aus dem Enshrouded Savegame-Ordner hoch (%USERPROFILE%/Saved Games/Enshrouded).",
+    "2. Wähle im Editor-Tab die gewünschten Attribute, Skillpoints oder Inventargegenstände aus.",
+    "3. Klicke auf 'Savegame exportieren', um die komprimierte Datei herunterzuladen und in deinen Spielstand-Ordner einzufügen."
+  ],
+  "configuration": {
+    "autoBackup": true,
+    "maxInventorySlots": 64,
+    "serviceRequired": "enshrouded"
+  },
+  "prerequisites": [
+    "Enshrouded Spielstand (.charactersave)",
+    "Moderner Webbrowser mit WebAssembly (Wasm) Unterstützung"
+  ],
+  "requiredPermissions": [
+    "storage:user",
+    "services:enshrouded"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "Enshrouded Companion Service (/api/services/enshrouded)"
+  ],
+  "notes": "Erstelle immer ein manuelles Backup deiner Original-Spielstandsdateien vor dem Überschreiben.",
+  "knownLimitations": "Sehr große modifizierte Inventarmengen über 9999 können vom Spiel auf das Maximum zurückgesetzt werden."
+}

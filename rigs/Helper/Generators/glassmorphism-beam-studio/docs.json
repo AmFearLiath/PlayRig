@@ -1,0 +1,38 @@
+{
+  "id": "glassmorphism-beam-studio",
+  "name": "CSS Glassmorphism & Border-Beam Studio",
+  "version": "v0.0.2",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "High-End Kantenlicht-Generator und Milchglas-Konfigurator mit echtem Kantenumlauf via CSS @property und SVG Laser Tracer.",
+  "category": "Helper",
+  "subcategory": "Generators",
+  "features": [
+    "Echter Perimeter Border-Beam: Der Lichtstrahl wandert exakt an der Außenkante des Rahmens entlang",
+    "Katalogisierter Effekt-Modus: Kanten-Komet (@property), SVG Laser Tracer, Dual Orbit Lasers, Neon Pulse, Cyberpunk Corner Brackets und Rainbow Prism",
+    "Oberflächen-Spezialeffekte: Liquid Light Sheen, Analoges Film-Rauschen und Hexagonales Wabennetz",
+    "Interaktive 3D Parallax-Tilt-Simulation mit reflexiver Lichtbrechung",
+    "Direkter Code-Export für reines CSS, Tailwind CSS (v3/v4) und React TSX"
+  ],
+  "manual": [
+    "1. Wähle im linken Katalog ein Preset oder passe Rahmenmodus, Unschärfe und Glas-Deckkraft an.",
+    "2. Bewege die Maus über die zentrale 3D-Karte, um die Lichtreflexionen zu testen.",
+    "3. Kopiere rechts den einsatzbereiten CSS- oder Tailwind-Code."
+  ],
+  "configuration": {
+    "defaultPreset": "obsidian",
+    "defaultFormat": "css"
+  },
+  "prerequisites": [
+    "Moderner Webbrowser mit CSS @property und Masking Unterstützung"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller UI Components",
+    "PlayRig Design System",
+    "Tailwind Web Apps"
+  ],
+  "notes": "Der Kantenstrahl nutzt hardwarebeschleunigte CSS-Interpolation für ruckelfreie 60 FPS."
+}

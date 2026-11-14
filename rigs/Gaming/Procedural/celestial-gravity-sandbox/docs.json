@@ -1,0 +1,38 @@
+{
+  "id": "celestial-gravity-sandbox",
+  "name": "Celestial Gravity N-Body Sandbox",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Astrophysikalischer N-Körper-Gravitationssimulator mit Keplerian Orbit-Inspector, relativistischen Schwarzen Löchern und wissenschaftlichen Presets.",
+  "category": "Gaming",
+  "subcategory": "Procedural",
+  "features": [
+    "Runge-Kutta 4. Ordnung (RK4) und Symplektischer Verlet Integrator für hohe Bahngenauigkeit",
+    "Interaktiver Himmelskörper-Inspektor mit Fokus-Fadenkreuz, Geschwindigkeitsvektoren und Massereglern",
+    "'+ Mond im Orbit erzeugen' Knopf zur stabilen Kepler-Orbit-Initialisierung",
+    "Fixierungs-Option (Anchor/Lock) für Zentralgestirne oder Fixpunkte im System",
+    "Wissenschaftliche Presets: Sonnensystem mit Monden, Doppelstern-Baryzentrum, Chenciner & Montgomery Figure-8 Choreografie, Schwarzes Loch mit Akkretionsscheibe"
+  ],
+  "manual": [
+    "1. Wähle ein Preset oder klicke auf die Arbeitsfläche, um einen neuen Himmelskörper mit Vektor zu platzieren.",
+    "2. Klicke auf einen beliebigen Planeten, um den Himmelskörper-Inspektor am rechten Rand zu öffnen.",
+    "3. Passe Masse, Farbe, Bahnspuren oder Bahngeschwindigkeit in Echtzeit an."
+  ],
+  "configuration": {
+    "gravitationalConstant": 1.2,
+    "maxBodies": 250,
+    "collisionMode": "merge"
+  },
+  "prerequisites": [
+    "HTML5 Canvas 2D / WebGL"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "PlayRig Deck Spotlight"
+  ],
+  "notes": "Bei instabilen Mehrkörpersystemen können chaotische Bahnstörungen zu Schleuderbahnen ins Unendliche führen."
+}

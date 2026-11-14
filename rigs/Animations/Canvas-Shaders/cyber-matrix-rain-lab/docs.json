@@ -1,0 +1,35 @@
+{
+  "id": "cyber-matrix-rain-lab",
+  "name": "Cyber Matrix Rain Lab",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Hochgradig performanter prozeduraler Matrix-Regen-Simulator mit Glyphen-Kompilierung, Phosphor-Nachglimmen und Audio-Reaktivität.",
+  "category": "Animations",
+  "subcategory": "Canvas-Shaders",
+  "features": [
+    "Japanische Katakana-, Hexadezimal- und Alchemie-Runen Zeichensätze",
+    "Stufenlose Steuerung von Dichte, Fallgeschwindigkeit, Nachleucht-Dauer (Decay) und Zeichengröße",
+    "Farb-Presets: Klassisches Terminal-Grün, Cyberpunk Neon-Cyan, Crimson Blood und Matrix Gold",
+    "Geringe CPU-Last durch optimiertes Canvas 2D Blitting mit 60 FPS"
+  ],
+  "manual": [
+    "1. Wähle links ein Farbschema und passe Geschwindigkeit sowie Schriftdichte an.",
+    "2. Klicke auf die Leinwand, um lokale EMP-Schockwellen und temporäre Glyphen-Entladungen auszulösen."
+  ],
+  "configuration": {
+    "defaultFont": "Matrix-Katakana",
+    "fontSize": 18
+  },
+  "prerequisites": [
+    "HTML5 Canvas 2D"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Background Screensaver",
+    "OBS Stream Background / Pause Screen"
+  ],
+  "notes": "Ideal als stimmungsvoller Hintergrund für Gaming-Livestreams oder Community-Panels."
+}

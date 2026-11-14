@@ -1,0 +1,36 @@
+{
+  "id": "crosshair-scope-lab",
+  "name": "Tactical Crosshair & Scope Lab",
+  "version": "v1.0.0",
+  "author": "Liath",
+  "copyright": "© GameChiller",
+  "purpose": "Taktischer Fadenkreuz- und Zielvisier-Konfigurator mit dynamischem Rückstoß, Streuung und Code-Export für CS2, Valorant und Custom Engines.",
+  "category": "Gaming",
+  "subcategory": "Shooter-Tools",
+  "features": [
+    "Vollständig anpassbare Fadenkreuz-Geometrie: Länge, Dicke, Lücke (Gap), Mittelpunkt (Dot) und Umriss",
+    "Dynamische Rückstoß- und Bewegungssimulation mit Canvas-Zielscheiben-Tester",
+    "Optische Visier-Modi: Red Dot, Holographic Reticle, Acog Sniper Scope und Minimalist Cross",
+    "1-Klick Code-Export für CS2 Console Commands, Valorant Profile Strings und CSS/SVG Overlays"
+  ],
+  "manual": [
+    "1. Stelle links Geometrie, Farbe und Transparenz deines Wunsch-Fadenkreuzes ein.",
+    "2. Klicke im mittleren Testbereich, um Schuss-Animationen und dynamische Ausdehnung zu prüfen.",
+    "3. Kopiere rechts den generierten Spielbefehl oder CSS-Code."
+  ],
+  "configuration": {
+    "dynamicSpread": true,
+    "outline": true
+  },
+  "prerequisites": [
+    "HTML5 Canvas 2D"
+  ],
+  "requiredPermissions": [
+    "storage:user"
+  ],
+  "supportedIntegrations": [
+    "GameChiller Network Hub",
+    "OBS Stream Crosshair Overlay"
+  ],
+  "notes": "Für OBS kann das Fadenkreuz im transparenten Vollbildmodus als Zielhilfe im Stream eingebunden werden."
+}

@@ -4,19 +4,20 @@
 
 **High-Performance Modular Web Platform, Rig Studio & Interactive Sandbox**
 
-[![Version](https://img.shields.io/badge/Version-v0.0.1-00f0ff?style=for-the-badge)](https://github.com/AmFearLiath/PlayRig)
+[![Version](https://img.shields.io/badge/Version-v1.0.0-00f0ff?style=for-the-badge)](https://github.com/AmFearLiath/PlayRig)
 [![Author](https://img.shields.io/badge/Author-Liath-fbbf24?style=for-the-badge)](https://github.com/AmFearLiath)
 [![Copyright](https://img.shields.io/badge/Copyright-GameChiller-a855f7?style=for-the-badge)](https://github.com/AmFearLiath)
 [![License](https://img.shields.io/badge/License-Proprietary%20%2F%20All%20Rights%20Reserved-ef4444?style=for-the-badge)](LICENSE.md)
 [![Database](https://img.shields.io/badge/Database-MySQL%20(Port%203307)-38bdf8?style=for-the-badge)](server/db.js)
+[![Docs](https://img.shields.io/badge/Handbook-GameChiller%20Integration-10b981?style=for-the-badge)](docs/PLAYRIG_GAMECHILLER_INTEGRATION.md)
 
 <p align="center">
-  <i>Eine moderne, autarke Plattform zur Erstellung, Katalogisierung, Ausführung und Einbettung von interaktiven Web-Tools, Gaming-Editoren, Canvas-Shadern und prozeduralen Generatoren.</i>
+  <i>Eine moderne, autarke Plattform zur Erstellung, Katalogisierung, Ausführung und Einbettung von interaktiven Web-Tools, Gaming-Editoren, Canvas-Shadern und prozeduralen Generatoren – vollintegriert in das GameChiller-Ökosystem.</i>
 </p>
 
 [✨ Features](#-features) •
 [🕹️ Rig Katalog](#-rig-katalog) •
-[🏗️ Architektur](#-architektur) •
+[🏗️ Architektur & GameChiller Integration](docs/PLAYRIG_GAMECHILLER_INTEGRATION.md) •
 [🚀 Installation](#-installation--schnellstart) •
 [📜 Lizenz](#-lizenz)
 
@@ -31,7 +32,6 @@
 - **PlayRig Studio:** Schneller Code- und Rig-Editor mit 1-Klick CDN-Integration (Three.js, Lucide, Tailwind, MathJS etc.), Hot-Reload und Export.
 - **Admin Control Panel:** Umfassende Nutzer-, Rechte- und Audit-Log-Verwaltung auf separater Sicherheits-Ebene (`/admin`).
 - **Prozedurale Audio-Synthese:** Keine externen MP3-Dateien oder 404-Risiken – Sound-Effekte und Ambientes werden in Echtzeit über die Web Audio API synthetisiert.
-- **Automatisches Versioning & Copyright:** Jedes Rig trägt standardmäßig die Signatur `Author: Liath`, `© GameChiller`, ab `v0.0.1` mit responsivem Hub-Rücksprung.
 
 ---
 

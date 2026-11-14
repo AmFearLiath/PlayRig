@@ -45,7 +45,7 @@
           🛡️ Admin-Panel ↗
         </a>
 
-        <a href="/" target="_blank" class="btn btn-secondary btn-sm" title="PlayRig Deck im neuen Tab öffnen">
+        <a href="/" class="btn btn-secondary btn-sm" title="Zum PlayRig Deck wechseln">
           Deck Vorschau ↗
         </a>
 
@@ -162,9 +162,16 @@
             <h2>Meine <span class="gradient-text">Rigs & Quellcode</span></h2>
             <p>Verwalte deine Rigs, bearbeite HTML/CSS/JS und steuere, was im Deck publiziert ist.</p>
           </div>
-          <button class="btn btn-primary fx-ripple" onclick="switchView('create-tool')">
-            + Neues Rig anlegen
-          </button>
+          <div class="view-actions-group" style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-primary fx-ripple" onclick="switchView('create-tool')" title="Neues Rig erstellen">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              + Neu
+            </button>
+            <button class="btn btn-secondary fx-ripple" onclick="switchView('codepen-import')" title="Bestehendes Rig oder CodePen importieren">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Importieren
+            </button>
+          </div>
         </div>
 
         <div class="data-table-card">
@@ -325,7 +332,7 @@
           </div>
 
           <div class="editor-view-actions">
-            <a id="editor-btn-preview" href="#" target="_blank" class="btn btn-secondary btn-sm" title="Im Browser öffnen">
+            <a id="editor-btn-preview" href="#" class="btn btn-secondary btn-sm" title="Im Browser öffnen">
               Live-Vorschau ↗
             </a>
             <button id="editor-btn-fork" class="btn btn-secondary btn-sm" title="Rig klonen">

@@ -300,7 +300,7 @@
               </div>
               <div style="display:flex; gap:8px;">
                 <button class="btn btn-primary btn-sm btn-edit-quick" data-id="${r.id}">Code & Studio</button>
-                <a href="/${r.path}" target="_blank" class="btn btn-ghost btn-sm">↗</a>
+                <a href="/${r.path}" class="btn btn-ghost btn-sm" title="Vorschau im selben Fenster">↗</a>
               </div>
             `;
             row.querySelector('.btn-edit-quick').addEventListener('click', () => openRigEditor(r));
@@ -376,7 +376,7 @@
             <button class="btn btn-secondary btn-sm btn-fork-rig" data-id="${rig.id}" title="Rig klonen (Fork)">
               ⚡
             </button>
-            <a href="/${rig.path}" target="_blank" class="btn btn-ghost btn-sm" title="Vorschau im Browser">
+            <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau im Browser">
               ↗
             </a>
             ${isOwner ? `

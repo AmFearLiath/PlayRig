@@ -179,7 +179,8 @@
 
     if (heroContainer && featuredRig) {
       const directUrl = `/${featuredRig.path}`;
-      const embedUrl = featuredRig.path.includes('?') ? `/${featuredRig.path}&embed=true` : `/${featuredRig.path}?embed=true`;
+      const dir = featuredRig.path ? featuredRig.path.substring(0, featuredRig.path.lastIndexOf('/')) : '';
+      const screenshotUrl = featuredRig.screenshot || featuredRig.thumbnail || (dir ? `/${dir}/thumbnail.png` : '/_shared/assets/placeholder-rig.png');
 
       heroContainer.innerHTML = `
         <div class="hero-spotlight-card fx-beam">
@@ -188,10 +189,11 @@
               <span class="spotlight-featured-pill">⭐ Spotlight Flagship</span>
               <span class="badge badge-indigo">${featuredRig.category} • ${featuredRig.subcategory}</span>
               <span class="badge badge-cyan" style="font-family: var(--font-mono);">${featuredRig.version || 'v0.0.1'}</span>
+              ${featuredRig.services && featuredRig.services.required && featuredRig.services.required.length > 0 ? `<span class="badge badge-amber" title="Erfordert Services: ${featuredRig.services.required.join(', ')}">⚡ ${featuredRig.services.required.join(', ')}</span>` : ''}
             </div>
 
             <h2 class="hero-spotlight-title"><span class="gradient-text">${featuredRig.title}</span></h2>
-            <p class="hero-spotlight-desc">${featuredRig.description || 'Interaktives high-end Webmodul mit Three.js und Voxel-Architektur.'}</p>
+            <p class="hero-spotlight-desc">${featuredRig.description || 'Interaktives high-end Webmodul mit GameChiller-Integration.'}</p>
 
             <div class="hero-spotlight-meta-row">
               <span>👤 <strong>${featuredRig.author || 'Liath'}</strong></span>
@@ -204,11 +206,14 @@
               <button class="btn btn-primary fx-ripple btn-hero-launch">
                 Sandbox Runner ▶
               </button>
-              <a href="${directUrl}" target="_blank" class="btn btn-secondary">
+              <a href="${directUrl}" class="btn btn-secondary">
                 Vollbild Vorschau ↗
               </a>
+              <button class="btn btn-secondary btn-hero-docs" title="Handbuch und API-Dokumentation">
+                📖 Handbuch & Docs
+              </button>
               <a href="/studio" class="btn btn-secondary">
-                ⚡ Im Studio bearbeiten
+                ⚡ Studio
               </a>
               <button class="btn btn-secondary btn-hero-fork" title="Rig klonen">
                 ⚡ Fork
@@ -216,17 +221,30 @@
             </div>
           </div>
 
-          <div class="hero-spotlight-preview-wrap">
-            <a href="${directUrl}" target="_blank" class="hero-preview-overlay-btn" title="Live in neuem Tab öffnen">
-              Interaktive Vorschau ↗
-            </a>
-            <iframe class="hero-preview-iframe" src="${embedUrl}" loading="lazy"></iframe>
+          <div class="hero-spotlight-screenshot-wrap">
+            <img src="${screenshotUrl}" alt="${featuredRig.title} Screenshot" class="hero-spotlight-screenshot" onerror="this.onerror=null; this.src='/_shared/assets/placeholder-rig.png';" />
+            <div class="hero-spotlight-screenshot-overlay">
+              <span class="spotlight-mode-badge">Static Snapshot • Instant Load</span>
+              <button class="btn btn-secondary btn-sm btn-hero-refresh-ss" title="Screenshot neu generieren / aktualisieren">📸 Aktualisieren</button>
+            </div>
           </div>
         </div>
       `;
 
       heroContainer.querySelector('.btn-hero-launch').addEventListener('click', () => openSandbox(featuredRig));
+      heroContainer.querySelector('.btn-hero-docs').addEventListener('click', () => openDocsModal(featuredRig));
       heroContainer.querySelector('.btn-hero-fork').addEventListener('click', () => forkRigFromHub(featuredRig));
+      heroContainer.querySelector('.btn-hero-refresh-ss').addEventListener('click', async () => {
+        try {
+          const img = heroContainer.querySelector('.hero-spotlight-screenshot');
+          if (img) {
+            img.src = `/api/v1/rigs/${featuredRig.id}/screenshot?t=${Date.now()}`;
+            window.showToast?.('Screenshot-Snapshot erfolgreich aktualisiert!', 'success');
+          }
+        } catch (e) {
+          window.showToast?.('Verbindungsfehler beim Screenshot-Refresh', 'error');
+        }
+      });
     }
 
     // 2. Carousel: Top Rated (Sorted by Stars)
@@ -282,7 +300,7 @@
             <button class="btn btn-primary btn-sm fx-ripple btn-thumb-launch">
               Sandbox ▶
             </button>
-            <a href="${directUrl}" target="_blank" class="btn btn-secondary btn-sm" title="Vorschau im neuen Tab">
+            <a href="${directUrl}" class="btn btn-secondary btn-sm" title="Vorschau">
               ↗
             </a>
           </div>
@@ -303,7 +321,8 @@
         <div class="showcase-card-footer">
           <div style="display:flex; gap:6px;">
             <button class="btn btn-secondary btn-sm btn-fork" data-id="${rig.id}" title="Rig klonen">⚡ Fork</button>
-            <a href="/${rig.path}" target="_blank" class="btn btn-ghost btn-sm" title="Vorschau">↗</a>
+            <button class="btn btn-secondary btn-sm btn-docs" data-id="${rig.id}" title="Dokumentation">📖</button>
+            <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau">↗</a>
           </div>
           <button class="btn btn-primary btn-sm btn-launch fx-ripple" data-id="${rig.id}">Sandbox ▶</button>
         </div>
@@ -312,6 +331,8 @@
       card.querySelector('.btn-launch').addEventListener('click', () => openSandbox(rig));
       card.querySelector('.btn-thumb-launch').addEventListener('click', () => openSandbox(rig));
       card.querySelector('.btn-fork').addEventListener('click', () => forkRigFromHub(rig));
+      const docsBtn = card.querySelector('.btn-docs');
+      if (docsBtn) docsBtn.addEventListener('click', () => openDocsModal(rig));
 
       track.appendChild(card);
     });
@@ -450,9 +471,10 @@
           <td style="text-align: right;">
             <div style="display: inline-flex; gap: 6px;">
               <button class="btn btn-secondary btn-sm btn-fork" data-id="${rig.id}">⚡ Fork</button>
+              <button class="btn btn-secondary btn-sm btn-docs" data-id="${rig.id}" title="Dokumentation">📖</button>
               <a href="/api/rigs/${rig.id}/export" class="btn btn-secondary btn-sm">📦</a>
               <button class="btn btn-secondary btn-sm btn-embed" data-id="${rig.id}">Embed</button>
-              <a href="/${rig.path}" target="_blank" class="btn btn-ghost btn-sm">↗</a>
+              <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau">↗</a>
               <button class="btn btn-primary btn-sm btn-launch fx-ripple" data-id="${rig.id}">Sandbox ▶</button>
             </div>
           </td>
@@ -461,6 +483,8 @@
         tr.querySelector('.btn-launch').addEventListener('click', () => openSandbox(rig));
         tr.querySelector('.btn-embed').addEventListener('click', () => openEmbedModal(rig));
         tr.querySelector('.btn-fork').addEventListener('click', () => forkRigFromHub(rig));
+        const rowDocsBtn = tr.querySelector('.btn-docs');
+        if (rowDocsBtn) rowDocsBtn.addEventListener('click', () => openDocsModal(rig));
 
         tbody.appendChild(tr);
       });
@@ -512,11 +536,12 @@
         <div class="tool-card-footer">
           <div style="display: flex; gap: 6px;">
             <button class="btn btn-secondary btn-sm btn-fork" data-id="${rig.id}" title="Rig klonen">⚡ Fork</button>
+            <button class="btn btn-secondary btn-sm btn-docs" data-id="${rig.id}" title="Handbuch & Dokumentation">📖 Docs</button>
             <button class="btn btn-secondary btn-sm btn-embed" data-id="${rig.id}" title="Embed Code">Embed</button>
           </div>
           <div style="display: flex; gap: 6px;">
             <a href="/api/rigs/${rig.id}/export" class="btn btn-secondary btn-sm" title="Als ZIP herunterladen">📦</a>
-            <a href="/${rig.path}" target="_blank" class="btn btn-ghost btn-sm" title="Vorschau">↗</a>
+            <a href="/${rig.path}" class="btn btn-ghost btn-sm" title="Vorschau">↗</a>
             <button class="btn btn-primary btn-sm btn-launch fx-ripple" data-id="${rig.id}">Sandbox ▶</button>
           </div>
         </div>
@@ -525,6 +550,8 @@
       card.querySelector('.btn-launch').addEventListener('click', () => openSandbox(rig));
       card.querySelector('.btn-embed').addEventListener('click', () => openEmbedModal(rig));
       card.querySelector('.btn-fork').addEventListener('click', () => forkRigFromHub(rig));
+      const cardDocsBtn = card.querySelector('.btn-docs');
+      if (cardDocsBtn) cardDocsBtn.addEventListener('click', () => openDocsModal(rig));
 
       container.appendChild(card);
     });
@@ -595,6 +622,149 @@
 
   function closeEmbedModal() {
     document.getElementById('embed-modal').classList.remove('active');
+  }
+
+  // ==========================================================================
+  // STANDALONE RIG DOCUMENTATION MODAL
+  // ==========================================================================
+  async function openDocsModal(rig) {
+    let modal = document.getElementById('docs-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'docs-modal';
+      modal.className = 'docs-modal-overlay';
+      modal.innerHTML = `
+        <div class="docs-modal-card">
+          <div class="docs-modal-header">
+            <div>
+              <h3 id="docs-modal-title" style="margin:0; font-size:1.15rem; color:#fff; display:flex; align-items:center; gap:8px;">
+                📖 Rig-Handbuch & API
+              </h3>
+              <div id="docs-modal-subtitle" style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-close-docs" style="font-size:1.2rem; line-height:1; padding:4px 8px;">✕</button>
+          </div>
+          <div class="docs-modal-body" id="docs-modal-content">
+            <div style="text-align:center; padding:30px; color:var(--text-dim);">Lade Dokumentation...</div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeDocsModal();
+      });
+      modal.querySelector('#btn-close-docs').addEventListener('click', closeDocsModal);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display !== 'none') closeDocsModal();
+      });
+    }
+
+    modal.style.display = 'flex';
+    const titleEl = modal.querySelector('#docs-modal-title');
+    const subEl = modal.querySelector('#docs-modal-subtitle');
+    const contentEl = modal.querySelector('#docs-modal-content');
+
+    titleEl.innerHTML = `📖 <span>${rig.title}</span>`;
+    subEl.textContent = `${rig.category} • ${rig.subcategory} | Version: ${rig.version || 'v0.0.2'} | Author: ${rig.author || 'Liath'} (${rig.copyright || '© GameChiller'})`;
+    contentEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--cyan-400);">⏳ Lade Standalone-Dokumentation...</div>`;
+
+    let docData = rig.standaloneDocs || null;
+    try {
+      const res = await fetch(`/api/v1/rigs/${rig.id}/docs`, { credentials: 'same-origin' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && (json.data || json.docs)) {
+          docData = json.data || json.docs;
+        }
+      }
+    } catch (e) {
+      // Offline fallback
+    }
+
+    if (!docData) {
+      docData = {
+        name: rig.title,
+        version: rig.version || 'v0.0.2',
+        overview: rig.description || 'Keine detaillierte Beschreibung hinterlegt.',
+        features: rig.features || ['Modulare PlayRig-Komponente', 'GameChiller Plattform-Integration', 'Offline-kompatibel'],
+        permissions: rig.permissions || ['storage:user:read', 'storage:user:write'],
+        services: (rig.services && rig.services.required) || []
+      };
+    }
+
+    const permissions = docData.permissions || [];
+    const services = docData.services || [];
+    const features = docData.features || [];
+    const apiRef = docData.api_reference || null;
+    const faq = docData.faq || [];
+
+    contentEl.innerHTML = `
+      <div class="docs-badge-row">
+        <span class="badge badge-indigo">${rig.category}</span>
+        <span class="badge badge-cyan">v${docData.version || rig.version || '0.0.2'}</span>
+        ${services.length > 0 ? `<span class="badge badge-amber">⚡ Services: ${services.join(', ')}</span>` : '<span class="badge badge-ghost">Keine externen Services erforderlich</span>'}
+        <span class="badge badge-emerald">GameChiller Verified</span>
+      </div>
+
+      <h3>📌 Übersicht & Zweck</h3>
+      <p>${docData.overview || docData.description || rig.description || 'Modulare Anwendung für die GameChiller Plattform.'}</p>
+
+      ${features.length > 0 ? `
+        <h3>✨ Hauptfunktionen</h3>
+        <ul>
+          ${features.map(f => `<li>${typeof f === 'string' ? f : `<strong>${f.name}:</strong> ${f.description}`}</li>`).join('')}
+        </ul>
+      ` : ''}
+
+      <h3>🔐 Erforderliche Berechtigungen (Permissions & Scopes)</h3>
+      ${permissions.length > 0 ? `
+        <ul>
+          ${permissions.map(p => `<li><code style="color:var(--cyan-300);">${p}</code></li>`).join('')}
+        </ul>
+      ` : '<p style="color:var(--text-dim);">Dieses Rig benötigt keine gesonderten Berechtigungen.</p>'}
+
+      <h3>🌐 GameChiller Bridge & Ereignisse</h3>
+      <p>Dieses Rig kommuniziert bidirektional über das globale Objekt <code>window.PlayRig</code>:</p>
+      <div class="docs-code-box">// Daten in GameChiller Session speichern
+window.PlayRig.storage.set("state", { lastScore: 100 });
+
+// Gespeicherte Daten abrufen
+const savedState = await window.PlayRig.storage.get("state");
+
+// Navigation im selben Fenster
+window.PlayRig.navigate("/studio");</div>
+
+      ${apiRef ? `
+        <h3>🛠️ API-Referenz & Methoden</h3>
+        <p>${apiRef.description || 'Spezifische Endpunkte und Schnittstellen dieses Rigs:'}</p>
+        ${Array.isArray(apiRef.methods) ? `
+          <ul>
+            ${apiRef.methods.map(m => `<li><strong>${m.name}</strong>: <code>${m.signature || ''}</code> – ${m.description || ''}</li>`).join('')}
+          </ul>
+        ` : ''}
+      ` : ''}
+
+      ${faq.length > 0 ? `
+        <h3>❓ Häufige Fragen & Troubleshooting (FAQ)</h3>
+        ${faq.map(item => `
+          <div style="margin-bottom:12px;">
+            <div style="font-weight:600; color:#fff;">Q: ${item.q || item.question}</div>
+            <div style="color:var(--text-dim); margin-top:3px;">A: ${item.a || item.answer}</div>
+          </div>
+        `).join('')}
+      ` : ''}
+
+      <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border-default); display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.75rem; color:var(--text-dim);">Entwickelt von <strong>${rig.author || 'Liath'}</strong> • ${rig.copyright || '© GameChiller'}</span>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('docs-modal').style.display='none';">Schließen</button>
+      </div>
+    `;
+  }
+
+  function closeDocsModal() {
+    const modal = document.getElementById('docs-modal');
+    if (modal) modal.style.display = 'none';
   }
 
   // Switch between Discovery and Catalog View Modes

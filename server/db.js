@@ -110,13 +110,48 @@ async function init() {
       ) ENGINE=InnoDB;
     `);
 
-    // Ensure 'featured' and 'thumbnail' columns exist if table was created previously without them
-    try {
-      await pool.query('ALTER TABLE rigs ADD COLUMN featured TINYINT(1) DEFAULT 0');
-    } catch (e) {}
-    try {
-      await pool.query('ALTER TABLE rigs ADD COLUMN thumbnail VARCHAR(255) DEFAULT NULL');
-    } catch (e) {}
+    // Rig Storage Table for GameChiller User & Component Settings
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS rig_storage (
+        id VARCHAR(64) PRIMARY KEY,
+        user_id VARCHAR(64) NULL,
+        rig_id VARCHAR(96) NULL,
+        storage_key VARCHAR(128) NOT NULL,
+        data_value JSON NOT NULL,
+        is_global TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user_key (user_id, storage_key),
+        INDEX idx_rig_key (rig_id, storage_key),
+        INDEX idx_global_key (is_global, storage_key)
+      ) ENGINE=InnoDB;
+    `);
+
+    // GameChiller Registered Clients & API Consumers
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS gamechiller_clients (
+        client_id VARCHAR(64) PRIMARY KEY,
+        client_secret VARCHAR(128) NOT NULL,
+        name VARCHAR(128) NOT NULL,
+        scopes JSON NOT NULL,
+        status ENUM('active', 'revoked') DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
+    // Ensure schema columns on rigs exist
+    const rigMigrations = [
+      'ALTER TABLE rigs ADD COLUMN featured TINYINT(1) DEFAULT 0',
+      'ALTER TABLE rigs ADD COLUMN thumbnail VARCHAR(255) DEFAULT NULL',
+      'ALTER TABLE rigs ADD COLUMN screenshot VARCHAR(255) DEFAULT NULL',
+      'ALTER TABLE rigs ADD COLUMN permissions JSON DEFAULT NULL',
+      'ALTER TABLE rigs ADD COLUMN dependencies JSON DEFAULT NULL',
+      "ALTER TABLE rigs ADD COLUMN min_runtime_version VARCHAR(32) DEFAULT 'v1.0.0'",
+      'ALTER TABLE rigs ADD COLUMN docs JSON DEFAULT NULL'
+    ];
+    for (const sql of rigMigrations) {
+      try { await pool.query(sql); } catch (e) {}
+    }
 
     // Seed Initial Data & Fix Paths
     await seedInitialData();
@@ -861,6 +896,86 @@ async function getAuditLogs(limit = 100) {
   return rows;
 }
 
+// ==========================================
+// CENTRAL STORAGE API HELPERS (GameChiller & Rigs)
+// ==========================================
+async function getStorageEntry(scope, key, userId = null, rigId = null) {
+  if (scope === 'user') {
+    if (!userId) return null;
+    const [rows] = await pool.query(
+      'SELECT data_value, updated_at FROM rig_storage WHERE user_id = ? AND storage_key = ? AND is_global = 0',
+      [userId, key]
+    );
+    return rows[0] || null;
+  } else if (scope === 'rig') {
+    if (!rigId) return null;
+    const [rows] = await pool.query(
+      'SELECT data_value, updated_at FROM rig_storage WHERE rig_id = ? AND storage_key = ? AND is_global = 0',
+      [rigId, key]
+    );
+    return rows[0] || null;
+  } else if (scope === 'global') {
+    const [rows] = await pool.query(
+      'SELECT data_value, updated_at FROM rig_storage WHERE storage_key = ? AND is_global = 1',
+      [key]
+    );
+    return rows[0] || null;
+  }
+  return null;
+}
+
+async function setStorageEntry(scope, key, value, userId = null, rigId = null) {
+  const serialized = JSON.stringify(value !== undefined ? value : null);
+  const entryId = crypto.randomUUID ? crypto.randomUUID() : ('st_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8));
+
+  if (scope === 'user') {
+    if (!userId) throw new Error('user_id erforderlich für User-Storage');
+    await pool.query(`
+      INSERT INTO rig_storage (id, user_id, rig_id, storage_key, data_value, is_global)
+      VALUES (?, ?, ?, ?, ?, 0)
+      ON DUPLICATE KEY UPDATE data_value = VALUES(data_value), updated_at = CURRENT_TIMESTAMP
+    `, [entryId, userId, rigId || null, key, serialized]);
+  } else if (scope === 'rig') {
+    if (!rigId) throw new Error('rig_id erforderlich für Rig-Storage');
+    await pool.query(`
+      INSERT INTO rig_storage (id, user_id, rig_id, storage_key, data_value, is_global)
+      VALUES (?, ?, ?, ?, ?, 0)
+      ON DUPLICATE KEY UPDATE data_value = VALUES(data_value), updated_at = CURRENT_TIMESTAMP
+    `, [entryId, userId || null, rigId, key, serialized]);
+  } else if (scope === 'global') {
+    await pool.query(`
+      INSERT INTO rig_storage (id, user_id, rig_id, storage_key, data_value, is_global)
+      VALUES (?, NULL, NULL, ?, ?, 1)
+      ON DUPLICATE KEY UPDATE data_value = VALUES(data_value), updated_at = CURRENT_TIMESTAMP
+    `, [entryId, key, serialized]);
+  }
+  return { key, updated: true };
+}
+
+async function deleteStorageEntry(scope, key, userId = null, rigId = null) {
+  if (scope === 'user') {
+    await pool.query('DELETE FROM rig_storage WHERE user_id = ? AND storage_key = ? AND is_global = 0', [userId, key]);
+  } else if (scope === 'rig') {
+    await pool.query('DELETE FROM rig_storage WHERE rig_id = ? AND storage_key = ? AND is_global = 0', [rigId, key]);
+  } else if (scope === 'global') {
+    await pool.query('DELETE FROM rig_storage WHERE storage_key = ? AND is_global = 1', [key]);
+  }
+  return true;
+}
+
+async function updateRigScreenshot(id, screenshotPath) {
+  await pool.query('UPDATE rigs SET screenshot = ?, thumbnail = ? WHERE id = ?', [screenshotPath, screenshotPath, id]);
+  return getRigById(id);
+}
+
+async function updateRigStatus(id, status) {
+  if (!['active', 'wip', 'deprecated', 'pending'].includes(status)) {
+    throw new Error('Ungültiger Status: ' + status);
+  }
+  await pool.query('UPDATE rigs SET status = ? WHERE id = ?', [status, id]);
+  return getRigById(id);
+}
+
 module.exports = {
   init,
   authenticate,
@@ -878,5 +993,10 @@ module.exports = {
   forkRig,
   incrementRigStat,
   logAudit,
-  getAuditLogs
+  getAuditLogs,
+  getStorageEntry,
+  setStorageEntry,
+  deleteStorageEntry,
+  updateRigScreenshot,
+  updateRigStatus
 };

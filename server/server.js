@@ -96,6 +96,10 @@ function resolveRigDirectory(rigPath) {
 // API ROUTES
 // ==========================================
 
+// Central Versioned PlayRig API v1 (GameChiller Integration)
+const apiV1 = require('./api/v1');
+app.use('/api/v1', apiV1);
+
 // Health & Metrics
 app.get('/api/health', async (req, res) => {
   try {
