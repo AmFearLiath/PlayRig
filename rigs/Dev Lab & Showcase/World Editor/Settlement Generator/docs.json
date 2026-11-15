@@ -1,41 +1,57 @@
 {
   "id": "settlement-generator",
   "name": "Settlement Generator",
-  "version": "v0.1.0",
+  "version": "v0.2.0",
   "author": "Liath",
   "copyright": "© GameChiller",
-  "purpose": "Eigenständiger World-Editor-Rig zum Importieren, Anzeigen und Untersuchen von Fantasy-Weltkarten. Erste Ausbaustufe mit gemeinsamem World Core und Azgaar Full JSON Adapter.",
+  "purpose": "Eigenständiger PlayRig World Editor zur Untersuchung importierter Fantasy-Welten und zur Erstellung, prozeduralen Generierung und manuellen Bearbeitung verknüpfter Settlement-Projekte.",
   "category": "Dev Lab & Showcase",
   "subcategory": "World Editor",
   "features": [
-    "Azgaar Full JSON Import",
-    "Source-agnostisches PlayRig World Core Datenmodell mit erhaltener Originalquelle",
-    "Interaktive 2D-Weltansicht mit Zoom, Pan und Zellenauswahl",
-    "Biome-, Höhenrelief- und politische Darstellung",
-    "Ein-/ausblendbare Siedlungen, Flüsse, Routen und Grenzlinien",
-    "Inspector für Gelände-, Regions- und Siedlungszuordnungen",
-    "Export des vollständigen PlayRig World Projects inklusive Quelldaten"
+    "Azgaar Full JSON Import mit unveränderter Originalquelle im World Project",
+    "Source-agnostischer World Core mit Terrain-Zellen, Biomen, Regionen, Flüssen, Routen und Siedlungen",
+    "Auswahl von Städten, Dörfern, Hauptstädten und Festungen aus der importierten Welt",
+    "Eigenständiges Settlement Project mit Referenz auf World ID, Quell-Siedlungs-ID, Ursprung und lokalem Bearbeitungsbereich",
+    "Deterministische, seed-basierte Generierung von Bezirken, Straßennetz, Parzellen, Gebäuden, Plätzen und Umgebung",
+    "Stadtformen: organisch, radial, Raster und linear",
+    "Siedlungsprofile: Hamlet, Village, Town, City und Fortress",
+    "Visueller 2D-Editor mit Auswahl, Gebäude-, Straßen-, Baum-, Platz- und Löschwerkzeug",
+    "Objektmetadaten für Generatorstatus, Sperrung und District-Zuordnung",
+    "Validierung auf doppelte IDs, ungültige Straßen und Gebäude außerhalb der empfohlenen Siedlungsgrenze",
+    "Lokales Speichern via Browser Local Storage und JSON-Projektexport",
+    "World Project Export inklusive originaler Azgaar Full JSON Quelldaten",
+    "Direktes Verschieben ausgewählter Gebäude und Objekte per Drag-and-drop",
+    "Undo für manuelle Änderungen und Generierung",
+    "Laden des zuletzt lokal gespeicherten Settlement-Projekts"
   ],
   "manual": [
-    "Exportiere deine Karte in Azgaar über Export → Export to JSON → Full.",
-    "Lade die JSON-Datei über World Source.",
-    "Nutze die Layer-Steuerung für Biome, Höhenrelief oder politische Darstellung.",
-    "Klicke auf eine Kartenfläche, um ihre Daten im Inspector zu untersuchen.",
-    "Exportiere das World-Projekt über Projekt exportieren."
+    "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
+    "Wähle unter Settlement Studio eine vorhandene Stadt aus der Liste. Die Liste gruppiert Hauptstädte, Städte, Ortschaften, Dörfer und Festungen.",
+    "Lege Profil, Radius, Gebäudedichte und Stadtform fest und klicke auf Settlement-Projekt erstellen.",
+    "Klicke auf Siedlung generieren, um Bezirke, Straßen, Parzellen, Gebäude, Plätze und Umgebung anhand des Projekt-Seeds zu erzeugen.",
+    "Wähle im Editor ein Werkzeug und klicke in die Karte, um Gebäude, Straßen, Bäume oder Plätze manuell hinzuzufügen. Das Löschwerkzeug entfernt ausgewählte Objekte.",
+    "Speichern legt das Settlement-Projekt im Local Storage des aktuellen Browsers ab. Laden stellt das zuletzt gespeicherte Projekt wieder her; Export erzeugt eine eigenständige JSON-Datei.",
+    "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert.",
+    "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
+    "settlementCoreApi": "1.0.0",
+    "generatorVersion": "1.0.0",
     "supportedImport": [
       "azgaar-full-json"
     ],
-    "nativeAzgaarMapParsing": false
+    "nativeAzgaarMapParsing": false,
+    "localPersistence": "browser-local-storage"
   },
   "prerequisites": [
-    "Moderner Browser mit ES-Module- und Canvas-2D-Unterstützung"
+    "Moderner Browser mit ES-Modul-, Canvas-2D-, ResizeObserver- und Local-Storage-Unterstützung"
   ],
   "requiredPermissions": [],
   "supportedIntegrations": [
-    "PlayRig World Core"
+    "PlayRig World Core",
+    "PlayRig Settlement Core",
+    "PlayRig Settlement Generator"
   ],
-  "notes": "Die native Azgaar .map-Datei wird in dieser Version nicht direkt geparst. Für den Import ist der Full JSON Export vorgesehen. Die vollständige JSON-Quelle wird unverändert im World-Projekt mitgeführt."
+  "notes": "Diese Ausbaustufe liefert einen funktionsfähigen 2D-Workflow. Der isometrische Renderer, Terrain-Brushes, echte polygonale District- und Parzellenbearbeitung, Gebäude-Komponenten-Editor, Synchronisierung von World-Änderungen und GLTF/GLB-Export sind noch nicht enthalten. Die native Azgaar .map-Datei wird weiterhin als Originalarchiv behandelt; importiert wird der Full JSON Export."
 }

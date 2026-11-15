@@ -84,7 +84,7 @@ export function importAzgaarFull(input) {
       provinces: list("provinces"), religions: list("religions"),
       zones: list("zones")
     },
-    settlements: list("burgs"),
+    settlements: list("burgs").filter(item => Number.isFinite(Number(item.i)) && Number(item.i) > 0),
     routes: list("routes"),
     locations: list("markers"),
     resources: { goods: list("goods"), markets: list("markets") },
