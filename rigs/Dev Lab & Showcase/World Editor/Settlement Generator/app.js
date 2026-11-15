@@ -9,13 +9,14 @@ let world=null, renderer=null, project=null, selectedObject=null, activeTool="se
 const fmt=value=>new Intl.NumberFormat("de-DE").format(value||0);
 const escapeHTML=value=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const uid=prefix=>prefix+"-"+Math.random().toString(36).slice(2,9);
+function lastSavedKey(){try{return localStorage.getItem("playrig.settlement.last");}catch{return null;}}
 
 function notify(message,error=false){
   const el=$("#toast");el.textContent=message;el.style.borderColor=error?"#9c4c4c":"";el.classList.add("visible");
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("visible"),3200);
 }
 function setLoaded(loaded){
-  $("#export-project").disabled=!loaded;$("#reset-view").disabled=!loaded;$("#load-settlement").disabled=!loaded||!localStorage.getItem("playrig.settlement.last");
+  $("#export-project").disabled=!loaded;$("#reset-view").disabled=!loaded;$("#load-settlement").disabled=!loaded||!lastSavedKey();
   $("#world-status").classList.toggle("ready",loaded);
   $("#world-status").innerHTML=loaded?"<i></i> World Core aktiv":"<i></i> Kein World-Projekt geladen";
   $("#empty-state").hidden=loaded;$("#canvas-legend").hidden=!loaded;
@@ -164,13 +165,19 @@ function generate(){
   notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
 }
 function saveLocal(){
-  if(!project)return;const key="playrig.settlement."+project.id;
-  localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));localStorage.setItem("playrig.settlement.last",key);$("#load-settlement").disabled=false;notify("Settlement lokal gespeichert.");
+  if(!project)return;
+  try{
+    const key="playrig.settlement."+project.id;
+    localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));
+    localStorage.setItem("playrig.settlement.last",key);
+    $("#load-settlement").disabled=false;
+    notify("Settlement lokal gespeichert.");
+  }catch(error){notify("Lokales Speichern fehlgeschlagen: "+error.message,true);}
 }
 function loadLocal(){
-  const key=localStorage.getItem("playrig.settlement.last");
-  if(!key){notify("Noch kein lokal gespeichertes Settlement gefunden.",true);return;}
   try{
+    const key=lastSavedKey();
+    if(!key){notify("Noch kein lokal gespeichertes Settlement gefunden.",true);return;}
     const saved=JSON.parse(localStorage.getItem(key)||"null");
     if(!saved?.settlement)throw new Error("Ungültiges Settlement-Projekt.");
     if(world&&saved.settlement.world.id!==world.id)throw new Error("Das gespeicherte Projekt gehört zu einer anderen Welt. Bitte zuerst die passende Welt importieren.");
