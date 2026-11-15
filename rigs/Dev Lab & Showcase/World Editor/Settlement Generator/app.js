@@ -68,7 +68,7 @@ function updateProjectStatus(){
   if(!project)return;
   $("#settlement-status").textContent=project.name+" · "+project.metadata.status;
   $("#settlement-counts").textContent=project.buildings.length+" Gebäude · "+project.roads.length+" Straßen · "+project.districts.length+" Bezirke";
-  $("#generate-settlement").disabled=false;$("#save-settlement").disabled=false;$("#export-settlement").disabled=false;
+  $("#generate-settlement").disabled=false;$("#save-settlement").disabled=false;$("#load-settlement").disabled=false;$("#undo-settlement").disabled=project.history.entries.length===0;$("#export-settlement").disabled=false;
 }
 function createProject(){
   const burg=world.settlements.find(b=>b&&String(b.i)===$("#settlement-select").value);
@@ -123,8 +123,8 @@ function createSettlementRenderer(target,data){
     if(activeTool==="road")item={name:"New Lane",type:"local",width:3,points:[{x:p.x-18,y:p.y-18},{x:p.x+18,y:p.y+18}]};
     if(activeTool==="tree")item={type:"tree",x:p.x,y:p.y,scale:1,rotation:0};
     if(activeTool==="plaza")item={name:"New Plaza",kind:"public-square",x:p.x,y:p.y,radius:20,importance:50};
-    if(activeTool==="erase"){const hit=hitTest(p);if(hit){for(const key of ["buildings","roads","locations","districts","environment","plots"])project[key]=project[key].filter(o=>o.id!==hit.id);commitHistory(project,"Objekt löschen",before);}draw();updateProjectStatus();return;}
-    if(item){const collection={building:"buildings",road:"roads",tree:"environment",plaza:"locations"}[activeTool];item.id=uid(collection.slice(0,3));item.status="modified";item.locked=false;project[collection].push(item);commitHistory(project,"Manuell: "+activeTool,before);selectedObject=item;view.selected=item.id;updateSettlementInspector(item);updateProjectStatus();draw();}
+    if(activeTool==="erase"){const hit=hitTest(p);if(hit){for(const key of ["buildings","roads","locations","districts","environment","plots"])project[key]=project[key].filter(o=>o.id!==hit.id);commitHistory(project,"Objekt löschen",before);$("#undo-settlement").disabled=false;}draw();updateProjectStatus();return;}
+    if(item){const collection={building:"buildings",road:"roads",tree:"environment",plaza:"locations"}[activeTool];item.id=uid(collection.slice(0,3));item.status="modified";item.locked=false;project[collection].push(item);commitHistory(project,"Manuell: "+activeTool,before);$("#undo-settlement").disabled=false;selectedObject=item;view.selected=item.id;updateSettlementInspector(item);updateProjectStatus();draw();}
   });
   const observer=new ResizeObserver(resize);observer.observe(target);resize();
   return{draw,destroy(){observer.disconnect();}};
@@ -140,13 +140,29 @@ function updateSettlementInspector(item){
 }
 function generate(){
   if(!project)return;const before=snapshotProject(project);const result=generateSettlement(project);
-  commitHistory(project,"Siedlung generieren",before);project.metadata.status="generated";
+  commitHistory(project,"Siedlung generieren",before);$("#undo-settlement").disabled=false;project.metadata.status="generated";
   const issues=validateSettlement(project);updateProjectStatus();editorView?.draw();updateSettlementInspector(null);
   notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
 }
 function saveLocal(){
   if(!project)return;const key="playrig.settlement."+project.id;
-  localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));notify("Settlement lokal gespeichert.");
+  localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));localStorage.setItem("playrig.settlement.last",key);notify("Settlement lokal gespeichert.");
+}
+function loadLocal(){
+  const key=localStorage.getItem("playrig.settlement.last");
+  if(!key){notify("Noch kein lokal gespeichertes Settlement gefunden.",true);return;}
+  try{
+    const saved=JSON.parse(localStorage.getItem(key)||"null");
+    if(!saved?.settlement)throw new Error("Ungültiges Settlement-Projekt.");
+    if(world&&saved.settlement.world.id!==world.id)throw new Error("Das gespeicherte Projekt gehört zu einer anderen Welt. Bitte zuerst die passende Welt importieren.");
+    project=saved.settlement;
+    renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;
+    $("#map-title").textContent=project.name+" · Settlement Editor";
+    editorView=createSettlementRenderer(settlementCanvas,project);
+    updateProjectStatus();updateSettlementInspector(null);
+    $("#undo-settlement").disabled=!project.history?.entries?.length;
+    notify(project.name+" geladen.");
+  }catch(error){notify("Projekt konnte nicht geladen werden: "+error.message,true);}
 }
 function exportProject(){
   if(!project)return;const blob=new Blob([JSON.stringify(serializeSettlement(project),null,2)],{type:"application/json"});
@@ -166,6 +182,8 @@ $("#settlement-density").addEventListener("input",e=>$("#density-value").textCon
 $("#create-settlement").addEventListener("click",createProject);
 $("#generate-settlement").addEventListener("click",generate);
 $("#save-settlement").addEventListener("click",saveLocal);
+$("#load-settlement").addEventListener("click",loadLocal);
+$("#undo-settlement").addEventListener("click",()=>{if(project&&undoProject(project)){editorView?.draw();updateProjectStatus();updateSettlementInspector(null);$("#undo-settlement").disabled=!project.history.entries.length;notify("Letzte Änderung rückgängig gemacht.");}});
 $("#export-settlement").addEventListener("click",exportProject);
 document.querySelectorAll("[data-tool]").forEach(button=>button.addEventListener("click",()=>{
   activeTool=button.dataset.tool;document.querySelectorAll("[data-tool]").forEach(b=>b.classList.toggle("active",b===button));
