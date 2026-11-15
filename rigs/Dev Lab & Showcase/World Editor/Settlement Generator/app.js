@@ -15,6 +15,52 @@ function notify(message,error=false){
   const el=$("#toast");el.textContent=message;el.style.borderColor=error?"#9c4c4c":"";el.classList.add("visible");
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("visible"),3200);
 }
+function setWorkspaceView(view){
+  const allowed=["world","settlement","editor","data"];
+  if(!allowed.includes(view))return;
+  document.querySelectorAll(".workspace-tab").forEach(button=>{
+    const active=button.dataset.view===view;
+    button.classList.toggle("active",active);
+    button.setAttribute("aria-pressed",String(active));
+  });
+  document.querySelectorAll("[data-view-panel]").forEach(section=>{
+    section.hidden=section.dataset.viewPanel!==view;
+  });
+  document.querySelector(".workspace")?.setAttribute("data-active-view",view);
+}
+function setupWorkspaceNavigation(){
+  document.querySelectorAll(".workspace-tab").forEach(button=>
+    button.addEventListener("click",()=>setWorkspaceView(button.dataset.view))
+  );
+  document.querySelectorAll(".panel-section").forEach((section,index)=>{
+    const heading=section.querySelector(".section-heading");
+    if(!heading||section.dataset.collapsible==="false")return;
+    const content=document.createElement("div");
+    content.className="section-content";
+    let node=heading.nextSibling;
+    while(node){const next=node.nextSibling;content.append(node);node=next;}
+    section.append(content);
+    const toggle=document.createElement("button");
+    toggle.type="button";
+    toggle.className="section-collapse";
+    toggle.setAttribute("aria-label","Bereich ein- oder ausklappen");
+    toggle.setAttribute("aria-expanded","true");
+    toggle.innerHTML='<span aria-hidden="true">⌄</span>';
+    heading.append(toggle);
+    heading.classList.add("section-toggle");
+    toggle.addEventListener("click",event=>{
+      event.stopPropagation();
+      const collapsed=section.classList.toggle("collapsed");
+      toggle.setAttribute("aria-expanded",String(!collapsed));
+    });
+    // Keep the most relevant work areas open; secondary reference panels start compact.
+    if(["World Modules","Source Metadata"].includes(heading.querySelector("h2")?.textContent.trim())){
+      section.classList.add("collapsed");
+      toggle.setAttribute("aria-expanded","false");
+    }
+  });
+  setWorkspaceView("world");
+}
 function setLoaded(loaded){
   $("#export-project").disabled=!loaded;$("#reset-view").disabled=!loaded;$("#load-settlement").disabled=!loaded||!lastSavedKey();
   $("#world-status").classList.toggle("ready",loaded);
@@ -60,7 +106,7 @@ async function loadFile(file){
   try{
     notify("Weltkarte wird geprüft und importiert …");
     const imported=importAzgaarFull(JSON.parse(await file.text()));
-    renderer?.destroy();world=imported;project=null;renderer=createWorldRenderer(canvas,world);
+    renderer?.destroy();world=imported;project=null;renderer=createWorldRenderer(canvas,world);setWorkspaceView("world");
     canvas.hidden=false;settlementCanvas.hidden=true;setLoaded(true);updateOverview();populateSettlements();
     $("#inspector-empty").hidden=false;$("#inspector-content").hidden=true;$("#cell-readout").textContent="Keine Zelle ausgewählt";
     notify(world.name+" importiert · "+fmt(world.terrain.cells.length)+" Zellen · "+fmt(world.settlements.length-1)+" Siedlungen");
@@ -80,7 +126,7 @@ function createProject(){
   project.settings.roadDensity=.58;
   project.terrain.sourceCellIds=world.terrain.cells.filter(c=>Math.hypot(c.center.x-burg.x,c.center.y-burg.y)<=radius*1.35).map(c=>c.id);
   renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;$("#map-title").textContent=project.name+" · Settlement Editor";
-  editorView=createSettlementRenderer(settlementCanvas,project);updateProjectStatus();updateSettlementInspector(null);
+  editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);
   notify("Settlement-Projekt für "+burg.name+" angelegt. Jetzt generieren oder manuell bearbeiten.");
 }
 function createSettlementRenderer(target,data){
@@ -162,7 +208,7 @@ function generate(){
   if(!project)return;const before=snapshotProject(project);const result=generateSettlement(project);
   commitHistory(project,"Siedlung generieren",before);$("#undo-settlement").disabled=false;project.metadata.status="generated";
   const issues=validateSettlement(project);updateProjectStatus();editorView?.draw();updateSettlementInspector(null);
-  notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
+  setWorkspaceView("editor");notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
 }
 function saveLocal(){
   if(!project)return;
@@ -185,7 +231,7 @@ function loadLocal(){
     renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;
     $("#map-title").textContent=project.name+" · Settlement Editor";
     editorView=createSettlementRenderer(settlementCanvas,project);
-    updateProjectStatus();updateSettlementInspector(null);
+    setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);
     $("#undo-settlement").disabled=!project.history?.entries?.length;
     notify(project.name+" geladen.");
   }catch(error){notify("Projekt konnte nicht geladen werden: "+error.message,true);}
@@ -221,5 +267,6 @@ $("#export-project").addEventListener("click",()=>{
 });
 $("#return-hub").addEventListener("click",()=>window.PlayRig?.navigate?window.PlayRig.navigate("/"):(window.location.href="/"));
 window.addEventListener("beforeunload",()=>renderer?.destroy());
+setupWorkspaceNavigation();
 setLoaded(false);
 console.info("PlayRig World Core "+WORLD_CORE_API_VERSION+" · Settlement Core initialized.");
