@@ -30,7 +30,32 @@
     <p class="source-note">Die originale .map-Datei bleibt als natives Azgaar-Archiv erhalten. Der aktuelle Importadapter verarbeitet den Full-JSON-Export.</p>
   </section>
   <section class="panel-section">
-    <div class="section-heading"><span>02</span><div><h2>Map Layers</h2><p>Darstellung steuern</p></div></div>
+    <div class="section-heading"><span>02</span><div><h2>Settlement Studio</h2><p>Stadt auswählen und bearbeiten</p></div></div>
+    <label class="field-label" for="settlement-select">Stadt aus der Welt</label>
+    <select id="settlement-select" class="world-select" disabled><option>Erst Welt importieren</option></select>
+    <label class="field-label" for="settlement-profile">Siedlungsprofil</label>
+    <select id="settlement-profile" class="world-select"><option value="hamlet">Hamlet</option><option value="village">Village</option><option value="town" selected>Town</option><option value="city">City</option><option value="fortress">Fortress</option></select>
+    <label class="field-label" for="settlement-radius">Größe / Radius <span id="radius-value">180</span></label>
+    <input id="settlement-radius" type="range" min="90" max="420" value="180" class="world-range">
+    <label class="field-label" for="settlement-density">Gebäudedichte <span id="density-value">62%</span></label>
+    <input id="settlement-density" type="range" min="15" max="95" value="62" class="world-range">
+    <label class="field-label" for="settlement-form">Stadtform</label>
+    <select id="settlement-form" class="world-select"><option value="organic">Organisch</option><option value="radial">Radial</option><option value="grid">Raster</option><option value="linear">Linear</option></select>
+    <button class="btn btn-primary btn-sm full-width" id="create-settlement" disabled>Settlement-Projekt erstellen</button>
+    <button class="btn btn-secondary btn-sm full-width" id="generate-settlement" disabled>✦ Siedlung generieren</button>
+    <div class="settlement-actions"><button class="btn btn-ghost btn-sm" id="save-settlement" disabled>Speichern</button><button class="btn btn-ghost btn-sm" id="export-settlement" disabled>Export</button></div>
+  </section>
+  <section class="panel-section">
+    <div class="section-heading"><span>03</span><div><h2>Editor Tools</h2><p>Objekte manuell platzieren</p></div></div>
+    <div class="tool-grid">
+      <button class="tool-button active" data-tool="select">↖ Auswahl</button><button class="tool-button" data-tool="building">⌂ Gebäude</button>
+      <button class="tool-button" data-tool="road">╱ Straße</button><button class="tool-button" data-tool="tree">♣ Baum</button>
+      <button class="tool-button" data-tool="plaza">◉ Platz</button><button class="tool-button" data-tool="erase">⌫ Löschen</button>
+    </div>
+    <div class="module-row"><i class="module-indicator active"></i><div><b id="settlement-status">Kein Projekt</b><small id="settlement-counts">Warte auf Auswahl</small></div></div>
+  </section>
+  <section class="panel-section">
+    <div class="section-heading"><span>05</span><div><h2>World Modules</h2><p>Darstellung steuern</p></div></div>
     <label class="field-label" for="render-mode">Farbmodus</label>
     <select id="render-mode" class="world-select"><option value="biome">Biome</option><option value="height">Höhenrelief</option><option value="political">Politische Karte</option></select>
     <label class="toggle-row"><span>● Siedlungen</span><input type="checkbox" id="layer-settlements" checked></label>
