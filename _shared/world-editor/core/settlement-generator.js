@@ -141,14 +141,14 @@ export function generateSettlement(project, options={}) {
 }
 
 export function regenerateSettlementLayer(project, layer, options={}) {
-  const current={districts:project.districts,roads:project.roads,plots:project.plots,buildings:project.buildings,locations:project.locations,environment:project.environment};
-  const snapshot=JSON.parse(JSON.stringify(current));
-  generateSettlement(project,options);
-  const keepLocked=items=>items.filter(item=>item.locked || item.status === "modified");
-  if(layer==="buildings"){project.buildings=keepLocked(snapshot.buildings);project.plots=snapshot.plots;}
-  else if(layer==="roads"){project.roads=keepLocked(snapshot.roads);}
-  else if(layer==="environment"){project.environment=keepLocked(snapshot.environment);}
-  else if(layer==="districts"){project.districts=keepLocked(snapshot.districts);}
-  else return generateSettlement(project,options);
-  return {layer,regenerated:true};
+  const collections=["districts","roads","plots","buildings","locations","environment"];
+  if(!collections.includes(layer)) throw new Error("Unbekannte Settlement-Ebene: "+layer);
+  const snapshot={};
+  for(const key of collections) snapshot[key]=JSON.parse(JSON.stringify(project[key]||[]));
+  const result=generateSettlement(project,options);
+  // Only the requested layer is replaced. All other editor layers remain byte-for-byte
+  // equivalent to their previous project state; modified/locked objects are retained
+  // by generateSettlement inside the layer being regenerated.
+  for(const key of collections) if(key!==layer) project[key]=snapshot[key];
+  return {layer,regenerated:true,seed:result.seed,count:project[layer].length};
 }
