@@ -12,7 +12,7 @@ function randomFromSeed(seed) {
     let t=h;
     t=Math.imul(t^(t>>>15),t|1);
     t^=t+Math.imul(t^(t>>>7),t|61);
-    return ((t^(t>>>14))>>>0)/4294967296;
+    return (((t^(t>>>14))>>>0)/4294967296);
   };
 }
 const uid = (prefix, n) => prefix + "-" + String(n).padStart(4,"0");
@@ -132,7 +132,7 @@ export function generateSettlement(project, options={}) {
   project.plots=[...plots,...next.plots.filter(item=>!plots.some(old=>old.id===item.id))];
   project.buildings=[...buildings,...next.buildings.filter(item=>!buildings.some(old=>old.id===item.id))];
   project.locations=[...locations,...nextLocations.filter(item=>!locations.some(old=>old.id===item.id))];
-  project.environment=[...environment,...next.environment.filter(item=>!environment.some(old=>old.id===item.id)),...next.environment];
+  project.environment=[...environment,...next.environment.filter(item=>!environment.some(old=>old.id===item.id))];
   project.settings.seed=seed;
   project.metadata.generatorVersion="1.0.0";
   project.metadata.lastGeneratedAt=new Date().toISOString();
