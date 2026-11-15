@@ -159,11 +159,27 @@ const db = require('./server/db');
 })();
 "
 
+echo ""
+echo -e "${CYAN}--------------------------------------------------------------${NC}"
+echo -e "${CYAN} 👤 Administrator-Konto für PlayRig einrichten${NC}"
+echo -e "${CYAN}--------------------------------------------------------------${NC}"
+echo -e "Es existieren keine Standard-Passwörter mehr (höchste Sicherheit)."
+read -p "Möchtest du jetzt ein Administrator-Konto erstellen? (j/n) [j]: " SETUP_ADMIN
+if [[ "$SETUP_ADMIN" =~ ^[jJyY]$ ]] || [ -z "$SETUP_ADMIN" ]; then
+  node scripts/create-user.js || {
+    echo -e "${YELLOW}Hinweis: Du kannst jederzeit ein Konto mit 'node scripts/create-user.js' anlegen.${NC}"
+  }
+else
+  echo -e "${YELLOW}Übersprungen. Du kannst jederzeit mit folgendem Befehl ein Konto erstellen:${NC}"
+  echo -e "cd ${TARGET_DIR} && node scripts/create-user.js"
+fi
+
 # Dateiberechtigungen für Systembenutzer setzen
 chown -R playrig:playrig "$TARGET_DIR"
 
 # 6. Systemd Service einrichten & starten
 echo -e "${BLUE}[6/8] Richte Systemd-Dienst 'playrig.service' ein...${NC}"
+NODE_BIN="$(command -v node || echo /usr/bin/node)"
 cat > /etc/systemd/system/playrig.service <<EOF
 [Unit]
 Description=PlayRig Engine Server & Modular Gaming Platform
@@ -175,7 +191,7 @@ Type=simple
 User=playrig
 Group=playrig
 WorkingDirectory=${TARGET_DIR}
-ExecStart=/usr/bin/node server/server.js
+ExecStart=${NODE_BIN} server/server.js
 Restart=always
 RestartSec=5
 EnvironmentFile=-${TARGET_DIR}/.env
@@ -202,32 +218,83 @@ fi
 # 7. NGINX Reverse-Proxy Konfiguration
 echo -e "${BLUE}[7/8] Konfiguriere NGINX Reverse-Proxy für ${DOMAIN}...${NC}"
 NGINX_CONF="/etc/nginx/sites-available/${DOMAIN}.conf"
-cp "$TARGET_DIR/deploy/nginx/playrig.amfearliath.de.conf" "$NGINX_CONF"
 
-# Port anpassen
-sed -i "s/127.0.0.1:[0-9]\+/127.0.0.1:${APP_PORT}/g" "$NGINX_CONF"
-
-# Symlink erstellen & Standard-Konflikte entfernen
+# Alte und konfliktbehaftete Konfigurationen in sites-enabled restlos entfernen
 rm -f /etc/nginx/sites-enabled/default
+rm -f /etc/nginx/sites-enabled/*playrig*
+rm -f /etc/nginx/sites-enabled/*amfearliath*
+
+SSL_CERT="/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+if [ -f "$SSL_CERT" ]; then
+  echo -e "${GREEN}✓ SSL-Zertifikat für ${DOMAIN} gefunden.${NC}"
+  cp "$TARGET_DIR/deploy/nginx/playrig.amfearliath.de.conf" "$NGINX_CONF"
+  sed -i "s/127.0.0.1:[0-9]\+/127.0.0.1:${APP_PORT}/g" "$NGINX_CONF"
+else
+  echo -e "${YELLOW}Kein SSL-Zertifikat gefunden. Erstelle temporäre HTTP-Konfiguration für Certbot...${NC}"
+  cat > "$NGINX_CONF" <<NGINX_HTTP_EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+
+    client_max_body_size 50M;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        allow all;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:${APP_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_read_timeout 90s;
+    }
+}
+NGINX_HTTP_EOF
+fi
+
 ln -sf "$NGINX_CONF" "/etc/nginx/sites-enabled/${DOMAIN}.conf"
 
-# NGINX Konfiguration prüfen & neu laden
 nginx -t
 systemctl reload nginx
 echo -e "${GREEN}✓ NGINX erfolgreich für ${DOMAIN} konfiguriert und neu geladen.${NC}"
 
-# 8. Let's Encrypt SSL-Zertifikat mit Certbot (Optional / Interaktiv)
-echo -e "${BLUE}[8/8] SSL-Zertifikat für ${DOMAIN}...${NC}"
-read -p "Möchtest du jetzt ein kostenloses Let's Encrypt SSL-Zertifikat via Certbot einrichten? (j/n): " RUN_CERTBOT
-if [[ "$RUN_CERTBOT" =~ ^[jJyY]$ ]]; then
-  echo -e "${CYAN}Starte Certbot für ${DOMAIN}...${NC}"
-  certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --redirect -m admin@amfearliath.de || {
-    echo -e "${YELLOW}Hinweis: Certbot konnte nicht automatisch abschließen. Stelle sicher, dass der DNS A-Record für ${DOMAIN} auf diesen Server zeigt.${NC}"
-    echo -e "${YELLOW}Du kannst den Befehl später erneut ausführen: sudo certbot --nginx -d ${DOMAIN}${NC}"
-  }
+# 8. Let's Encrypt SSL-Zertifikat mit Certbot (falls noch nicht aktiv)
+if [ ! -f "$SSL_CERT" ]; then
+  echo -e "${BLUE}[8/8] SSL-Zertifikat für ${DOMAIN}...${NC}"
+  read -p "Möchtest du jetzt ein kostenloses Let's Encrypt SSL-Zertifikat via Certbot einrichten? (j/n): " RUN_CERTBOT
+  if [[ "$RUN_CERTBOT" =~ ^[jJyY]$ ]]; then
+    echo -e "${CYAN}Starte Certbot für ${DOMAIN}...${NC}"
+    certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos --redirect -m admin@amfearliath.de || {
+      echo -e "${YELLOW}Hinweis: Certbot konnte nicht automatisch abschließen. Stelle sicher, dass der DNS A-Record für ${DOMAIN} auf diesen Server zeigt.${NC}"
+      echo -e "${YELLOW}Du kannst den Befehl später erneut ausführen: sudo certbot --nginx -d ${DOMAIN}${NC}"
+    }
+    if [ -f "$SSL_CERT" ]; then
+      cp "$TARGET_DIR/deploy/nginx/playrig.amfearliath.de.conf" "$NGINX_CONF"
+      sed -i "s/127.0.0.1:[0-9]\+/127.0.0.1:${APP_PORT}/g" "$NGINX_CONF"
+      nginx -t && systemctl reload nginx
+      echo -e "${GREEN}✓ NGINX mit vollem SSL/TLS-Proxy aktiviert.${NC}"
+    fi
+  else
+    echo -e "${YELLOW}SSL-Einrichtung übersprungen. Du kannst sie jederzeit starten mit:${NC}"
+    echo -e "sudo certbot --nginx -d ${DOMAIN}"
+  fi
 else
-  echo -e "${YELLOW}SSL-Einrichtung übersprungen. Du kannst sie jederzeit starten mit:${NC}"
-  echo -e "sudo certbot --nginx -d ${DOMAIN}"
+  echo -e "${GREEN}[8/8] SSL-Zertifikat für ${DOMAIN} ist bereits aktiv und eingebunden.${NC}"
+fi
+
+# Lokale Backend-Prüfung
+sleep 1
+HEALTH=$(curl -s "http://127.0.0.1:${APP_PORT}/api/health" || echo "")
+if [[ "$HEALTH" == *"\"status\":\"ok\""* ]]; then
+  echo -e "${GREEN}✓ PlayRig Engine antwortet erfolgreich auf Port ${APP_PORT} (Status: OK).${NC}"
 fi
 
 # Abschluss-Zusammenfassung
@@ -239,12 +306,9 @@ echo -e " 🌐 URL:                  ${CYAN}https://${DOMAIN}${NC}"
 echo -e " 📂 Installationspfad:    ${TARGET_DIR}"
 echo -e " 🛠️ Dienst-Status:        systemctl status playrig"
 echo -e " 📜 Live-Logs:            journalctl -u playrig.service -f"
+echo -e " 👤 Benutzerverwaltung:   node scripts/create-user.js"
 echo -e " 🗄️ MariaDB Benutzer:     ${DB_USER}"
 echo -e " 🔑 MariaDB Passwort:     ${DB_PASS}"
-echo -e "--------------------------------------------------------------"
-echo -e " Standard-Zugänge in PlayRig:"
-echo -e " • Admin:    ${BOLD}admin${NC} / ${BOLD}admin123${NC}"
-echo -e " • Creator:  ${BOLD}creator${NC} / ${BOLD}creator123${NC}"
 echo -e "=============================================================="
 echo ""
 

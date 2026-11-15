@@ -29,6 +29,7 @@ const items = [
   'GRUNDREGELN.md',
   'LICENSE.md',
   'favicon.svg',
+  'favicon.ico',
   'hub.css',
   'hub.js',
   'registry.js',

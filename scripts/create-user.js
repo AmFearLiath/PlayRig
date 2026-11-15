@@ -71,8 +71,9 @@ async function main() {
   try {
     await db.init();
     const user = await db.registerUser(username, name, password, role);
+    const statusText = user.updated ? 'BENUTZERKONTO ERFOLGREICH AKTUALISIERT / PASSWORT ZURÜCKGESETZT!' : 'BENUTZERKONTO ERFOLGREICH ERSTELLT!';
     console.log('\n==============================================================');
-    console.log(' 🎉 BENUTZERKONTO ERFOLGREICH ERSTELLT!');
+    console.log(` 🎉 ${statusText}`);
     console.log('==============================================================');
     console.log(` • ID:           ${user.id}`);
     console.log(` • Benutzername: ${user.username}`);

@@ -910,16 +910,25 @@ async function logout(token) {
 }
 
 async function registerUser(username, name, password, role = 'user') {
-  const [exists] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
-  if (exists.length > 0) throw new Error('Username already taken');
+  const [exists] = await pool.query('SELECT id, name, role FROM users WHERE username = ?', [username]);
+  const hash = hashPassword(password);
+
+  if (exists.length > 0) {
+    const finalName = name || exists[0].name;
+    const finalRole = role || exists[0].role;
+    await pool.query(
+      'UPDATE users SET password_hash = ?, name = ?, role = ? WHERE username = ?',
+      [hash, finalName, finalRole, username]
+    );
+    return { id: exists[0].id, username, name: finalName, role: finalRole, updated: true };
+  }
 
   const id = 'u-' + Date.now();
-  const hash = hashPassword(password);
   await pool.query(
     'INSERT INTO users (id, username, name, password_hash, role) VALUES (?, ?, ?, ?, ?)',
-    [id, username, name, hash, role]
+    [id, username, name || username, hash, role]
   );
-  return { id, username, name, role };
+  return { id, username, name: name || username, role, created: true };
 }
 
 async function getAllUsers() {
