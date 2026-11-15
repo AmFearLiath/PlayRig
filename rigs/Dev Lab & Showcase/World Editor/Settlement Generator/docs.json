@@ -27,7 +27,10 @@
     "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten",
     "Übereinanderliegende Canvas-Layer mit korrekter Sichtbarkeit und gemeinsamer Viewport-Fläche",
     "Robuste Canvas-Neuberechnung nach Ansichtswechsel und Größenänderung",
-    "Unabhängige Sidebar-Scrollbereiche mit stabil reserviertem Scrollleistenplatz"
+    "Unabhängige Sidebar-Scrollbereiche mit stabil reserviertem Scrollleistenplatz",
+    "Übernahme des lokalen Azgaar-Terrains in Settlement-Koordinaten inklusive Biomen, Wasserzellen und Flussverläufen",
+    "Automatisches Einpassen des lokalen Geländeausschnitts in den Settlement-Viewport",
+    "Zoom zum Mauszeiger sowie Verschieben der Settlement-Kamera per mittlerer/rechter Maustaste oder Shift-Ziehen"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -40,7 +43,9 @@
     "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig.",
     "Nutze die Navigation im Header, um zwischen Welt, Settlement, Editor und Daten zu wechseln. Die Seitenbereiche zeigen jeweils nur die dazugehörigen Werkzeuge und Informationen.",
     "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche.",
-    "Wenn du ein Settlement-Projekt erstellst, wird die Weltkarten-Canvas ausgeblendet und die Settlement-Canvas exakt über derselben Viewport-Fläche angezeigt. Beide Sidebars behalten ihre eigenen Scrollbereiche."
+    "Wenn du ein Settlement-Projekt erstellst, wird die Weltkarten-Canvas ausgeblendet und die Settlement-Canvas exakt über derselben Viewport-Fläche angezeigt. Beide Sidebars behalten ihre eigenen Scrollbereiche.",
+    "Beim Anlegen eines Settlement-Projekts wird ein lokaler Ausschnitt der ursprünglichen Azgaar-Zellen übernommen. Die Zellpolygone werden relativ zum Stadtursprung gespeichert und im Settlement-Viewport als Terrainbasis gezeichnet. Wasserzellen, Biome und Flussverläufe bleiben sichtbar.",
+    "Mit dem Mausrad zoomst du zum Mauszeiger. Mit mittlerer oder rechter Maustaste oder Shift-Ziehen verschiebst du die Kamera. Die Auswahl- und Platzierungswerkzeuge bleiben davon getrennt."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
@@ -58,7 +63,9 @@
       "data"
     ],
     "sidebarSectionsCollapsible": true,
-    "sidebarScrollbars": "independent-custom"
+    "sidebarScrollbars": "independent-custom",
+    "terrainSource": "Azgaar Full JSON cell polygons translated into settlement-local source-pixel coordinates",
+    "terrainRadiusFactor": 1.65
   },
   "prerequisites": [
     "Moderner Browser mit ES-Modul-, Canvas-2D-, ResizeObserver- und Local-Storage-Unterstützung"
