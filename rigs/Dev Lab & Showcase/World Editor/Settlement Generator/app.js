@@ -7,6 +7,7 @@ const canvas = $("#world-canvas");
 const settlementCanvas = $("#settlement-canvas");
 let world=null, renderer=null, project=null, selectedObject=null, activeTool="select", editorView=null, toastTimer=null;
 const fmt=value=>new Intl.NumberFormat("de-DE").format(value||0);
+const escapeHTML=value=>String(value??"").replace(/[&<>"\']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[char]));
 const uid=prefix=>prefix+"-"+Math.random().toString(36).slice(2,9);
 
 function notify(message,error=false){
@@ -14,7 +15,7 @@ function notify(message,error=false){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("visible"),3200);
 }
 function setLoaded(loaded){
-  $("#export-project").disabled=!loaded;$("#reset-view").disabled=!loaded;
+  $("#export-project").disabled=!loaded;$("#reset-view").disabled=!loaded;$("#load-settlement").disabled=!loaded||!localStorage.getItem("playrig.settlement.last");
   $("#world-status").classList.toggle("ready",loaded);
   $("#world-status").innerHTML=loaded?"<i></i> World Core aktiv":"<i></i> Kein World-Projekt geladen";
   $("#empty-state").hidden=loaded;$("#canvas-legend").hidden=!loaded;
@@ -38,7 +39,7 @@ function showCell(cell){
     ["Terrain",cell.isWater?"Wasser":"Land"],["State ID",cell.stateId||"—"],["Province ID",cell.provinceId||"—"],
     ["Culture ID",cell.cultureId||"—"],["Religion ID",cell.religionId||"—"],["Settlement ID",cell.burgId||"—"],
     ["River ID",cell.riverId||"—"],["Population",cell.population.toFixed(3)],["Nachbarn",cell.neighbors.length]];
-  $("#cell-details").innerHTML=details.map(v=>"<dt>"+v[0]+"</dt><dd>"+v[1]+"</dd>").join("");
+  $("#cell-details").innerHTML=details.map(v=>"<dt>"+escapeHTML(v[0])+"</dt><dd>"+escapeHTML(v[1])+"</dd>").join("");
 }
 function populateSettlements(){
   const burgs=world.settlements.filter(b=>b&&b.i&&Number.isFinite(Number(b.x))&&Number.isFinite(Number(b.y)));
@@ -136,7 +137,7 @@ function updateSettlementInspector(item){
   $("#inspector-empty").hidden=true;$("#inspector-content").hidden=false;
   $("#cell-id").textContent=item.id;$("#cell-readout").textContent=item.name||item.type||item.kind||"Settlement-Objekt";
   const rows=[["Typ",item.type||item.kind||"—"],["Name",item.name||"—"],["X",Number(item.x||0).toFixed(1)],["Y",Number(item.y||0).toFixed(1)],["Status",item.status||"modified"],["Gesperrt",item.locked?"Ja":"Nein"],["District",item.districtId||"—"]];
-  $("#cell-details").innerHTML=rows.map(v=>"<dt>"+v[0]+"</dt><dd>"+v[1]+"</dd>").join("");
+  $("#cell-details").innerHTML=rows.map(v=>"<dt>"+escapeHTML(v[0])+"</dt><dd>"+escapeHTML(v[1])+"</dd>").join("");
 }
 function generate(){
   if(!project)return;const before=snapshotProject(project);const result=generateSettlement(project);
@@ -146,7 +147,7 @@ function generate(){
 }
 function saveLocal(){
   if(!project)return;const key="playrig.settlement."+project.id;
-  localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));localStorage.setItem("playrig.settlement.last",key);notify("Settlement lokal gespeichert.");
+  localStorage.setItem(key,JSON.stringify(serializeSettlement(project)));localStorage.setItem("playrig.settlement.last",key);$("#load-settlement").disabled=false;notify("Settlement lokal gespeichert.");
 }
 function loadLocal(){
   const key=localStorage.getItem("playrig.settlement.last");
