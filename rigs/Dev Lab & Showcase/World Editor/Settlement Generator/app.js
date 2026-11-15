@@ -197,7 +197,7 @@ function createSettlementRenderer(target,data){
   function drawTerrain(){
     if(!terrain.cells?.length)return;
     for(const cell of terrain.cells){
-      if(!cell.polygon||cell.polygon.length<3)continue;
+      if(!cell.polygon||cell.polygon.length<3||cell.polygon.some(p=>!Number.isFinite(Number(p.x))||!Number.isFinite(Number(p.y))))continue;
       drawPath(cell.polygon,true);
       ctx.fillStyle=terrainColor(cell);
       ctx.fill();
