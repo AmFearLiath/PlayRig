@@ -1,6 +1,7 @@
 import { importAzgaarFull, createWorldRenderer, getWorldSummary, WORLD_CORE_API_VERSION } from "../../../../_shared/world-editor/core/world-core.js";
 import { createSettlementProject, commitHistory, snapshotProject, undoProject, validateSettlement, serializeSettlement } from "../../../../_shared/world-editor/core/settlement-core.js";
 import { generateSettlement } from "../../../../_shared/world-editor/core/settlement-generator.js";
+import { analyzeSettlementScene, createSettlementCamera, fitSettlementCamera, worldToScreen, screenToWorld, zoomCameraAt, buildSettlementRenderDiagnostics } from "../../../../_shared/world-editor/rendering/settlement-render-core.js";
 
 const $ = selector => document.querySelector(selector);
 const canvas = $("#world-canvas");
@@ -120,30 +121,24 @@ function updateProjectStatus(){
 }
 
 function collectSettlementDiagnostics(stage="Manuelle Diagnose"){
-  const rect=element=>{const r=element.getBoundingClientRect();return{x:+r.x.toFixed(2),y:+r.y.toFixed(2),width:+r.width.toFixed(2),height:+r.height.toFixed(2)};};
-  const style=element=>{const s=getComputedStyle(element);return{display:s.display,visibility:s.visibility,position:s.position,width:s.width,height:s.height,overflow:s.overflow};};
-  const cells=project?.terrain?.cells||[];
-  const points=cells.flatMap(cell=>cell.polygon||[]);
-  const bounds=points.length?{
-    minX:Math.min(...points.map(p=>p.x)),maxX:Math.max(...points.map(p=>p.x)),
-    minY:Math.min(...points.map(p=>p.y)),maxY:Math.max(...points.map(p=>p.y))
-  }:null;
-  const report={
-    stage,at:new Date().toISOString(),
-    project:project?{id:project.id,name:project.name,origin:project.origin,radius:project.settings.radius,coordinateSystem:project.terrain.coordinateSystem}:null,
-    viewport:{rect:rect(document.querySelector(".canvas-wrap")),computed:style(document.querySelector(".canvas-wrap"))},
-    worldCanvas:{hidden:canvas.hidden,rect:rect(canvas),computed:style(canvas),backing:{width:canvas.width,height:canvas.height}},
-    settlementCanvas:{hidden:settlementCanvas.hidden,rect:rect(settlementCanvas),computed:style(settlementCanvas),backing:{width:settlementCanvas.width,height:settlementCanvas.height}},
-    terrain:{cells:cells.length,sourceIds:project?.terrain?.sourceCellIds?.length||0,vertices:points.length,bounds,
-      waterCells:cells.filter(c=>c.isWater).length,rivers:project?.terrain?.rivers?.length||0,
-      sample:cells.slice(0,3).map(c=>({id:c.id,center:c.center,polygon:c.polygon?.slice(0,3)}))},
-    browser:{devicePixelRatio:window.devicePixelRatio,innerWidth,innerHeight,activeView:document.querySelector(".workspace")?.dataset.activeView}
-  };
-  console.groupCollapsed("[PlayRig Settlement Diagnose]",stage);
-  console.log(report);console.table({worldCanvas:{hidden:report.worldCanvas.hidden,...report.worldCanvas.rect,...report.worldCanvas.computed},settlementCanvas:{hidden:report.settlementCanvas.hidden,...report.settlementCanvas.rect,...report.settlementCanvas.computed}});
+  const scene=analyzeSettlementScene(project);
+  const report=buildSettlementRenderDiagnostics(project,settlementCanvas,document.querySelector(".canvas-wrap"),editorView?.camera||createSettlementCamera(),scene);
+  report.stage=stage;
+  report.project=report.project?{...report.project,sourceCellCount:project.terrain?.sourceCellIds?.length||0,configuredRadius:project.settings.radius}:null;
+  console.groupCollapsed("[PlayRig Settlement Render Diagnose]",stage);
+  console.log("Vollständiger Bericht",report);
+  console.table({
+    geometry:{cells:scene.counts.cells,valid:scene.counts.validCells,invalid:scene.counts.invalidCells,vertices:scene.counts.vertices,water:scene.counts.waterCells,rivers:scene.counts.rivers},
+    bounds:scene.terrainBounds||{},
+    canvas:{...report.canvas,rect:report.canvas.rect},
+    camera:report.camera
+  });
+  if(scene.invalidSamples.length)console.warn("Ungültige Polygonbeispiele",scene.invalidSamples);
+  if(scene.warnings.length)console.warn("Geometrie-Warnungen",scene.warnings);
   console.groupEnd();
   const output=$("#canvas-debug-output");
-  if(output){output.textContent=JSON.stringify(report,null,2);output.hidden=false;}
+  if(output)output.textContent=JSON.stringify(report,null,2);
+  if(output)output.hidden=false;
   return report;
 }
 
@@ -161,9 +156,11 @@ function createProject(){
 }
 function createSettlementRenderer(target,data){
   const ctx=target.getContext("2d");
-  const view={scale:1,zoom:1,panX:0,panY:0,width:0,height:0,drag:null,pan:null,selected:null};
-  const radius=Math.max(90,Number(data.settings.radius)||180);
+  const camera=createSettlementCamera();
+  const view={get scale(){return camera.baseScale;},get zoom(){return camera.zoom;},get panX(){return camera.panX;},set panX(v){camera.panX=v;},get panY(){return camera.panY;},set panY(v){camera.panY=v;},get width(){return camera.width;},get height(){return camera.height;},drag:null,pan:null,selected:null};
   const terrain=data.terrain||{cells:[],rivers:[]};
+  const scene=analyzeSettlementScene(data);
+  const sceneBounds=scene.sceneBounds;
 
   function resize(){
     const rect=target.getBoundingClientRect();
@@ -174,19 +171,15 @@ function createSettlementRenderer(target,data){
     if(target.width!==pixelWidth)target.width=pixelWidth;
     if(target.height!==pixelHeight)target.height=pixelHeight;
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    view.width=rect.width;view.height=rect.height;
-    // Fit the complete extracted terrain patch, not just the settlement boundary.
-    view.scale=Math.min(rect.width,rect.height)/(radius*3.5);
-    view.panX=0;view.panY=0;view.zoom=1;
+    fitSettlementCamera(camera,sceneBounds,rect.width,rect.height,54);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
     draw();
   }
   function screen(p){
-    const scale=view.scale*view.zoom;
-    return{x:view.width/2+view.panX+p.x*scale,y:view.height/2+view.panY+p.y*scale};
+    return worldToScreen(camera,p);
   }
   function worldAt(x,y){
-    const scale=view.scale*view.zoom;
-    return{x:(x-view.width/2-view.panX)/scale,y:(y-view.height/2-view.panY)/scale};
+    return screenToWorld(camera,x,y);
   }
   function drawPath(points,close=false){
     if(!points?.length)return;
@@ -340,14 +333,13 @@ function createSettlementRenderer(target,data){
   target.addEventListener("pointercancel",()=>{view.pan=null;view.drag=null;});
   target.addEventListener("wheel",event=>{
     event.preventDefault();const rect=target.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
-    const before=worldAt(x,y);view.zoom=Math.max(.35,Math.min(8,view.zoom*(event.deltaY<0?1.12:.89)));
-    const scale=view.scale*view.zoom;view.panX=x-view.width/2-before.x*scale;view.panY=y-view.height/2-before.y*scale;draw();
+    zoomCameraAt(camera,x,y,event.deltaY<0?1.12:.89);draw();
   },{passive:false});
   target.addEventListener("contextmenu",event=>event.preventDefault());
 
   const observer=new ResizeObserver(resize);observer.observe(target);
   window.addEventListener("resize",resize,{passive:true});requestAnimationFrame(resize);resize();
-  return{draw,resize,reset:resize,destroy(){observer.disconnect();window.removeEventListener("resize",resize);}};
+  return{draw,resize,reset:resize,camera,scene,destroy(){observer.disconnect();window.removeEventListener("resize",resize);}};
 }
 function updateSettlementInspector(item){
   $("#inspector-empty").hidden=!!item||!!project;$("#inspector-content").hidden=!item;
