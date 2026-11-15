@@ -7,7 +7,7 @@ const canvas = $("#world-canvas");
 const settlementCanvas = $("#settlement-canvas");
 let world=null, renderer=null, project=null, selectedObject=null, activeTool="select", editorView=null, toastTimer=null;
 const fmt=value=>new Intl.NumberFormat("de-DE").format(value||0);
-const escapeHTML=value=>String(value??"").replace(/[&<>"\']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","\'":"&#39;"}[char]));
+const escapeHTML=value=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const uid=prefix=>prefix+"-"+Math.random().toString(36).slice(2,9);
 
 function notify(message,error=false){
