@@ -120,7 +120,7 @@ function extractLocalTerrain(world, burg, radius, boundary) {
 }
 
 function validColor(value) {
-  return typeof value === "string" && (/^#[0-9a-f]{3,8}$/i.test(value) || /^rgba?\\(/i.test(value) || /^hsla?\\(/i.test(value));
+  return typeof value === "string" && (/^#[0-9a-f]{3,8}$/i.test(value) || /^rgba?\(/i.test(value) || /^hsla?\(/i.test(value));
 }
 
 function profileFromBurg(burg) {
