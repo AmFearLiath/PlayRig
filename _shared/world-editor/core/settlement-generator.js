@@ -121,7 +121,7 @@ export function generateSettlement(project, options={}) {
   const seed=String(options.seed ?? project.settings.seed);
   const rand=randomFromSeed(seed);
   const before={districts:project.districts.length,roads:project.roads.length,plots:project.plots.length,buildings:project.buildings.length,locations:project.locations.length,environment:project.environment.length};
-  const keepLocked=(list)=>list.filter(item=>item.locked);
+  const keepLocked=(list)=>list.filter(item=>item.locked || item.status === "modified");
   const districts=keepLocked(project.districts),roads=keepLocked(project.roads),plots=keepLocked(project.plots),buildings=keepLocked(project.buildings),locations=keepLocked(project.locations),environment=keepLocked(project.environment);
   const nextDistricts=makeDistricts(project,rand);
   const nextRoads=makeRoads(project,rand);
@@ -144,7 +144,7 @@ export function regenerateSettlementLayer(project, layer, options={}) {
   const current={districts:project.districts,roads:project.roads,plots:project.plots,buildings:project.buildings,locations:project.locations,environment:project.environment};
   const snapshot=JSON.parse(JSON.stringify(current));
   generateSettlement(project,options);
-  const keepLocked=items=>items.filter(item=>item.locked);
+  const keepLocked=items=>items.filter(item=>item.locked || item.status === "modified");
   if(layer==="buildings"){project.buildings=keepLocked(snapshot.buildings);project.plots=snapshot.plots;}
   else if(layer==="roads"){project.roads=keepLocked(snapshot.roads);}
   else if(layer==="environment"){project.environment=keepLocked(snapshot.environment);}
