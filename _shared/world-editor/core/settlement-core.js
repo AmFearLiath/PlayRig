@@ -71,7 +71,9 @@ export function createSettlementProject(world, burg, options = {}) {
 function extractLocalTerrain(world, burg, radius, boundary) {
   const origin = { x: finite(burg.x), y: finite(burg.y) };
   const limit = radius * 1.65;
-  const sourceCells = (world.terrain?.cells || []).filter(cell =>
+  const worldCells = world.terrain?.cells || [];
+  const cellsById = new Map(worldCells.map(cell => [cell.id, cell]));
+  const sourceCells = worldCells.filter(cell =>
     cell.center && Math.hypot(cell.center.x - origin.x, cell.center.y - origin.y) <= limit
   );
   const selectedIds = new Set(sourceCells.map(cell => cell.id));
@@ -92,7 +94,7 @@ function extractLocalTerrain(world, burg, radius, boundary) {
 
   const rivers = (world.water?.rivers || []).map(river => {
     const points = (river.cells || [])
-      .map(id => world.terrain.cells[id])
+      .map(id => cellsById.get(id))
       .filter(cell => cell && selectedIds.has(cell.id))
       .map(cell => ({ x: cell.center.x - origin.x, y: cell.center.y - origin.y }));
     return points.length >= 2 ? {
