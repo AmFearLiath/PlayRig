@@ -49,3 +49,17 @@
 .workspace{min-width:0;min-height:0;grid-template-rows:minmax(0,1fr);overflow:hidden}
 .workspace>.panel{display:block;width:auto;height:100%;min-width:0;min-height:0;max-height:100%;align-self:stretch;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-gutter:stable}
 .workspace>.left-panel,.workspace>.right-panel{min-height:0}
+
+
+/* Canvas layers share one viewport surface. ID rules must never override [hidden]. */
+.canvas-wrap{position:relative;isolation:isolate;min-width:0;min-height:0}
+.canvas-wrap>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:100%;max-height:100%}
+.canvas-wrap>#world-canvas,.canvas-wrap>#settlement-canvas{position:absolute;inset:0}
+.canvas-wrap>canvas[hidden]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#world-canvas,#settlement-canvas{touch-action:none}
+.viewport-toolbar{position:relative;z-index:2}
+.canvas-debug{position:absolute;z-index:5;top:12px;right:12px;width:min(520px,calc(100% - 24px));max-height:70%;overflow:auto;padding:12px;border:1px solid #3c6577;border-radius:9px;background:rgba(5,13,21,.96);color:#c5d9e4;box-shadow:0 12px 36px rgba(0,0,0,.4);font:10px/1.5 ui-monospace,monospace;white-space:pre-wrap}
+.canvas-debug[hidden]{display:none!important}
+.canvas-debug-button{font-size:10px;padding:6px 9px}
+.viewport-toolbar{gap:12px}
+.viewport-toolbar .toolbar-actions{display:flex;align-items:center;gap:8px}
