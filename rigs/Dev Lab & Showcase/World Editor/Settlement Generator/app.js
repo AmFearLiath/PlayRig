@@ -132,10 +132,20 @@ function createProject(){
 function createSettlementRenderer(target,data){
   const ctx=target.getContext("2d"),view={scale:1,offsetX:0,offsetY:0,width:0,height:0,drag:null,selected:null};
   function resize(){
-    const rect=target.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
-    target.width=Math.max(1,Math.floor(rect.width*dpr));target.height=Math.max(1,Math.floor(rect.height*dpr));
-    ctx.setTransform(dpr,0,0,dpr,0,0);view.width=rect.width;view.height=rect.height;
-    view.scale=Math.min(rect.width,rect.height)/(data.settings.radius*2.55);view.offsetX=rect.width/2;view.offsetY=rect.height/2;draw();
+    const rect=target.getBoundingClientRect();
+    // Hidden or not-yet-laid-out canvases report a zero-sized rectangle. Do not
+    // replace their backing store with 1x1 pixels; ResizeObserver will retry.
+    if(rect.width<2||rect.height<2)return;
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const pixelWidth=Math.max(1,Math.round(rect.width*dpr));
+    const pixelHeight=Math.max(1,Math.round(rect.height*dpr));
+    if(target.width!==pixelWidth)target.width=pixelWidth;
+    if(target.height!==pixelHeight)target.height=pixelHeight;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    view.width=rect.width;view.height=rect.height;
+    view.scale=Math.min(rect.width,rect.height)/(data.settings.radius*2.55);
+    view.offsetX=rect.width/2;view.offsetY=rect.height/2;
+    draw();
   }
   function screen(p){return{x:view.offsetX+p.x*view.scale,y:view.offsetY+p.y*view.scale};}
   function drawPath(points,close=false){
@@ -192,8 +202,14 @@ function createSettlementRenderer(target,data){
     view.drag=null;
   });
   target.addEventListener("pointercancel",()=>view.drag=null);
-  const observer=new ResizeObserver(resize);observer.observe(target);resize();
-  return{draw,destroy(){observer.disconnect();}};
+  const observer=new ResizeObserver(resize);
+  observer.observe(target);
+  window.addEventListener("resize",resize,{passive:true});
+  // Run after the browser has completed the visibility/layout change caused by
+  // switching from the World canvas to the Settlement canvas.
+  requestAnimationFrame(resize);
+  resize();
+  return{draw,resize,destroy(){observer.disconnect();window.removeEventListener("resize",resize);}};
 }
 function updateSettlementInspector(item){
   $("#inspector-empty").hidden=!!item||!!project;$("#inspector-content").hidden=!item;
