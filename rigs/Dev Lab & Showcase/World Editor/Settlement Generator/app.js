@@ -146,14 +146,17 @@ function collectSettlementDiagnostics(stage="Manuelle Diagnose"){
   if(output){output.textContent=JSON.stringify(report,null,2);output.hidden=false;}
   return report;
 }
-\nfunction createProject(){
+
+function createProject(){
   const burg=world.settlements.find(b=>b&&String(b.i)===$("#settlement-select").value);
   if(!burg){notify("Bitte zuerst eine Stadt auswählen.",true);return;}
   const radius=Number($("#settlement-radius").value),density=Number($("#settlement-density").value)/100;
-  try{project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});}\n  catch(error){console.error("[PlayRig Settlement] Projekt konnte nicht erstellt werden",error);notify("Settlement-Erstellung fehlgeschlagen: "+error.message,true);return;}
+  try{project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});}
+  catch(error){console.error("[PlayRig Settlement] Projekt konnte nicht erstellt werden",error);notify("Settlement-Erstellung fehlgeschlagen: "+error.message,true);return;}
   project.settings.roadDensity=.58;
   renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;$("#map-title").textContent=project.name+" · Settlement Editor";
-  editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);\n  requestAnimationFrame(()=>collectSettlementDiagnostics("Nach Settlement-Projekterstellung"));
+  editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);
+  requestAnimationFrame(()=>collectSettlementDiagnostics("Nach Settlement-Projekterstellung"));
   notify("Settlement-Projekt für "+burg.name+" angelegt. Jetzt generieren oder manuell bearbeiten.");
 }
 function createSettlementRenderer(target,data){
@@ -402,7 +405,8 @@ canvas.addEventListener("worldcellselect",e=>showCell(e.detail));
 $("#reset-view").addEventListener("click",()=>renderer?.reset());
 $("#settlement-radius").addEventListener("input",e=>$("#radius-value").textContent=e.target.value);
 $("#settlement-density").addEventListener("input",e=>$("#density-value").textContent=e.target.value+"%");
-$("#create-settlement").addEventListener("click",createProject);\n$("#debug-settlement").addEventListener("click",()=>{const output=$("#canvas-debug-output");if(output&&!output.hidden){output.hidden=true;return;}collectSettlementDiagnostics("Manuell über Diagnose-Button");});
+$("#create-settlement").addEventListener("click",createProject);
+$("#debug-settlement").addEventListener("click",()=>{const output=$("#canvas-debug-output");if(output&&!output.hidden){output.hidden=true;return;}collectSettlementDiagnostics("Manuell über Diagnose-Button");});
 $("#generate-settlement").addEventListener("click",generate);
 $("#save-settlement").addEventListener("click",saveLocal);
 $("#load-settlement").addEventListener("click",loadLocal);
