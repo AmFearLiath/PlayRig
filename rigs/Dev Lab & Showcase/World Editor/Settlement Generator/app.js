@@ -106,7 +106,7 @@ async function loadFile(file){
   try{
     notify("Weltkarte wird geprüft und importiert …");
     const imported=importAzgaarFull(JSON.parse(await file.text()));
-    renderer?.destroy();world=imported;project=null;renderer=createWorldRenderer(canvas,world);
+    renderer?.destroy();world=imported;project=null;renderer=createWorldRenderer(canvas,world);setWorkspaceView("world");
     canvas.hidden=false;settlementCanvas.hidden=true;setLoaded(true);updateOverview();populateSettlements();
     $("#inspector-empty").hidden=false;$("#inspector-content").hidden=true;$("#cell-readout").textContent="Keine Zelle ausgewählt";
     notify(world.name+" importiert · "+fmt(world.terrain.cells.length)+" Zellen · "+fmt(world.settlements.length-1)+" Siedlungen");
@@ -208,7 +208,7 @@ function generate(){
   if(!project)return;const before=snapshotProject(project);const result=generateSettlement(project);
   commitHistory(project,"Siedlung generieren",before);$("#undo-settlement").disabled=false;project.metadata.status="generated";
   const issues=validateSettlement(project);updateProjectStatus();editorView?.draw();updateSettlementInspector(null);
-  notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
+  setWorkspaceView("editor");notify("Generierung abgeschlossen: "+result.after.buildings+" Gebäude, "+result.after.roads+" Straßen, "+issues.length+" Hinweise.");
 }
 function saveLocal(){
   if(!project)return;
