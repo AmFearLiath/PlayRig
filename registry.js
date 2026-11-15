@@ -313,8 +313,7 @@ window.PLAYRIG_REGISTRY = [
       "Atmosphärischer, prozeduraler Cosmic Space Drone via Web Audio API"
     ],
     embedSupported: true
-  }
-
+  },
   {
     id: "settlement-generator",
     title: "Settlement Generator",
@@ -324,19 +323,19 @@ window.PLAYRIG_REGISTRY = [
     difficultyLabel: "World Editor",
     difficultyColor: "cyan",
     icon: "map",
-    description: "Eigenständiger World-Editor mit Azgaar Full JSON Import, gemeinsamem World Core, interaktiver 2D-Kartenansicht und Dateninspektor.",
+    description: "Modularer Fantasy-Siedlungseditor mit Azgaar-Weltimport, Stadt-Auswahl, deterministischer prozeduraler Generierung, Bezirken, Straßen, Gebäuden und manuellem 2D-Editor.",
     path: "rigs/Dev Lab & Showcase/World Editor/Settlement Generator/index.html",
     thumbnail: "",
     author: "Liath",
     copyright: "© GameChiller",
-    version: "v0.1.0",
+    version: "v0.2.0",
     featured: 1,
     stars: 0,
     views: 0,
     forks: 0,
-    tags: ["World Editor", "Azgaar", "Fantasy Map", "World Core", "Settlement", "2D Map"],
-    techStack: ["Vanilla JavaScript ES Modules", "HTML5 Canvas 2D", "PlayRig World Core"],
-    features: ["Azgaar Full JSON Import", "Source-agnostic World Core", "Interaktive Weltkarte mit Zoom, Pan und Zellenauswahl", "Biome-, Höhen- und politische Layer", "World Inspector und Projekt-Export"],
+    tags: ["World Editor", "Azgaar", "Fantasy Map", "World Core", "Settlement", "Procedural Generation", "City Builder", "2D Editor"],
+    techStack: ["Vanilla JavaScript ES Modules", "HTML5 Canvas 2D", "PlayRig World Core", "Settlement Core", "Seeded Generator"],
+    features: ["Azgaar Full JSON Import mit erhaltener Originalquelle", "Stadt-Auswahl aus importierten Weltkarten", "Eigenständige Settlement-Projekte mit World-Link", "Seed-basierte Generierung von Bezirken, Straßen, Parzellen und Gebäuden", "Visueller 2D-Editor mit manueller Objektplatzierung und Löschwerkzeug", "Lokales Speichern und JSON-Projektexport", "Validierung und Generator-Metadaten"],
     embedSupported: true
   },
 ];
