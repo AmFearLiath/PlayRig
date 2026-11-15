@@ -118,14 +118,42 @@ function updateProjectStatus(){
   $("#settlement-counts").textContent=project.buildings.length+" Gebäude · "+project.roads.length+" Straßen · "+project.districts.length+" Bezirke";
   $("#generate-settlement").disabled=false;$("#save-settlement").disabled=false;$("#load-settlement").disabled=false;$("#undo-settlement").disabled=project.history.entries.length===0;$("#export-settlement").disabled=false;
 }
-function createProject(){
+
+function collectSettlementDiagnostics(stage="Manuelle Diagnose"){
+  const rect=element=>{const r=element.getBoundingClientRect();return{x:+r.x.toFixed(2),y:+r.y.toFixed(2),width:+r.width.toFixed(2),height:+r.height.toFixed(2)};};
+  const style=element=>{const s=getComputedStyle(element);return{display:s.display,visibility:s.visibility,position:s.position,width:s.width,height:s.height,overflow:s.overflow};};
+  const cells=project?.terrain?.cells||[];
+  const points=cells.flatMap(cell=>cell.polygon||[]);
+  const bounds=points.length?{
+    minX:Math.min(...points.map(p=>p.x)),maxX:Math.max(...points.map(p=>p.x)),
+    minY:Math.min(...points.map(p=>p.y)),maxY:Math.max(...points.map(p=>p.y))
+  }:null;
+  const report={
+    stage,at:new Date().toISOString(),
+    project:project?{id:project.id,name:project.name,origin:project.origin,radius:project.settings.radius,coordinateSystem:project.terrain.coordinateSystem}:null,
+    viewport:{rect:rect(document.querySelector(".canvas-wrap")),computed:style(document.querySelector(".canvas-wrap"))},
+    worldCanvas:{hidden:canvas.hidden,rect:rect(canvas),computed:style(canvas),backing:{width:canvas.width,height:canvas.height}},
+    settlementCanvas:{hidden:settlementCanvas.hidden,rect:rect(settlementCanvas),computed:style(settlementCanvas),backing:{width:settlementCanvas.width,height:settlementCanvas.height}},
+    terrain:{cells:cells.length,sourceIds:project?.terrain?.sourceCellIds?.length||0,vertices:points.length,bounds,
+      waterCells:cells.filter(c=>c.isWater).length,rivers:project?.terrain?.rivers?.length||0,
+      sample:cells.slice(0,3).map(c=>({id:c.id,center:c.center,polygon:c.polygon?.slice(0,3)}))},
+    browser:{devicePixelRatio:window.devicePixelRatio,innerWidth,innerHeight,activeView:document.querySelector(".workspace")?.dataset.activeView}
+  };
+  console.groupCollapsed("[PlayRig Settlement Diagnose]",stage);
+  console.log(report);console.table({worldCanvas:{hidden:report.worldCanvas.hidden,...report.worldCanvas.rect,...report.worldCanvas.computed},settlementCanvas:{hidden:report.settlementCanvas.hidden,...report.settlementCanvas.rect,...report.settlementCanvas.computed}});
+  console.groupEnd();
+  const output=$("#canvas-debug-output");
+  if(output){output.textContent=JSON.stringify(report,null,2);output.hidden=false;}
+  return report;
+}
+\nfunction createProject(){
   const burg=world.settlements.find(b=>b&&String(b.i)===$("#settlement-select").value);
   if(!burg){notify("Bitte zuerst eine Stadt auswählen.",true);return;}
   const radius=Number($("#settlement-radius").value),density=Number($("#settlement-density").value)/100;
-  project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});
+  try{project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});}\n  catch(error){console.error("[PlayRig Settlement] Projekt konnte nicht erstellt werden",error);notify("Settlement-Erstellung fehlgeschlagen: "+error.message,true);return;}
   project.settings.roadDensity=.58;
   renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;$("#map-title").textContent=project.name+" · Settlement Editor";
-  editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);
+  editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);\n  requestAnimationFrame(()=>collectSettlementDiagnostics("Nach Settlement-Projekterstellung"));
   notify("Settlement-Projekt für "+burg.name+" angelegt. Jetzt generieren oder manuell bearbeiten.");
 }
 function createSettlementRenderer(target,data){
@@ -374,7 +402,7 @@ canvas.addEventListener("worldcellselect",e=>showCell(e.detail));
 $("#reset-view").addEventListener("click",()=>renderer?.reset());
 $("#settlement-radius").addEventListener("input",e=>$("#radius-value").textContent=e.target.value);
 $("#settlement-density").addEventListener("input",e=>$("#density-value").textContent=e.target.value+"%");
-$("#create-settlement").addEventListener("click",createProject);
+$("#create-settlement").addEventListener("click",createProject);\n$("#debug-settlement").addEventListener("click",()=>{const output=$("#canvas-debug-output");if(output&&!output.hidden){output.hidden=true;return;}collectSettlementDiagnostics("Manuell über Diagnose-Button");});
 $("#generate-settlement").addEventListener("click",generate);
 $("#save-settlement").addEventListener("click",saveLocal);
 $("#load-settlement").addEventListener("click",loadLocal);
