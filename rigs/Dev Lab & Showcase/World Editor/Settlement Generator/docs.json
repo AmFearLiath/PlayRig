@@ -19,7 +19,10 @@
     "Objektmetadaten für Generatorstatus, Sperrung und District-Zuordnung",
     "Validierung auf doppelte IDs, ungültige Straßen und Gebäude außerhalb der empfohlenen Siedlungsgrenze",
     "Lokales Speichern via Browser Local Storage und JSON-Projektexport",
-    "World Project Export inklusive originaler Azgaar Full JSON Quelldaten"
+    "World Project Export inklusive originaler Azgaar Full JSON Quelldaten",
+    "Direktes Verschieben ausgewählter Gebäude und Objekte per Drag-and-drop",
+    "Undo für manuelle Änderungen und Generierung",
+    "Laden des zuletzt lokal gespeicherten Settlement-Projekts"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -27,8 +30,9 @@
     "Lege Profil, Radius, Gebäudedichte und Stadtform fest und klicke auf Settlement-Projekt erstellen.",
     "Klicke auf Siedlung generieren, um Bezirke, Straßen, Parzellen, Gebäude, Plätze und Umgebung anhand des Projekt-Seeds zu erzeugen.",
     "Wähle im Editor ein Werkzeug und klicke in die Karte, um Gebäude, Straßen, Bäume oder Plätze manuell hinzuzufügen. Das Löschwerkzeug entfernt ausgewählte Objekte.",
-    "Speichern legt das Settlement-Projekt im Local Storage des aktuellen Browsers ab. Export erzeugt eine eigenständige JSON-Datei.",
-    "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert."
+    "Speichern legt das Settlement-Projekt im Local Storage des aktuellen Browsers ab. Laden stellt das zuletzt gespeicherte Projekt wieder her; Export erzeugt eine eigenständige JSON-Datei.",
+    "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert.",
+    "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
