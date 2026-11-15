@@ -22,7 +22,9 @@
     "World Project Export inklusive originaler Azgaar Full JSON Quelldaten",
     "Direktes Verschieben ausgewählter Gebäude und Objekte per Drag-and-drop",
     "Undo für manuelle Änderungen und Generierung",
-    "Laden des zuletzt lokal gespeicherten Settlement-Projekts"
+    "Laden des zuletzt lokal gespeicherten Settlement-Projekts",
+    "Header-Navigation zum Umschalten zwischen Welt-, Settlement-, Editor- und Datenansicht",
+    "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -32,7 +34,9 @@
     "Wähle im Editor ein Werkzeug und klicke in die Karte, um Gebäude, Straßen, Bäume oder Plätze manuell hinzuzufügen. Das Löschwerkzeug entfernt ausgewählte Objekte.",
     "Speichern legt das Settlement-Projekt im Local Storage des aktuellen Browsers ab. Laden stellt das zuletzt gespeicherte Projekt wieder her; Export erzeugt eine eigenständige JSON-Datei.",
     "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert.",
-    "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig."
+    "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig.",
+    "Nutze die Navigation im Header, um zwischen Welt, Settlement, Editor und Daten zu wechseln. Die Seitenbereiche zeigen jeweils nur die dazugehörigen Werkzeuge und Informationen.",
+    "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
@@ -42,7 +46,15 @@
       "azgaar-full-json"
     ],
     "nativeAzgaarMapParsing": false,
-    "localPersistence": "browser-local-storage"
+    "localPersistence": "browser-local-storage",
+    "workspaceViews": [
+      "world",
+      "settlement",
+      "editor",
+      "data"
+    ],
+    "sidebarSectionsCollapsible": true,
+    "sidebarScrollbars": "independent-custom"
   },
   "prerequisites": [
     "Moderner Browser mit ES-Modul-, Canvas-2D-, ResizeObserver- und Local-Storage-Unterstützung"
