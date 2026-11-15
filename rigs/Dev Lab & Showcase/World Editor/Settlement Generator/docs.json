@@ -24,7 +24,10 @@
     "Undo für manuelle Änderungen und Generierung",
     "Laden des zuletzt lokal gespeicherten Settlement-Projekts",
     "Header-Navigation zum Umschalten zwischen Welt-, Settlement-, Editor- und Datenansicht",
-    "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten"
+    "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten",
+    "Übereinanderliegende Canvas-Layer mit korrekter Sichtbarkeit und gemeinsamer Viewport-Fläche",
+    "Robuste Canvas-Neuberechnung nach Ansichtswechsel und Größenänderung",
+    "Unabhängige Sidebar-Scrollbereiche mit stabil reserviertem Scrollleistenplatz"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -36,7 +39,8 @@
     "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert.",
     "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig.",
     "Nutze die Navigation im Header, um zwischen Welt, Settlement, Editor und Daten zu wechseln. Die Seitenbereiche zeigen jeweils nur die dazugehörigen Werkzeuge und Informationen.",
-    "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche."
+    "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche.",
+    "Wenn du ein Settlement-Projekt erstellst, wird die Weltkarten-Canvas ausgeblendet und die Settlement-Canvas exakt über derselben Viewport-Fläche angezeigt. Beide Sidebars behalten ihre eigenen Scrollbereiche."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
