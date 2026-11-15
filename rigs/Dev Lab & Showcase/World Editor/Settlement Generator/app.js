@@ -124,7 +124,6 @@ function createProject(){
   const radius=Number($("#settlement-radius").value),density=Number($("#settlement-density").value)/100;
   project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});
   project.settings.roadDensity=.58;
-  project.terrain.sourceCellIds=world.terrain.cells.filter(c=>Math.hypot(c.center.x-burg.x,c.center.y-burg.y)<=radius*1.35).map(c=>c.id);
   renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;$("#map-title").textContent=project.name+" · Settlement Editor";
   editorView=createSettlementRenderer(settlementCanvas,project);setWorkspaceView("settlement");updateProjectStatus();updateSettlementInspector(null);
   notify("Settlement-Projekt für "+burg.name+" angelegt. Jetzt generieren oder manuell bearbeiten.");
