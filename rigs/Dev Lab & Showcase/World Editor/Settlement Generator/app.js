@@ -138,7 +138,7 @@ function createSettlementRenderer(target,data){
     const rect=target.getBoundingClientRect(),p=worldAt(e.clientX-rect.left,e.clientY-rect.top);
     const dx=p.x-view.drag.last.x,dy=p.y-view.drag.last.y;
     if(Math.abs(dx)+Math.abs(dy)>.1)view.drag.moved=true;
-    view.drag.object.x+=dx;view.drag.object.y+=dy;view.drag.last=p;draw();
+    view.drag.object.x+=dx;view.drag.object.y+=dy;view.drag.object.status="modified";view.drag.last=p;draw();
   });
   target.addEventListener("pointerup",()=>{
     if(!view.drag)return;
