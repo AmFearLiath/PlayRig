@@ -118,7 +118,12 @@ function createSettlementRenderer(target,data){
   }
   target.addEventListener("pointerdown",e=>{
     if(!project)return;const rect=target.getBoundingClientRect(),p=worldAt(e.clientX-rect.left,e.clientY-rect.top);
-    if(activeTool==="select"){const hit=hitTest(p);view.selected=hit?.id||null;selectedObject=hit;updateSettlementInspector(hit);draw();return;}
+    if(activeTool==="select"){
+      const hit=hitTest(p);view.selected=hit?.id||null;selectedObject=hit;updateSettlementInspector(hit);
+      view.drag=hit&&Number.isFinite(Number(hit.x))&&Number.isFinite(Number(hit.y))?{object:hit,last:p,before:snapshotProject(project),moved:false}:null;
+      if(view.drag)target.setPointerCapture(e.pointerId);
+      draw();return;
+    }
     const before=snapshotProject(project);let item=null;
     if(activeTool==="building")item={name:"New Building",type:"house",x:p.x,y:p.y,width:14,height:12,rotation:0,floors:1,architecture:"vernacular",palette:"regional"};
     if(activeTool==="road")item={name:"New Lane",type:"local",width:3,points:[{x:p.x-18,y:p.y-18},{x:p.x+18,y:p.y+18}]};
@@ -127,6 +132,19 @@ function createSettlementRenderer(target,data){
     if(activeTool==="erase"){const hit=hitTest(p);if(hit){for(const key of ["buildings","roads","locations","districts","environment","plots"])project[key]=project[key].filter(o=>o.id!==hit.id);commitHistory(project,"Objekt löschen",before);$("#undo-settlement").disabled=false;}draw();updateProjectStatus();return;}
     if(item){const collection={building:"buildings",road:"roads",tree:"environment",plaza:"locations"}[activeTool];item.id=uid(collection.slice(0,3));item.status="modified";item.locked=false;project[collection].push(item);commitHistory(project,"Manuell: "+activeTool,before);$("#undo-settlement").disabled=false;selectedObject=item;view.selected=item.id;updateSettlementInspector(item);updateProjectStatus();draw();}
   });
+  target.addEventListener("pointermove",e=>{
+    if(!view.drag)return;
+    const rect=target.getBoundingClientRect(),p=worldAt(e.clientX-rect.left,e.clientY-rect.top);
+    const dx=p.x-view.drag.last.x,dy=p.y-view.drag.last.y;
+    if(Math.abs(dx)+Math.abs(dy)>.1)view.drag.moved=true;
+    view.drag.object.x+=dx;view.drag.object.y+=dy;view.drag.last=p;draw();
+  });
+  target.addEventListener("pointerup",()=>{
+    if(!view.drag)return;
+    if(view.drag.moved){commitHistory(project,"Objekt verschieben",view.drag.before);$("#undo-settlement").disabled=false;updateProjectStatus();updateSettlementInspector(view.drag.object);}
+    view.drag=null;
+  });
+  target.addEventListener("pointercancel",()=>view.drag=null);
   const observer=new ResizeObserver(resize);observer.observe(target);resize();
   return{draw,destroy(){observer.disconnect();}};
 }
