@@ -276,10 +276,33 @@ function createSettlementRenderer(target,data){
     ctx.restore();
   }
   function hitTest(p){
-    for(let i=(data.buildings||[]).length-1;i>=0;i--){const b=data.buildings[i];if(Math.abs(p.x-b.x)<=b.width*.65&&Math.abs(p.y-b.y)<=b.height*.65)return b;}
-    for(const collection of ["locations","roads","districts","environment"]){
+    for(let i=(data.buildings||[]).length-1;i>=0;i--){
+      const b=data.buildings[i];
+      if(Math.abs(p.x-b.x)<=b.width*.65&&Math.abs(p.y-b.y)<=b.height*.65)return b;
+    }
+    // Roads are line geometries, so test the distance to every segment instead of
+    // treating them as point objects at the origin.
+    const distanceToSegment=(point,a,b)=>{
+      const dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy;
+      const t=length?Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.y-a.y)*dy)/length)):0;
+      return Math.hypot(point.x-(a.x+t*dx),point.y-(a.y+t*dy));
+    };
+    for(let i=(data.roads||[]).length-1;i>=0;i--){
+      const road=data.roads[i],points=road.points||[];
+      for(let j=1;j<points.length;j++){
+        if(distanceToSegment(p,points[j-1],points[j])<Math.max(5,(Number(road.width)||2)*.7))return road;
+      }
+    }
+    for(const collection of ["locations","districts","environment","plots"]){
       const items=data[collection]||[];
-      for(let i=items.length-1;i>=0;i--){const item=items[i];const x=Number(item.x)||0,y=Number(item.y)||0;if(Math.hypot(p.x-x,p.y-y)<14/view.zoom)return item;}
+      for(let i=items.length-1;i>=0;i--){
+        const item=items[i];
+        if(Array.isArray(item.points)&&item.points.length>=3){
+          if(pointInPolygon(p,item.points))return item;
+        }else if(Number.isFinite(Number(item.x))&&Number.isFinite(Number(item.y))){
+          if(Math.hypot(p.x-item.x,p.y-item.y)<Math.max(8,Number(item.radius)||14))return item;
+        }
+      }
     }
     return null;
   }
