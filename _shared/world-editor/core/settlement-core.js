@@ -59,7 +59,70 @@ export function createSettlementProject(world, burg, options = {}) {
     history: { revision: 0, entries: [] },
     metadata: { generatorVersion: "1.0.0", status: "draft", validation: [] }
   };
+  project.terrain = extractLocalTerrain(world, burg, radius, project.boundary);
   return project;
+}
+
+/**
+ * Build a renderer-independent local terrain snapshot from the imported world.
+ * Azgaar coordinates are source-map pixels; every stored point is translated
+ * into settlement-local coordinates relative to the selected burg.
+ */
+function extractLocalTerrain(world, burg, radius, boundary) {
+  const origin = { x: finite(burg.x), y: finite(burg.y) };
+  const limit = radius * 1.65;
+  const worldCells = world.terrain?.cells || [];
+  const cellsById = new Map(worldCells.map(cell => [cell.id, cell]));
+  const sourceCells = worldCells.filter(cell =>
+    cell.center && Math.hypot(cell.center.x - origin.x, cell.center.y - origin.y) <= limit
+  );
+  const selectedIds = new Set(sourceCells.map(cell => cell.id));
+  const cells = sourceCells.map(cell => ({
+    id: cell.id,
+    center: { x: cell.center.x - origin.x, y: cell.center.y - origin.y },
+    polygon: (cell.polygon || []).map(point => ({ x: point.x - origin.x, y: point.y - origin.y })),
+    height: finite(cell.height),
+    area: finite(cell.area),
+    biomeId: cell.biomeId,
+    biomeName: cell.biomeName || "Unbekannt",
+    biomeColor: validColor(cell.biomeColor) ? cell.biomeColor : null,
+    isWater: Boolean(cell.isWater),
+    riverId: finite(cell.riverId),
+    featureId: finite(cell.featureId),
+    stateId: finite(cell.stateId)
+  })).filter(cell => cell.polygon.length >= 3);
+
+  const rivers = (world.water?.rivers || []).map(river => {
+    const points = (river.cells || [])
+      .map(id => cellsById.get(id))
+      .filter(cell => cell && selectedIds.has(cell.id))
+      .map(cell => ({ x: cell.center.x - origin.x, y: cell.center.y - origin.y }));
+    return points.length >= 2 ? {
+      id: river.i,
+      name: river.name || "",
+      width: finite(river.width, 1),
+      points
+    } : null;
+  }).filter(Boolean);
+
+  return {
+    coordinateSystem: "settlement-local-source-pixels",
+    sourceOrigin: origin,
+    sourceCellIds: cells.map(cell => cell.id),
+    cells,
+    rivers,
+    boundary: clone(boundary),
+    stats: {
+      cellCount: cells.length,
+      waterCellCount: cells.filter(cell => cell.isWater).length,
+      riverCount: rivers.length
+    },
+    localEdits: []
+  };
+}
+
+function validColor(value) {
+  return typeof value === "string" && (/^#[0-9a-f]{3,8}$/i.test(value) || /^rgba?\(/i.test(value) || /^hsla?\(/i.test(value));
 }
 
 function profileFromBurg(burg) {

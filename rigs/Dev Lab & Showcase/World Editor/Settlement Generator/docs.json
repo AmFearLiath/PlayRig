@@ -24,6 +24,20 @@
     "Undo für manuelle Änderungen und Generierung",
     "Laden des zuletzt lokal gespeicherten Settlement-Projekts",
     "Header-Navigation zum Umschalten zwischen Welt-, Settlement-, Editor- und Datenansicht",
+    "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten",
+    "Übereinanderliegende Canvas-Layer mit korrekter Sichtbarkeit und gemeinsamer Viewport-Fläche",
+    "Robuste Canvas-Neuberechnung nach Ansichtswechsel und Größenänderung",
+    "Unabhängige Sidebar-Scrollbereiche mit stabil reserviertem Scrollleistenplatz",
+    "Übernahme des lokalen Azgaar-Terrains in Settlement-Koordinaten inklusive Biomen, Wasserzellen und Flussverläufen",
+    "Automatisches Einpassen des lokalen Geländeausschnitts in den Settlement-Viewport",
+    "Zoom zum Mauszeiger sowie Verschieben der Settlement-Kamera per mittlerer/rechter Maustaste oder Shift-Ziehen",
+    "Modularer Settlement Render Core mit separater Geometrieanalyse und Kamera-Transformation",
+    "Automatische Viewport-Anpassung anhand der tatsächlichen Terrain- und Fluss-Bounds statt eines angenommenen Settlement-Radius",
+    "Validierung von Zellpolygonen mit Erkennung ungültiger Koordinaten und doppelter Vertex-Punkte",
+    "Erweiterte Renderdiagnose mit Geometrie-, Bounds-, Canvas-, DPR- und Kameradaten",
+    "Adaptives Kontextmenü mit situationsabhängigen Aktionen für freie Terrainflächen und ausgewählte Objekte",
+    "Kontextaktionen zum Duplizieren, Sperren, Entsperren und Entfernen von Settlement-Objekten",
+    "Kontextbezogener Schnellzugriff auf Gebäude-, Wege-, Dekorations- und Platzierungswerkzeuge"
     "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten"
   ],
   "manual": [
@@ -36,6 +50,13 @@
     "Projektobjekte werden im lokalen Settlement-Koordinatensystem gespeichert. Die Quelldaten der Weltkarte werden nicht verändert.",
     "Wähle das Auswahlwerkzeug und ziehe ein Gebäude, einen Baum oder einen Platz, um es innerhalb der Siedlung zu verschieben. Undo macht die letzte dokumentierte Änderung rückgängig.",
     "Nutze die Navigation im Header, um zwischen Welt, Settlement, Editor und Daten zu wechseln. Die Seitenbereiche zeigen jeweils nur die dazugehörigen Werkzeuge und Informationen.",
+    "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche.",
+    "Wenn du ein Settlement-Projekt erstellst, wird die Weltkarten-Canvas ausgeblendet und die Settlement-Canvas exakt über derselben Viewport-Fläche angezeigt. Beide Sidebars behalten ihre eigenen Scrollbereiche.",
+    "Beim Anlegen eines Settlement-Projekts wird ein lokaler Ausschnitt der ursprünglichen Azgaar-Zellen übernommen. Die Zellpolygone werden relativ zum Stadtursprung gespeichert und im Settlement-Viewport als Terrainbasis gezeichnet. Wasserzellen, Biome und Flussverläufe bleiben sichtbar.",
+    "Mit dem Mausrad zoomst du zum Mauszeiger. Mit mittlerer oder rechter Maustaste oder Shift-Ziehen verschiebst du die Kamera. Die Auswahl- und Platzierungswerkzeuge bleiben davon getrennt.",
+    "Der Diagnose-Button im Viewport erstellt einen JSON-Bericht und schreibt strukturierte Daten sowie Warnungen in die Browser-Konsole. Der Bericht enthält gültige/ungültige Polygone, Terrain-Bounds, Canvas-CSS- und Backing-Größe, Device Pixel Ratio und Kameraparameter.",
+    "Die Settlement-Kamera wird anhand der tatsächlichen Bounds aller gültigen Terrainpolygone und Flusskoordinaten eingepasst. Zoom bleibt auf den Mauszeiger zentriert. Ungültige Zellpolygone werden beim Zeichnen übersprungen.",
+    "Klicke mit der rechten Maustaste auf eine freie Stelle oder ein Objekt, um das adaptive Kontextmenü zu öffnen. Die angebotenen Aktionen richten sich nach dem angeklickten Objekt und dem Terrain. Mit Escape oder einem Klick außerhalb wird das Menü geschlossen. Die rechte Maustaste verschiebt nicht mehr die Kamera; dafür stehen mittlere Maustaste oder Shift-Ziehen zur Verfügung."
     "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche."
   ],
   "configuration": {
@@ -54,6 +75,10 @@
       "data"
     ],
     "sidebarSectionsCollapsible": true,
+    "sidebarScrollbars": "independent-custom",
+    "terrainSource": "Azgaar Full JSON cell polygons translated into settlement-local source-pixel coordinates",
+    "terrainRadiusFactor": 1.65,
+    "renderCoreApiVersion": "1.0.0"
     "sidebarScrollbars": "independent-custom"
   },
   "prerequisites": [

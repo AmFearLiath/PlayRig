@@ -39,3 +39,37 @@
 .section-collapse:hover{border-color:#397b8d;color:#b7eff5;background:#142b38}
 .section-collapse span{display:block;transition:transform .16s}
 .panel-section.collapsed .section-collapse span{transform:rotate(-90deg)}
+
+/* Canvas layers share one viewport; never stack two 100%-height canvases in normal flow. */
+.canvas-wrap{min-width:0;min-height:0;isolation:isolate}
+#world-canvas,#settlement-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:100%;max-height:100%}
+#world-canvas[hidden],#settlement-canvas[hidden]{display:none!important}
+#world-canvas:not([hidden]),#settlement-canvas:not([hidden]){display:block}
+.viewport-panel{min-width:0;min-height:0;overflow:hidden}
+.workspace{min-width:0;min-height:0;grid-template-rows:minmax(0,1fr);overflow:hidden}
+.workspace>.panel{display:block;width:auto;height:100%;min-width:0;min-height:0;max-height:100%;align-self:stretch;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-gutter:stable}
+.workspace>.left-panel,.workspace>.right-panel{min-height:0}
+
+
+/* Canvas layers share one viewport surface. ID rules must never override [hidden]. */
+.canvas-wrap{position:relative;isolation:isolate;min-width:0;min-height:0}
+.canvas-wrap>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:100%;max-height:100%}
+.canvas-wrap>#world-canvas,.canvas-wrap>#settlement-canvas{position:absolute;inset:0}
+.canvas-wrap>canvas[hidden]{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#world-canvas,#settlement-canvas{touch-action:none}
+.viewport-toolbar{position:relative;z-index:2}
+.canvas-debug{position:absolute;z-index:5;top:12px;right:12px;width:min(520px,calc(100% - 24px));max-height:70%;overflow:auto;padding:12px;border:1px solid #3c6577;border-radius:9px;background:rgba(5,13,21,.96);color:#c5d9e4;box-shadow:0 12px 36px rgba(0,0,0,.4);font:10px/1.5 ui-monospace,monospace;white-space:pre-wrap}
+.canvas-debug[hidden]{display:none!important}
+.canvas-debug-button{font-size:10px;padding:6px 9px}
+.viewport-toolbar{gap:12px}
+.viewport-toolbar .toolbar-actions{display:flex;align-items:center;gap:8px}
+
+/* Adaptive settlement context menu */
+.settlement-context-menu{position:absolute;z-index:12;min-width:190px;max-width:260px;padding:6px;border:1px solid #355466;border-radius:9px;background:rgba(8,17,26,.97);box-shadow:0 14px 36px rgba(0,0,0,.48);backdrop-filter:blur(12px)}
+.settlement-context-menu[hidden]{display:none!important}
+.context-menu-heading{padding:7px 9px 4px;color:#5fc5d8;font-size:8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.context-menu-item{display:block;width:100%;padding:8px 9px;border:0;border-radius:6px;background:transparent;color:#c7d7e0;text-align:left;font:500 10px Inter,ui-sans-serif,system-ui;cursor:pointer}
+.context-menu-item:hover:not(:disabled){background:#173343;color:#d8f8fb}
+.context-menu-item:disabled{opacity:.55;cursor:default}
+.context-menu-item.danger{color:#e69a91}
+.context-menu-item.danger:hover{background:rgba(133,48,48,.24)}
