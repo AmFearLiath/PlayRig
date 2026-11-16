@@ -41,8 +41,9 @@
     <select id="settlement-select" class="world-select" disabled><option>Erst Welt importieren</option></select>
     <label class="field-label" for="settlement-profile">Siedlungsprofil</label>
     <select id="settlement-profile" class="world-select"><option value="hamlet">Hamlet</option><option value="village">Village</option><option value="town" selected>Town</option><option value="city">City</option><option value="fortress">Fortress</option></select>
-    <label class="field-label" for="settlement-radius">Größe / Radius <span id="radius-value">180</span></label>
-    <input id="settlement-radius" type="range" min="90" max="420" value="180" class="world-range">
+    <label class="field-label" for="settlement-radius">Flächennutzung <span id="radius-value">43%</span></label>
+    <input id="settlement-radius" type="range" min="10" max="100" value="43" step="1" class="world-range">
+    <p class="field-hint">Feste Siedlungskarte · 100% nutzt die gesamte verfügbare Arbeitsfläche.</p>
     <label class="field-label" for="settlement-density">Gebäudedichte <span id="density-value">62%</span></label>
     <input id="settlement-density" type="range" min="15" max="95" value="62" class="world-range">
     <label class="field-label" for="settlement-form">Stadtform</label>
