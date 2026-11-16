@@ -145,8 +145,10 @@ function collectSettlementDiagnostics(stage="Manuelle Diagnose"){
 function createProject(){
   const burg=world.settlements.find(b=>b&&String(b.i)===$("#settlement-select").value);
   if(!burg){notify("Bitte zuerst eine Stadt auswählen.",true);return;}
-  const radius=Number($("#settlement-radius").value),density=Number($("#settlement-density").value)/100;
-  try{project=createSettlementProject(world,burg,{radius,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});}
+  const utilization=Number($("#settlement-radius").value)/100;
+  const mapRadius=Number($("#settlement-radius").max)||420;
+  const density=Number($("#settlement-density").value)/100;
+  try{project=createSettlementProject(world,burg,{mapRadius,utilization,density,form:$("#settlement-form").value,profile:$("#settlement-profile").value});}
   catch(error){console.error("[PlayRig Settlement] Projekt konnte nicht erstellt werden",error);notify("Settlement-Erstellung fehlgeschlagen: "+error.message,true);return;}
   project.settings.roadDensity=.58;
   renderer?.destroy();canvas.hidden=true;settlementCanvas.hidden=false;$("#map-title").textContent=project.name+" · Settlement Editor";
@@ -516,7 +518,7 @@ $("#render-mode").addEventListener("change",e=>renderer?.setMode(e.target.value)
  .forEach(([selector,layer])=>$(selector).addEventListener("change",e=>renderer?.setLayer(layer,e.target.checked)));
 canvas.addEventListener("worldcellselect",e=>showCell(e.detail));
 $("#reset-view").addEventListener("click",()=>renderer?.reset());
-$("#settlement-radius").addEventListener("input",e=>$("#radius-value").textContent=e.target.value);
+$("#settlement-radius").addEventListener("input",e=>$("#radius-value").textContent=e.target.value+"%");
 $("#settlement-density").addEventListener("input",e=>$("#density-value").textContent=e.target.value+"%");
 $("#create-settlement").addEventListener("click",createProject);
 $("#debug-settlement").addEventListener("click",()=>{const output=$("#canvas-debug-output");if(output&&!output.hidden){output.hidden=true;return;}collectSettlementDiagnostics("Manuell über Diagnose-Button");});
