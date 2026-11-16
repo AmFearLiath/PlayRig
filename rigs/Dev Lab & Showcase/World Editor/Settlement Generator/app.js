@@ -286,6 +286,7 @@ function createSettlementRenderer(target,data){
 
   target.addEventListener("pointerdown",event=>{
     const rect=target.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
+    if(event.button===2)return;
     if(event.button===1||event.shiftKey){
       view.pan={x,y,lastX:x,lastY:y};target.setPointerCapture(event.pointerId);event.preventDefault();return;
     }
