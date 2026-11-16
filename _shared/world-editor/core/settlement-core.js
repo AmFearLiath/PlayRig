@@ -12,7 +12,9 @@ export function createSettlementProject(world, burg, options = {}) {
   if (!world || !burg || !Number.isFinite(Number(burg.x)) || !Number.isFinite(Number(burg.y))) {
     throw new Error("Für ein Settlement-Projekt werden eine geladene Welt und eine gültige Siedlung benötigt.");
   }
-  const radius = Math.max(90, finite(options.radius, 180));
+  const mapRadius = Math.max(90, finite(options.mapRadius, 420));
+  const utilization = Math.max(.1, Math.min(1, finite(options.utilization, finite(options.radius, 180) / mapRadius)));
+  const radius = mapRadius * utilization;
   const project = {
     schema: "playrig.settlement",
     schemaVersion: "1.0.0",
@@ -35,6 +37,8 @@ export function createSettlementProject(world, burg, options = {}) {
     origin: { x: finite(burg.x), y: finite(burg.y) },
     settings: {
       radius,
+      mapRadius,
+      utilization,
       form: options.form || "organic",
       profile: options.profile || profileFromBurg(burg),
       density: finite(options.density, .62),
@@ -59,7 +63,7 @@ export function createSettlementProject(world, burg, options = {}) {
     history: { revision: 0, entries: [] },
     metadata: { generatorVersion: "1.0.0", status: "draft", validation: [] }
   };
-  project.terrain = extractLocalTerrain(world, burg, radius, project.boundary);
+  project.terrain = extractLocalTerrain(world, burg, mapRadius, project.boundary);
   return project;
 }
 
@@ -68,9 +72,10 @@ export function createSettlementProject(world, burg, options = {}) {
  * Azgaar coordinates are source-map pixels; every stored point is translated
  * into settlement-local coordinates relative to the selected burg.
  */
-function extractLocalTerrain(world, burg, radius, boundary) {
+function extractLocalTerrain(world, burg, mapRadius, boundary) {
   const origin = { x: finite(burg.x), y: finite(burg.y) };
-  const limit = radius * 1.65;
+  // Fixed working area: changing settlement utilization never changes imported terrain coverage.
+  const limit = mapRadius * 1.15;
   const worldCells = world.terrain?.cells || [];
   const cellsById = new Map(worldCells.map(cell => [cell.id, cell]));
   const sourceCells = worldCells.filter(cell =>
