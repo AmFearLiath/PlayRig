@@ -270,7 +270,8 @@ function createSettlementRenderer(target,data){
     ctx.beginPath();ctx.moveTo(origin.x-11,origin.y);ctx.lineTo(origin.x+11,origin.y);ctx.moveTo(origin.x,origin.y-11);ctx.lineTo(origin.x,origin.y+11);ctx.stroke();
 
     ctx.fillStyle="#f0e7d2";ctx.font="600 12px ui-monospace";ctx.textAlign="center";
-    ctx.fillText(data.name,origin.x,origin.y-radius*view.scale*view.zoom-13);
+    const labelAnchor=screen({x:0,y:sceneBounds.minY});
+    ctx.fillText(data.name,origin.x,labelAnchor.y-13);
     ctx.fillStyle="#a8c1c8";ctx.font="10px ui-monospace";
     ctx.fillText("ORIGINAL TERRAIN · "+(terrain.stats?.cellCount||0)+" CELLS",view.width/2,view.height-14);
     ctx.restore();
