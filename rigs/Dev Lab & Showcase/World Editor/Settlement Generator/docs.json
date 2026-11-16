@@ -38,6 +38,7 @@
     "Adaptives Kontextmenü mit situationsabhängigen Aktionen für freie Terrainflächen und ausgewählte Objekte",
     "Kontextaktionen zum Duplizieren, Sperren, Entsperren und Entfernen von Settlement-Objekten",
     "Kontextbezogener Schnellzugriff auf Gebäude-, Wege-, Dekorations- und Platzierungswerkzeuge"
+    "Einklappbare Sidebar-Bereiche mit unabhängigem Scrollen und angepassten Scrollleisten"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -56,6 +57,7 @@
     "Der Diagnose-Button im Viewport erstellt einen JSON-Bericht und schreibt strukturierte Daten sowie Warnungen in die Browser-Konsole. Der Bericht enthält gültige/ungültige Polygone, Terrain-Bounds, Canvas-CSS- und Backing-Größe, Device Pixel Ratio und Kameraparameter.",
     "Die Settlement-Kamera wird anhand der tatsächlichen Bounds aller gültigen Terrainpolygone und Flusskoordinaten eingepasst. Zoom bleibt auf den Mauszeiger zentriert. Ungültige Zellpolygone werden beim Zeichnen übersprungen.",
     "Klicke mit der rechten Maustaste auf eine freie Stelle oder ein Objekt, um das adaptive Kontextmenü zu öffnen. Die angebotenen Aktionen richten sich nach dem angeklickten Objekt und dem Terrain. Mit Escape oder einem Klick außerhalb wird das Menü geschlossen. Die rechte Maustaste verschiebt nicht mehr die Kamera; dafür stehen mittlere Maustaste oder Shift-Ziehen zur Verfügung."
+    "Jeder Sidebar-Bereich lässt sich über den Pfeil in der Überschrift unabhängig ein- und ausklappen. Linke und rechte Sidebar besitzen eigene Scrollbereiche."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
@@ -77,6 +79,7 @@
     "terrainSource": "Azgaar Full JSON cell polygons translated into settlement-local source-pixel coordinates",
     "terrainRadiusFactor": 1.65,
     "renderCoreApiVersion": "1.0.0"
+    "sidebarScrollbars": "independent-custom"
   },
   "prerequisites": [
     "Moderner Browser mit ES-Modul-, Canvas-2D-, ResizeObserver- und Local-Storage-Unterstützung"
