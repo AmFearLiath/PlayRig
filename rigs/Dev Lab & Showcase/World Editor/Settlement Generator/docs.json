@@ -34,7 +34,10 @@
     "Modularer Settlement Render Core mit separater Geometrieanalyse und Kamera-Transformation",
     "Automatische Viewport-Anpassung anhand der tatsächlichen Terrain- und Fluss-Bounds statt eines angenommenen Settlement-Radius",
     "Validierung von Zellpolygonen mit Erkennung ungültiger Koordinaten und doppelter Vertex-Punkte",
-    "Erweiterte Renderdiagnose mit Geometrie-, Bounds-, Canvas-, DPR- und Kameradaten"
+    "Erweiterte Renderdiagnose mit Geometrie-, Bounds-, Canvas-, DPR- und Kameradaten",
+    "Adaptives Kontextmenü mit situationsabhängigen Aktionen für freie Terrainflächen und ausgewählte Objekte",
+    "Kontextaktionen zum Duplizieren, Sperren, Entsperren und Entfernen von Settlement-Objekten",
+    "Kontextbezogener Schnellzugriff auf Gebäude-, Wege-, Dekorations- und Platzierungswerkzeuge"
   ],
   "manual": [
     "Exportiere in Azgaar über Export → Export to JSON → Full und lade die JSON-Datei über World Source.",
@@ -51,7 +54,8 @@
     "Beim Anlegen eines Settlement-Projekts wird ein lokaler Ausschnitt der ursprünglichen Azgaar-Zellen übernommen. Die Zellpolygone werden relativ zum Stadtursprung gespeichert und im Settlement-Viewport als Terrainbasis gezeichnet. Wasserzellen, Biome und Flussverläufe bleiben sichtbar.",
     "Mit dem Mausrad zoomst du zum Mauszeiger. Mit mittlerer oder rechter Maustaste oder Shift-Ziehen verschiebst du die Kamera. Die Auswahl- und Platzierungswerkzeuge bleiben davon getrennt.",
     "Der Diagnose-Button im Viewport erstellt einen JSON-Bericht und schreibt strukturierte Daten sowie Warnungen in die Browser-Konsole. Der Bericht enthält gültige/ungültige Polygone, Terrain-Bounds, Canvas-CSS- und Backing-Größe, Device Pixel Ratio und Kameraparameter.",
-    "Die Settlement-Kamera wird anhand der tatsächlichen Bounds aller gültigen Terrainpolygone und Flusskoordinaten eingepasst. Zoom bleibt auf den Mauszeiger zentriert. Ungültige Zellpolygone werden beim Zeichnen übersprungen."
+    "Die Settlement-Kamera wird anhand der tatsächlichen Bounds aller gültigen Terrainpolygone und Flusskoordinaten eingepasst. Zoom bleibt auf den Mauszeiger zentriert. Ungültige Zellpolygone werden beim Zeichnen übersprungen.",
+    "Klicke mit der rechten Maustaste auf eine freie Stelle oder ein Objekt, um das adaptive Kontextmenü zu öffnen. Die angebotenen Aktionen richten sich nach dem angeklickten Objekt und dem Terrain. Mit Escape oder einem Klick außerhalb wird das Menü geschlossen. Die rechte Maustaste verschiebt nicht mehr die Kamera; dafür stehen mittlere Maustaste oder Shift-Ziehen zur Verfügung."
   ],
   "configuration": {
     "worldCoreApi": "1.0.0",
