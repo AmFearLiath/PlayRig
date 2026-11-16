@@ -286,7 +286,7 @@ function createSettlementRenderer(target,data){
 
   target.addEventListener("pointerdown",event=>{
     const rect=target.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
-    if(event.button===1||event.button===2||event.shiftKey){
+    if(event.button===1||event.shiftKey){
       view.pan={x,y,lastX:x,lastY:y};target.setPointerCapture(event.pointerId);event.preventDefault();return;
     }
     const p=worldAt(x,y);
@@ -335,12 +335,108 @@ function createSettlementRenderer(target,data){
     event.preventDefault();const rect=target.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
     zoomCameraAt(camera,x,y,event.deltaY<0?1.12:.89);draw();
   },{passive:false});
-  target.addEventListener("contextmenu",event=>event.preventDefault());
+  target.addEventListener("contextmenu",event=>{
+    event.preventDefault();
+    const rect=target.getBoundingClientRect();
+    const x=event.clientX-rect.left,y=event.clientY-rect.top;
+    const point=worldAt(x,y);
+    const hit=hitTest(point);
+    const cell=findTerrainCell(point);
+    openSettlementContextMenu(event.clientX,event.clientY,{point,hit,cell});
+  });
 
   const observer=new ResizeObserver(resize);observer.observe(target);
   window.addEventListener("resize",resize,{passive:true});requestAnimationFrame(resize);resize();
   return{draw,resize,reset:resize,camera,scene,destroy(){observer.disconnect();window.removeEventListener("resize",resize);}};
 }
+function pointInPolygon(point, polygon){
+  let inside=false;
+  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+    const a=polygon[i],b=polygon[j];
+    const crosses=((a.y>point.y)!==(b.y>point.y)) &&
+      point.x<(b.x-a.x)*(point.y-a.y)/(b.y-a.y||1e-9)+a.x;
+    if(crosses)inside=!inside;
+  }
+  return inside;
+}
+function findTerrainCell(point){
+  return (project?.terrain?.cells||[]).find(cell=>cell.polygon?.length>=3&&pointInPolygon(point,cell.polygon))||null;
+}
+function setActiveTool(tool){
+  activeTool=tool;
+  document.querySelectorAll("[data-tool]").forEach(button=>button.classList.toggle("active",button.dataset.tool===tool));
+}
+function closeSettlementContextMenu(){
+  const menu=$("#settlement-context-menu");
+  if(menu){menu.hidden=true;menu.replaceChildren();}
+}
+function openSettlementContextMenu(clientX,clientY,context){
+  const menu=$("#settlement-context-menu");
+  if(!menu)return;
+  const {point,hit,cell}=context;
+  const water=Boolean(cell?.isWater);
+  const actions=[];
+  if(hit){
+    const label=hit.name||hit.type||hit.kind||"Objekt";
+    actions.push({group:"Auswahl",label:"⌖ "+label,disabled:true});
+    actions.push({label:"✥ Duplizieren",action:"duplicate"});
+    actions.push({label:hit.locked?"🔓 Sperre aufheben":"🔒 Objekt sperren",action:"toggle-lock"});
+    actions.push({label:"⌫ Objekt entfernen",action:"delete",danger:true});
+    if(hit.type==="road"||Array.isArray(hit.points))actions.push({label:"↗ Weg weiter bearbeiten",action:"tool-road"});
+    if(hit.kind||hit.type==="building")actions.push({label:"⌂ Gebäude platzieren",action:"tool-building"});
+  }else{
+    actions.push({group:"Hier platzieren",label:water?"◉ Wasserfläche":"⌂ Gebäude",action:"tool-building",disabled:water});
+    actions.push({label:"╱ Weg / Straße",action:"tool-road",disabled:water});
+    actions.push({label:"♣ Dekoration",action:"tool-tree",disabled:water});
+    actions.push({label:"◉ Platz / POI",action:"tool-plaza",disabled:water});
+    if(cell)actions.push({group:"Gelände",label:(water?"Wasserzelle":"Landzelle")+" · Biome: "+(cell.biomeName||"Unbekannt"),disabled:true});
+  }
+  menu.replaceChildren();
+  for(const item of actions){
+    if(item.group){const heading=document.createElement("div");heading.className="context-menu-heading";heading.textContent=item.group;menu.append(heading);}
+    const button=document.createElement("button");
+    button.type="button";button.className="context-menu-item"+(item.danger?" danger":"");
+    button.textContent=item.label;button.disabled=Boolean(item.disabled);
+    if(item.action)button.dataset.action=item.action;
+    menu.append(button);
+  }
+  menu.dataset.worldX=String(point.x);menu.dataset.worldY=String(point.y);
+  menu.dataset.objectId=hit?.id||"";
+  const bounds=menu.parentElement.getBoundingClientRect();
+  menu.hidden=false;
+  const width=menu.offsetWidth,height=menu.offsetHeight;
+  menu.style.left=Math.max(8,Math.min(clientX-bounds.left,bounds.width-width-8))+"px";
+  menu.style.top=Math.max(8,Math.min(clientY-bounds.top,bounds.height-height-8))+"px";
+}
+function removeSettlementObject(item){
+  if(!item||item.locked){notify(item?.locked?"Dieses Objekt ist gesperrt.":"Kein Objekt ausgewählt.",true);return;}
+  const before=snapshotProject(project);
+  for(const key of ["buildings","roads","locations","districts","environment","plots"])
+    project[key]=(project[key]||[]).filter(object=>object.id!==item.id);
+  selectedObject=null;
+  if(editorView){editorView.draw();editorView.selected=null;}
+  commitHistory(project,"Objekt entfernen",before);
+  $("#undo-settlement").disabled=false;updateProjectStatus();updateSettlementInspector(null);
+}
+$("#settlement-context-menu")?.addEventListener("click",event=>{
+  const button=event.target.closest("[data-action]");
+  if(!button||button.disabled)return;
+  const menu=$("#settlement-context-menu");
+  const action=button.dataset.action;
+  const id=menu.dataset.objectId;
+  const item=id?["buildings","roads","locations","districts","environment","plots"].flatMap(key=>project?.[key]||[]).find(object=>object.id===id):null;
+  if(action==="delete")removeSettlementObject(item);
+  if(action==="duplicate"&&item){
+    const before=snapshotProject(project),copy={...structuredClone(item),id:uid("copy"),x:(Number(item.x)||0)+12,y:(Number(item.y)||0)+12,status:"modified",locked:false};
+    const collection=["buildings","roads","locations","districts","environment","plots"].find(key=>(project[key]||[]).some(object=>object.id===item.id));
+    if(collection){project[collection].push(copy);commitHistory(project,"Objekt duplizieren",before);selectedObject=copy;updateSettlementInspector(copy);updateProjectStatus();editorView?.draw();$("#undo-settlement").disabled=false;}
+  }
+  if(action==="toggle-lock"&&item){const before=snapshotProject(project);item.locked=!item.locked;commitHistory(project,item.locked?"Objekt sperren":"Objekt entsperren",before);updateSettlementInspector(item);notify(item.locked?"Objekt gesperrt.":"Objekt entsperrt.");}
+  if(action?.startsWith("tool-")){setActiveTool(action.slice(5));notify("Werkzeug aktiv: "+({building:"Gebäude",road:"Weg / Straße",tree:"Dekoration",plaza:"Platz / POI"}[action.slice(5)]||action.slice(5))+". Klicke auf die Karte.");}
+  closeSettlementContextMenu();
+});
+document.addEventListener("pointerdown",event=>{if(!event.target.closest("#settlement-context-menu"))closeSettlementContextMenu();});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeSettlementContextMenu();});
 function updateSettlementInspector(item){
   $("#inspector-empty").hidden=!!item||!!project;$("#inspector-content").hidden=!item;
   if(!project){$("#inspector-empty").hidden=false;$("#inspector-content").hidden=true;return;}
